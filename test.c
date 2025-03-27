@@ -2,7 +2,7 @@
 
 
 int main() {
-    printf("Hello, World!\n");
+    printf("Hello,!\n");
     __mingw_printf("Hello, World!\n");
     return 0;
 }
