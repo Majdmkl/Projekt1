@@ -1,26 +1,15 @@
-## Makefile for Windows + SDL2 (MSYS2)
-
-SRCDIR = ./src
 CC = gcc
+CFLAGS = -Wall -g -I/opt/homebrew/include/SDL2
+LDFLAGS = -L/opt/homebrew/lib -lSDL2 -lSDL2_image
+SRC = src/main.c
+OUT = build/main
 
-# SDL2 paths – include the parent of SDL2/
-INCLUDE = /mingw64/include
-LIBS = /mingw64/lib
+all:
+	mkdir -p build
+	$(CC) $(CFLAGS) $(SRC) -o $(OUT) $(LDFLAGS)
 
-CFLAGS = -g -I$(INCLUDE) -c
-LDFLAGS = -L$(LIBS) -lmingw32 -lSDL2main -lSDL2 -mwindows
-
-OBJ = hello.o
-EXE = hello.exe
-
-$(EXE): $(OBJ)
-	@echo "Linking $(EXE)"
-	$(CC) $(OBJ) -o $(EXE) $(LDFLAGS)
-
-$(OBJ): $(SRCDIR)/hello_sdl2.c
-	@echo "Compiling $<"
-	$(CC) $(CFLAGS) $< -o $@
+run:
+	./$(OUT)
 
 clean:
-	del $(EXE)
-	del $(OBJ)
+	rm -rf build
