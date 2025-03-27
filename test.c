@@ -6,5 +6,10 @@ int main() {
     __mingw_printf("Hello, World!\n");
     printf("Hello, World! ISRA\n");
     printf("Hello, World! Daria\n");
+    for (int i = 0; i < 10; i++)
+    {
+        printf("%d",i);
+s    }
+     
     return 0;
 }
