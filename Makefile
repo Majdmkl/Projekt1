@@ -22,5 +22,4 @@ $(OBJ): $(SRCDIR)/main.c
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	del $(EXE)
 	rm -f $(EXE) $(OBJ)
