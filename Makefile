@@ -17,10 +17,10 @@ $(EXE): $(OBJ)
 	@echo "Linking $(EXE)"
 	$(CC) $(OBJ) -o $(EXE) $(LDFLAGS)
 
-$(OBJ): $(SRCDIR)/hello_sdl2.c
+$(OBJ): $(SRCDIR)/main.c
 	@echo "Compiling $<"
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
 	del $(EXE)
-	del $(OBJ)
+	rm -f $(EXE) $(OBJ)
