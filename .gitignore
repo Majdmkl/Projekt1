@@ -1,16 +1,19 @@
-Makefile
-Makefile_linux
-Makefile_mac
-
+# Binära filer
 *.exe
 *.o
 *.obj
 *.out
 
+# macOS-systemfiler
 .DS_Store
-
-¨.vscode/
-
 *.dSYM
 
+# Loggfiler
 *.log
+
+# VSCode-mapp
+.vscode/
+
+# Ignorera Makefile
+Makefile
+makefile
