@@ -1,11 +1,27 @@
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <stdio.h>
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
+#define TILE_SIZE 128
+#define MAP_WIDTH 10
+#define MAP_HEIGHT 6
+#define FRAME_WIDTH 32
+#define FRAME_HEIGHT 32
+#define FRAME_DELAY 8
+#define MAX_FRAMES 4
 
-int main(int argc, char *argv[]) {
+int map[MAP_HEIGHT][MAP_WIDTH] = {
+    {0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
+    {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+    {1, 1, 0, 1, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
+int main() {
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
 
@@ -13,135 +29,107 @@ int main(int argc, char *argv[]) {
                                           SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    SDL_Surface* frontSurf = IMG_Load("assets/bunny_front.png");
-    SDL_Surface* backSurf = IMG_Load("assets/bunny_back.png");
-    SDL_Surface* leftSurf = IMG_Load("assets/bunny_left.png");
-    SDL_Surface* rightSurf = IMG_Load("assets/bunny_right.png");
+    SDL_Surface* tileSurfaces[2];
+    tileSurfaces[0] = IMG_Load("assets/grass.png");
+    tileSurfaces[1] = IMG_Load("assets/water.png");
 
-    SDL_Surface* bgSurf = IMG_Load("assets/background.png");
-    SDL_Texture* bgTex = SDL_CreateTextureFromSurface(renderer, bgSurf);
-    SDL_FreeSurface(bgSurf);
-    SDL_RenderCopy(renderer, bgTex, NULL, NULL);
-
-    
-    if (!frontSurf || !backSurf || !leftSurf || !rightSurf || !bgTex) {
-        printf("Failed to load image: %s\n", IMG_GetError());
-        return 1;
+    SDL_Texture* tileTextures[2];
+    for (int i = 0; i < 2; ++i) {
+        tileTextures[i] = SDL_CreateTextureFromSurface(renderer, tileSurfaces[i]);
+        SDL_FreeSurface(tileSurfaces[i]);
     }
 
-    if (!bgTex) {
-        printf("❌ Failed to load background.png: %s\n", IMG_GetError());
-    }    
+    SDL_Surface* bunnySheet = IMG_Load("assets/bunny_sprite_sheet.png");
+    SDL_Texture* bunnyTexture = SDL_CreateTextureFromSurface(renderer, bunnySheet);
+    SDL_FreeSurface(bunnySheet);
 
-    SDL_Texture* frontTex = SDL_CreateTextureFromSurface(renderer, frontSurf);
-    SDL_Texture* backTex = SDL_CreateTextureFromSurface(renderer, backSurf);
-    SDL_Texture* leftTex = SDL_CreateTextureFromSurface(renderer, leftSurf);
-    SDL_Texture* rightTex = SDL_CreateTextureFromSurface(renderer, rightSurf);
+    SDL_Rect srcRect = {0, 0, FRAME_WIDTH, FRAME_HEIGHT};
+    SDL_Rect dest = {0, 0, 64, 64};
+    int direction = 0; // 0 = down, 1 = left, 2 = right, 3 = up
+    int frame = 0;
+    int frameTime = 0;
 
-    int bunnyW = 50;
-    int bunnyH = 70;
-
-    int frontW = 50;
-    int backW = 45;
-
-    SDL_FreeSurface(frontSurf);
-    SDL_FreeSurface(backSurf);
-    SDL_FreeSurface(leftSurf);
-    SDL_FreeSurface(rightSurf);
-
-    SDL_Texture* currentTexture = frontTex;
-
-    SDL_Rect dest = { 100, 300, bunnyW, bunnyH };
-    int groundY = dest.y;
-
-    int isJumping = 0;
-    int velocityY = 0;
-    int jumpVelocity = -15;
-    int gravity = 1;
+    int playerX = 0;
+    int playerY = 0;
+    int speed = 4;
 
     SDL_Event event;
     int running = 1;
-
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT)
                 running = 0;
+        }
 
-            if (event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_SPACE && !isJumping) {
-                    isJumping = 1;
-                    velocityY = jumpVelocity;
-                }
+        const Uint8* keys = SDL_GetKeyboardState(NULL);
+        int prevX = playerX;
+        int prevY = playerY;
+        int moving = 0;
+
+        if (keys[SDL_SCANCODE_UP]) {
+            direction = 3;
+            playerY -= speed;
+            moving = 1;
+        } else if (keys[SDL_SCANCODE_DOWN]) {
+            direction = 0;
+            playerY += speed;
+            moving = 1;
+        } else if (keys[SDL_SCANCODE_LEFT]) {
+            direction = 1;
+            playerX -= speed;
+            moving = 1;
+        } else if (keys[SDL_SCANCODE_RIGHT]) {
+            direction = 2;
+            playerX += speed;
+            moving = 1;
+        }
+
+        int tileX = playerX / TILE_SIZE;
+        int tileY = playerY / TILE_SIZE;
+
+        if (tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT || map[tileY][tileX] == 1) {
+            playerX = prevX;
+            playerY = prevY;
+            moving = 0;
+        }
+
+        if (moving) {
+            frameTime++;
+            if (frameTime >= FRAME_DELAY) {
+                frame = (frame + 1) % MAX_FRAMES;
+                frameTime = 0;
             }
+        } else {
+            frame = 0;
         }
 
-        const Uint8* keystates = SDL_GetKeyboardState(NULL);
-
-        if (!isJumping) {
-            if (keystates[SDL_SCANCODE_UP]) {
-                dest.y -= 5;
-                currentTexture = backTex;
-                groundY = dest.y;
-            }
-            if (keystates[SDL_SCANCODE_DOWN]) {
-                dest.y += 5;
-                currentTexture = frontTex;
-                groundY = dest.y;
-            }
-        }
-
-        if (keystates[SDL_SCANCODE_LEFT]) {
-            dest.x -= 5;
-            currentTexture = leftTex;
-        }
-        if (keystates[SDL_SCANCODE_RIGHT]) {
-            dest.x += 5;
-            currentTexture = rightTex;
-        }
-
-        if (isJumping) {
-            dest.y += velocityY;
-            velocityY += gravity;
-
-            if (velocityY > 0 && dest.y >= groundY) {
-                dest.y = groundY;
-                isJumping = 0;
-                velocityY = 0;
-            }
-        }
+        srcRect.x = frame * FRAME_WIDTH;
+        srcRect.y = direction * FRAME_HEIGHT;
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        // 🖼️ Rita bakgrunden först
-        SDL_RenderCopy(renderer, bgTex, NULL, NULL);
-
-        // ✅ Sätt rätt storlek beroende på vilken textur det är
-        if (currentTexture == frontTex) {
-            dest.w = frontW;
-            dest.h = bunnyH;
-        } else if (currentTexture == backTex) {
-            dest.w = backW;
-            dest.h = bunnyH;
-        } else {
-            dest.w = bunnyW;
-            dest.h = bunnyH;
+        for (int y = 0; y < MAP_HEIGHT; y++) {
+            for (int x = 0; x < MAP_WIDTH; x++) {
+                SDL_Rect dst = { x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
+                SDL_RenderCopy(renderer, tileTextures[map[y][x]], NULL, &dst);
+            }
         }
 
-        SDL_RenderCopy(renderer, currentTexture, NULL, &dest);
+        dest.x = playerX;
+        dest.y = playerY;
+        SDL_RenderCopy(renderer, bunnyTexture, &srcRect, &dest);
+
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
     }
 
-    SDL_DestroyTexture(frontTex);
-    SDL_DestroyTexture(backTex);
-    SDL_DestroyTexture(leftTex);
-    SDL_DestroyTexture(rightTex);
-    SDL_DestroyTexture(bgTex);
+    SDL_DestroyTexture(bunnyTexture);
+    for (int i = 0; i < 2; ++i) SDL_DestroyTexture(tileTextures[i]);
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
     SDL_Quit();
-
     return 0;
 }
