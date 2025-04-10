@@ -40,8 +40,8 @@ int main() {
     }
 
     // Ladda spritesheets för höger och vänster
-    SDL_Texture* bunnyWalkRight = IMG_LoadTexture(renderer, "assets/spritesheets/panda_spritesheet/panda_walk_right.png");
-    SDL_Texture* bunnyWalkLeft = IMG_LoadTexture(renderer, "assets/spritesheets/panda_spritesheet/panda_walk_left.png");
+    SDL_Texture* bunnyWalkRight = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_right.png");
+    SDL_Texture* bunnyWalkLeft = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_left.png");
 
     if (!bunnyWalkRight || !bunnyWalkLeft) {
         printf("Kunde inte ladda spritesheets: %s\n", SDL_GetError());
