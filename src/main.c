@@ -7,10 +7,9 @@
 #define TILE_SIZE 128
 #define MAP_WIDTH 10
 #define MAP_HEIGHT 6
-#define FRAME_WIDTH 32
-#define FRAME_HEIGHT 32
-#define FRAME_DELAY 8
-#define MAX_FRAMES 4
+#define SCALE_FACTOR 1
+#define FRAME_COUNT 2
+#define FRAME_DELAY 100
 
 int map[MAP_HEIGHT][MAP_WIDTH] = {
     {0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
@@ -21,7 +20,7 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-int main(int argc, char* argv[]) {
+int main() {
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
 
@@ -29,6 +28,7 @@ int main(int argc, char* argv[]) {
                                           SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
+    // Ladda tiles
     SDL_Surface* tileSurfaces[2];
     tileSurfaces[0] = IMG_Load("assets/grass.png");
     tileSurfaces[1] = IMG_Load("assets/water.png");
@@ -39,19 +39,22 @@ int main(int argc, char* argv[]) {
         SDL_FreeSurface(tileSurfaces[i]);
     }
 
-    SDL_Surface* bunnySheet = IMG_Load("assets/bunny_sprite_sheet.png");
-    SDL_Texture* bunnyTexture = SDL_CreateTextureFromSurface(renderer, bunnySheet);
-    SDL_FreeSurface(bunnySheet);
+    // Ladda spritesheets för höger och vänster
+    SDL_Texture* bunnyWalkRight = IMG_LoadTexture(renderer, "assets/spritesheets/panda_spritesheet/panda_walk_right.png");
+    SDL_Texture* bunnyWalkLeft = IMG_LoadTexture(renderer, "assets/spritesheets/panda_spritesheet/panda_walk_left.png");
 
-    SDL_Rect srcRect = {0, 0, FRAME_WIDTH, FRAME_HEIGHT};
-    SDL_Rect dest = {0, 0, 64, 64};
-    int direction = 0; // 0 = down, 1 = left, 2 = right, 3 = up
+    if (!bunnyWalkRight || !bunnyWalkLeft) {
+        printf("Kunde inte ladda spritesheets: %s\n", SDL_GetError());
+        return 1;
+    }
+
     int frame = 0;
-    int frameTime = 0;
+    Uint32 lastFrameTime = SDL_GetTicks();
 
-    int playerX = 0;
-    int playerY = 0;
+    int playerX = 100;
+    int playerY = 100;
     int speed = 4;
+    int facingLeft = 0;
 
     SDL_Event event;
     int running = 1;
@@ -67,48 +70,40 @@ int main(int argc, char* argv[]) {
         int moving = 0;
 
         if (keys[SDL_SCANCODE_UP]) {
-            direction = 3;
             playerY -= speed;
             moving = 1;
         } else if (keys[SDL_SCANCODE_DOWN]) {
-            direction = 0;
             playerY += speed;
             moving = 1;
         } else if (keys[SDL_SCANCODE_LEFT]) {
-            direction = 1;
             playerX -= speed;
+            facingLeft = 1;
             moving = 1;
         } else if (keys[SDL_SCANCODE_RIGHT]) {
-            direction = 2;
             playerX += speed;
+            facingLeft = 0;
             moving = 1;
         }
 
+        // Kollision
         int tileX = playerX / TILE_SIZE;
         int tileY = playerY / TILE_SIZE;
-
         if (tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT || map[tileY][tileX] == 1) {
             playerX = prevX;
             playerY = prevY;
-            moving = 0;
-        }
-//hej
-        if (moving) {
-            frameTime++;
-            if (frameTime >= FRAME_DELAY) {
-                frame = (frame + 1) % MAX_FRAMES;
-                frameTime = 0;
-            }
-        } else {
-            frame = 0;
         }
 
-        srcRect.x = frame * FRAME_WIDTH;
-        srcRect.y = direction * FRAME_HEIGHT;
+        // Uppdatera animation
+        Uint32 currentTime = SDL_GetTicks();
+        if (moving && currentTime > lastFrameTime + FRAME_DELAY) {
+            frame = (frame + 1) % FRAME_COUNT;
+            lastFrameTime = currentTime;
+        }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
+        // Rita bakgrund
         for (int y = 0; y < MAP_HEIGHT; y++) {
             for (int x = 0; x < MAP_WIDTH; x++) {
                 SDL_Rect dst = { x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
@@ -116,20 +111,28 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        dest.x = playerX;
-        dest.y = playerY;
-        SDL_RenderCopy(renderer, bunnyTexture, &srcRect, &dest);
+        // Rita bunny med rätt riktning
+        SDL_Rect srcRect = { frame * 64, 0, 64, 64 };
+        SDL_Rect destRect = { playerX, playerY, 64, 64 };
+
+        if (facingLeft)
+            SDL_RenderCopy(renderer, bunnyWalkLeft, &srcRect, &destRect);
+        else
+            SDL_RenderCopy(renderer, bunnyWalkRight, &srcRect, &destRect);
 
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
     }
 
-    SDL_DestroyTexture(bunnyTexture);
-    for (int i = 0; i < 2; ++i) SDL_DestroyTexture(tileTextures[i]);
+    for (int i = 0; i < 2; ++i)
+        SDL_DestroyTexture(tileTextures[i]);
 
+    SDL_DestroyTexture(bunnyWalkRight);
+    SDL_DestroyTexture(bunnyWalkLeft);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
     SDL_Quit();
+
     return 0;
 }
