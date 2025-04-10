@@ -1,6 +1,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
+#include "menu.h"
+
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
@@ -27,6 +29,28 @@ int main(int argc, char* argv[]) {
     SDL_Window* window = SDL_CreateWindow("Cute Bunny", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                           SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    
+    initMenu(renderer);
+
+    int selectedCharacter = -1;
+    SDL_Event event;
+
+    // Visa meny tills spelaren valt karaktär eller stängt spelet
+    while (selectedCharacter == -1) {
+        selectedCharacter = handleMenu(renderer, &event);
+        if (selectedCharacter == -2) { // spelaren vill avsluta spelet helt
+            cleanMenu();
+            SDL_DestroyRenderer(renderer);
+            SDL_DestroyWindow(window);
+            IMG_Quit();
+            SDL_Quit();
+            return 0;
+        }
+    }
+
+    printf("Vald karaktär: %d\n", selectedCharacter); // för test
+
+
 
     SDL_Surface* tileSurfaces[2];
     tileSurfaces[0] = IMG_Load("assets/grass.png");
@@ -56,7 +80,6 @@ int main(int argc, char* argv[]) {
     int speed = 10;
     int facingLeft = 0;
 
-    SDL_Event event;
     int running = 1;
     while (running)
     {
@@ -133,6 +156,8 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < 2; ++i) SDL_DestroyTexture(tileTextures[i]);
 
+
+    cleanMenu(); // frigör meny-resurser
     SDL_DestroyTexture(bunnyWalkRight);
     SDL_DestroyTexture(bunnyWalkLeft);
     SDL_DestroyRenderer(renderer);
