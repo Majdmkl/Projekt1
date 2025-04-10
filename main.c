@@ -41,8 +41,9 @@ int main(int argc, char* argv[]) {
 
     SDL_Texture* bunnyWalkRight = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_right.png");
     SDL_Texture* bunnyWalkLeft = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_left.png");
+    SDL_Texture* bunnyWalkDown = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_spritesheet_2x64x64.png");
 
-    if (!bunnyWalkRight || !bunnyWalkLeft)
+    if (!bunnyWalkRight || !bunnyWalkLeft || !bunnyWalkDown)
     {
         printf("Kunde inte ladda spritesheets: %s\n", SDL_GetError());
         return 1;
@@ -55,6 +56,7 @@ int main(int argc, char* argv[]) {
     int playerY = 100;
     int speed = 10;
     int facingLeft = 0;
+    int walkingDown = 0;
 
     SDL_Event event;
     int running = 1;
@@ -66,6 +68,7 @@ int main(int argc, char* argv[]) {
         int prevX = playerX;
         int prevY = playerY;
         int moving = 0;
+        walkingDown = 0;
 
         int moveX = 0;
         int moveY = 0;
@@ -74,10 +77,12 @@ int main(int argc, char* argv[]) {
         {
             moveY -= speed;
             moving = 1;
-        } else if (keys[SDL_SCANCODE_S])
+        }
+        else if (keys[SDL_SCANCODE_S] || keys[SDL_SCANCODE_DOWN])
         {
             moveY += speed;
             moving = 1;
+            walkingDown = 1;
         }
 
         if (keys[SDL_SCANCODE_A])
@@ -85,7 +90,8 @@ int main(int argc, char* argv[]) {
             moveX -= speed;
             facingLeft = 1;
             moving = 1;
-        } else if (keys[SDL_SCANCODE_D])
+        }
+        else if (keys[SDL_SCANCODE_D])
         {
             moveX += speed;
             facingLeft = 0;
@@ -120,21 +126,21 @@ int main(int argc, char* argv[]) {
             SDL_RenderCopy(renderer, tileTextures[map[y][x]], NULL, &dst);
         }
 
-
         SDL_Rect srcRect = { frame * 64, 0, 64, 64 };
         SDL_Rect destRect = { playerX, playerY, 64, 64 };
 
-        if (facingLeft) SDL_RenderCopy(renderer, bunnyWalkLeft, &srcRect, &destRect);
+        if (walkingDown) SDL_RenderCopy(renderer, bunnyWalkDown, &srcRect, &destRect);
+        else if (facingLeft) SDL_RenderCopy(renderer, bunnyWalkLeft, &srcRect, &destRect);
         else SDL_RenderCopy(renderer, bunnyWalkRight, &srcRect, &destRect);
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(16);
+        SDL_Delay(25);
     }
 
     for (int i = 0; i < 2; ++i) SDL_DestroyTexture(tileTextures[i]);
-
     SDL_DestroyTexture(bunnyWalkRight);
     SDL_DestroyTexture(bunnyWalkLeft);
+    SDL_DestroyTexture(bunnyWalkDown);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
