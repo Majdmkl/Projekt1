@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 
     int playerX = 100;
     int playerY = 100;
-    int speed = 10;
+    int speed = 5;
     int facingLeft = 0;
 
     SDL_Event event;
