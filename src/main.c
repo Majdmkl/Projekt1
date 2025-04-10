@@ -33,7 +33,8 @@ int main(int argc, char* argv[]) {
     tileSurfaces[1] = IMG_Load("assets/water.png");
 
     SDL_Texture* tileTextures[2];
-    for (int i = 0; i < 2; ++i){
+    for (int i = 0; i < 2; ++i)
+    {
         tileTextures[i] = SDL_CreateTextureFromSurface(renderer, tileSurfaces[i]);
         SDL_FreeSurface(tileSurfaces[i]);
     }
@@ -41,7 +42,8 @@ int main(int argc, char* argv[]) {
     SDL_Texture* bunnyWalkRight = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_right.png");
     SDL_Texture* bunnyWalkLeft = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_left.png");
 
-    if (!bunnyWalkRight || !bunnyWalkLeft) {
+    if (!bunnyWalkRight || !bunnyWalkLeft)
+    {
         printf("Kunde inte ladda spritesheets: %s\n", SDL_GetError());
         return 1;
     }
@@ -58,10 +60,7 @@ int main(int argc, char* argv[]) {
     int running = 1;
     while (running)
     {
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_QUIT) running = 0;
-        }
+        while (SDL_PollEvent(&event)) if (event.type == SDL_QUIT) running = 0;
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         int prevX = playerX;
@@ -115,13 +114,12 @@ int main(int argc, char* argv[]) {
         SDL_RenderClear(renderer);
 
         for (int y = 0; y < MAP_HEIGHT; y++)
+        for (int x = 0; x < MAP_WIDTH; x++)
         {
-            for (int x = 0; x < MAP_WIDTH; x++)
-            {
-                SDL_Rect dst = { x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
-                SDL_RenderCopy(renderer, tileTextures[map[y][x]], NULL, &dst);
-            }
+            SDL_Rect dst = { x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
+            SDL_RenderCopy(renderer, tileTextures[map[y][x]], NULL, &dst);
         }
+
 
         SDL_Rect srcRect = { frame * 64, 0, 64, 64 };
         SDL_Rect destRect = { playerX, playerY, 64, 64 };
