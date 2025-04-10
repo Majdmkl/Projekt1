@@ -12,10 +12,10 @@
 #define FRAME_DELAY 100
 
 int map[MAP_HEIGHT][MAP_WIDTH] = {
-    {0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
-    {0, 1, 1, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
-    {1, 1, 0, 1, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 
     int playerX = 100;
     int playerY = 100;
-    int speed = 4;
+    int speed = 10;
     int facingLeft = 0;
 
     SDL_Event event;
@@ -69,17 +69,17 @@ int main(int argc, char* argv[]) {
         int prevY = playerY;
         int moving = 0;
 
-        if (keys[SDL_SCANCODE_UP]) {
+        if (keys[SDL_SCANCODE_W]) {
             playerY -= speed;
             moving = 1;
-        } else if (keys[SDL_SCANCODE_DOWN]) {
+        } else if (keys[SDL_SCANCODE_S]) {
             playerY += speed;
             moving = 1;
-        } else if (keys[SDL_SCANCODE_LEFT]) {
+        } else if (keys[SDL_SCANCODE_A]) {
             playerX -= speed;
             facingLeft = 1;
             moving = 1;
-        } else if (keys[SDL_SCANCODE_RIGHT]) {
+        } else if (keys[SDL_SCANCODE_D]) {
             playerX += speed;
             facingLeft = 0;
             moving = 1;
