@@ -28,18 +28,16 @@ int main(int argc, char* argv[]) {
                                           SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    // Ladda tiles
     SDL_Surface* tileSurfaces[2];
     tileSurfaces[0] = IMG_Load("assets/grass.png");
     tileSurfaces[1] = IMG_Load("assets/water.png");
 
     SDL_Texture* tileTextures[2];
-    for (int i = 0; i < 2; ++i) {
+    for (int i = 0; i < 2; ++i){
         tileTextures[i] = SDL_CreateTextureFromSurface(renderer, tileSurfaces[i]);
         SDL_FreeSurface(tileSurfaces[i]);
     }
 
-    // Ladda spritesheets för höger och vänster
     SDL_Texture* bunnyWalkRight = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_right.png");
     SDL_Texture* bunnyWalkLeft = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_left.png");
 
@@ -58,10 +56,11 @@ int main(int argc, char* argv[]) {
 
     SDL_Event event;
     int running = 1;
-    while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT)
-                running = 0;
+    while (running)
+    {
+        while (SDL_PollEvent(&event))
+        {
+            if (event.type == SDL_QUIT) running = 0;
         }
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
@@ -69,33 +68,45 @@ int main(int argc, char* argv[]) {
         int prevY = playerY;
         int moving = 0;
 
-        if (keys[SDL_SCANCODE_W]) {
-            playerY -= speed;
+        int moveX = 0;
+        int moveY = 0;
+
+        if (keys[SDL_SCANCODE_W])
+        {
+            moveY -= speed;
             moving = 1;
-        } else if (keys[SDL_SCANCODE_S]) {
-            playerY += speed;
+        } else if (keys[SDL_SCANCODE_S])
+        {
+            moveY += speed;
             moving = 1;
-        } else if (keys[SDL_SCANCODE_A]) {
-            playerX -= speed;
+        }
+
+        if (keys[SDL_SCANCODE_A])
+        {
+            moveX -= speed;
             facingLeft = 1;
             moving = 1;
-        } else if (keys[SDL_SCANCODE_D]) {
-            playerX += speed;
+        } else if (keys[SDL_SCANCODE_D])
+        {
+            moveX += speed;
             facingLeft = 0;
             moving = 1;
         }
 
-        // Kollision
+        playerX += moveX;
+        playerY += moveY;
+
         int tileX = playerX / TILE_SIZE;
         int tileY = playerY / TILE_SIZE;
-        if (tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT || map[tileY][tileX] == 1) {
+        if (tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT || map[tileY][tileX] == 1)
+        {
             playerX = prevX;
             playerY = prevY;
         }
 
-        // Uppdatera animation
         Uint32 currentTime = SDL_GetTicks();
-        if (moving && currentTime > lastFrameTime + FRAME_DELAY) {
+        if (moving && currentTime > lastFrameTime + FRAME_DELAY)
+        {
             frame = (frame + 1) % FRAME_COUNT;
             lastFrameTime = currentTime;
         }
@@ -103,15 +114,15 @@ int main(int argc, char* argv[]) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
-        // Rita bakgrund
-        for (int y = 0; y < MAP_HEIGHT; y++) {
-            for (int x = 0; x < MAP_WIDTH; x++) {
+        for (int y = 0; y < MAP_HEIGHT; y++)
+        {
+            for (int x = 0; x < MAP_WIDTH; x++)
+            {
                 SDL_Rect dst = { x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
                 SDL_RenderCopy(renderer, tileTextures[map[y][x]], NULL, &dst);
             }
         }
 
-        // Rita bunny med rätt riktning
         SDL_Rect srcRect = { frame * 64, 0, 64, 64 };
         SDL_Rect destRect = { playerX, playerY, 64, 64 };
 
