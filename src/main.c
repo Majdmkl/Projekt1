@@ -115,17 +115,14 @@ int main(int argc, char* argv[]) {
         SDL_Rect srcRect = { frame * 64, 0, 64, 64 };
         SDL_Rect destRect = { playerX, playerY, 64, 64 };
 
-        if (facingLeft)
-            SDL_RenderCopy(renderer, bunnyWalkLeft, &srcRect, &destRect);
-        else
-            SDL_RenderCopy(renderer, bunnyWalkRight, &srcRect, &destRect);
+        if (facingLeft) SDL_RenderCopy(renderer, bunnyWalkLeft, &srcRect, &destRect);
+        else SDL_RenderCopy(renderer, bunnyWalkRight, &srcRect, &destRect);
 
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
     }
 
-    for (int i = 0; i < 2; ++i)
-        SDL_DestroyTexture(tileTextures[i]);
+    for (int i = 0; i < 2; ++i) SDL_DestroyTexture(tileTextures[i]);
 
     SDL_DestroyTexture(bunnyWalkRight);
     SDL_DestroyTexture(bunnyWalkLeft);
