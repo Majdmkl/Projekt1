@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
             playerY = prevY;
             moving = 0;
         }
-
+//hej
         if (moving) {
             frameTime++;
             if (frameTime >= FRAME_DELAY) {
