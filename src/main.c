@@ -50,7 +50,42 @@ int main(int argc, char* argv[]) {
 
     printf("Vald karaktär: %d\n", selectedCharacter); // för test
 
+    SDL_Texture *characterFront, *characterBack, *characterLeft, *characterRight;
 
+    if (selectedCharacter == 0) { // Bunny
+        characterFront = IMG_LoadTexture(renderer, "assets/bunny_front.png");
+        characterBack = IMG_LoadTexture(renderer, "assets/bunny_back.png");
+        characterLeft = IMG_LoadTexture(renderer, "assets/bunny_left.png");
+        characterRight = IMG_LoadTexture(renderer, "assets/bunny_right.png");
+    }
+    else if (selectedCharacter == 2) { // Panda
+        characterFront = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_left_foot.png");
+        characterBack = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_left_foot.png"); // Använd samma tills annan finns
+        characterLeft = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_left.png");
+        characterRight = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_right.png");
+    }
+    else {
+        // Om användaren väljer en karaktär som inte är redo (t.ex. Lejon), avsluta programmet säkert:
+        printf("Den valda karaktären finns ej än!\n");
+        cleanMenu();
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        IMG_Quit();
+        SDL_Quit();
+        return 1;
+    }
+    
+    // Kontrollera om bilderna laddades korrekt
+    if (!characterFront || !characterBack || !characterLeft || !characterRight) {
+        printf("Kunde inte ladda någon av karaktärsbilderna: %s\n", SDL_GetError());
+        cleanMenu();
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        IMG_Quit();
+        SDL_Quit();
+        return 1;
+    }
+    
 
     SDL_Surface* tileSurfaces[2];
     tileSurfaces[0] = IMG_Load("assets/grass.png");
@@ -144,12 +179,21 @@ int main(int argc, char* argv[]) {
         }
 
 
-        SDL_Rect srcRect = { frame * 64, 0, 64, 64 };
         SDL_Rect destRect = { playerX, playerY, 64, 64 };
 
-        if (facingLeft) SDL_RenderCopy(renderer, bunnyWalkLeft, &srcRect, &destRect);
-        else SDL_RenderCopy(renderer, bunnyWalkRight, &srcRect, &destRect);
-
+        if (moveY < 0) { // upp
+            SDL_RenderCopy(renderer, characterBack, NULL, &destRect);
+        } else if (moveY > 0) { // ner
+            SDL_RenderCopy(renderer, characterFront, NULL, &destRect);
+        } else if (moveX < 0) { // vänster
+            SDL_RenderCopy(renderer, characterLeft, NULL, &destRect);
+        } else if (moveX > 0) { // höger
+            SDL_RenderCopy(renderer, characterRight, NULL, &destRect);
+        } else {
+            // Om stillastående, visa framåt-bild som default
+            SDL_RenderCopy(renderer, characterFront, NULL, &destRect);
+        }
+        
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
     }
@@ -158,8 +202,10 @@ int main(int argc, char* argv[]) {
 
 
     cleanMenu(); // frigör meny-resurser
-    SDL_DestroyTexture(bunnyWalkRight);
-    SDL_DestroyTexture(bunnyWalkLeft);
+    SDL_DestroyTexture(characterFront);
+    SDL_DestroyTexture(characterBack);
+    SDL_DestroyTexture(characterLeft);
+    SDL_DestroyTexture(characterRight);    
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
