@@ -2,11 +2,11 @@
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
+#define SCREEN_WIDTH 1750
+#define SCREEN_HEIGHT 1000
 #define TILE_SIZE 128
-#define MAP_WIDTH 10
-#define MAP_HEIGHT 6
+#define MAP_WIDTH 14
+#define MAP_HEIGHT 8
 #define FRAME_COUNT 2
 #define FRAME_DELAY 100
 
@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
     }
 
     int playerX = 100, playerY = 100;
-    int speed = 10, frame = 0;
+    int speed = 5, frame = 0;
     int facingLeft = 0, walkingDown = 0, walkingUp = 0, moving = 0;
     Uint32 lastFrameTime = SDL_GetTicks();
 
