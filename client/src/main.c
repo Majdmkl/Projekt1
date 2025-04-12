@@ -24,13 +24,13 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
 int main(void) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         SDL_Log("SDL_Init Error: %s", SDL_GetError());
-        return 1;
+        return -1;
     }
 
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
         SDL_Log("IMG_Init Error: %s", IMG_GetError());
         SDL_Quit();
-        return 1;
+        return -1;
     }
 
     SDL_Window* window = SDL_CreateWindow("Cute Bunny", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -39,7 +39,7 @@ int main(void) {
         SDL_Log("Failed to create window: %s", SDL_GetError());
         IMG_Quit();
         SDL_Quit();
-        return 1;
+        return -1;
     }
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -48,7 +48,7 @@ int main(void) {
         SDL_DestroyWindow(window);
         IMG_Quit();
         SDL_Quit();
-        return 1;
+        return -1;
     }
 
     SDL_Texture* tileTextures[2];
@@ -57,14 +57,13 @@ int main(void) {
 
     if (!tileTextures[0] || !tileTextures[1]) {
         SDL_Log("Failed to load tiles: %s", SDL_GetError());
-        for (int i = 0; i < 2; ++i) {
-            if (tileTextures[i]) SDL_DestroyTexture(tileTextures[i]);
-        }
+        for (int i = 0; i < 2; ++i) if (tileTextures[i]) SDL_DestroyTexture(tileTextures[i]);
+
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         IMG_Quit();
         SDL_Quit();
-        return 1;
+        return -1;
     }
 
     SDL_Texture* bunnyWalkRight = IMG_LoadTexture(renderer, "assets/panda_spritesheets/panda_walk_right.png");
@@ -72,14 +71,13 @@ int main(void) {
 
     if (!bunnyWalkRight || !bunnyWalkLeft) {
         SDL_Log("Could not load spritesheets: %s", SDL_GetError());
-        for (int i = 0; i < 2; ++i) {
-            SDL_DestroyTexture(tileTextures[i]);
-        }
+        for (int i = 0; i < 2; ++i) SDL_DestroyTexture(tileTextures[i]);
+
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         IMG_Quit();
         SDL_Quit();
-        return 1;
+        return -1;
     }
 
     int frame = 0;
@@ -93,9 +91,7 @@ int main(void) {
     bool isRunning = true;
 
     while (isRunning) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) isRunning = false;
-        }
+        while (SDL_PollEvent(&event)) if (event.type == SDL_QUIT) isRunning = false;
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         int prevX = playerX;
