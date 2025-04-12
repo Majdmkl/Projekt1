@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < 2; ++i) SDL_DestroyTexture(tileTextures[i]);
     SDL_DestroyTexture(bunnyWalkRight);
     SDL_DestroyTexture(bunnyWalkLeft);
-    SDL_DestroyTexture(bunnyWalkDown);
+    //SDL_DestroyTexture(bunnyWalkDown);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
