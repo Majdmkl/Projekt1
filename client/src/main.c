@@ -20,7 +20,6 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
 };
 
 int selectCharacter(SDL_Renderer* renderer) {
-    // Ladda meny och gräs
     SDL_Surface* menuSurface = IMG_Load("lib/assets/meny.png");
     SDL_Texture* menuTexture = SDL_CreateTextureFromSurface(renderer, menuSurface);
     SDL_FreeSurface(menuSurface);
@@ -41,20 +40,14 @@ int selectCharacter(SDL_Renderer* renderer) {
     int menuX = menuRect.x;
     int menuY = menuRect.y;
 
-    //X: höger & vänster (vänster plusar & höger minusar)
-    //Y: upp & ner (ner plusar & upp minusar)
-    // Skapa rektanglar för varje karaktär
-    // Karaktärerna är 64x64 pixlar stora
-    SDL_Rect characters[6] =
-    {
-        {menuX + 32,  menuY + 140,  64, 64}, // Panda
-        {menuX + 185, menuY + 140,  64, 64}, // Giraffe
-        {menuX + 288, menuY + 150,  64, 64}, // Fox
-        {menuX + 43,  menuY + 280,  64, 64}, // Bear
-        {menuX + 160, menuY + 270,  64, 64}, // Bunny
-        {menuX + 280, menuY + 280,  64, 64}  // Lion
+    SDL_Rect characters[6] = {
+        {menuX + 32,  menuY + 140,  64, 64},
+        {menuX + 185, menuY + 140,  64, 64},
+        {menuX + 288, menuY + 150,  64, 64},
+        {menuX + 43,  menuY + 280,  64, 64},
+        {menuX + 160, menuY + 270,  64, 64},
+        {menuX + 280, menuY + 280,  64, 64}
     };
-
 
     while (selected == -1) {
         while (SDL_PollEvent(&event)) {
@@ -71,7 +64,6 @@ int selectCharacter(SDL_Renderer* renderer) {
             }
         }
 
-        // RENDER: fyll hela bakgrunden med gräs
         for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
             for (int x = 0; x < SCREEN_WIDTH; x += 64) {
                 SDL_Rect dst = { x, y, 64, 64 };
@@ -79,7 +71,6 @@ int selectCharacter(SDL_Renderer* renderer) {
             }
         }
 
-        // Rita menybilden ovanpå
         SDL_RenderCopy(renderer, menuTexture, NULL, &menuRect);
         SDL_RenderPresent(renderer);
     }
@@ -97,8 +88,6 @@ int main(int argc, char* argv[]) {
                                           SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-    int selectCharacter(SDL_Renderer* renderer);
-
     SDL_Surface* tileSurfaces[2];
     tileSurfaces[0] = IMG_Load("lib/assets/grass.png");
     tileSurfaces[1] = IMG_Load("lib/assets/water.png");
@@ -111,46 +100,48 @@ int main(int argc, char* argv[]) {
 
     SDL_Texture *walkRight, *walkLeft, *walkDown, *walkUp, *idleFront;
 
+    SDL_Texture* treeTexture = IMG_LoadTexture(renderer, "lib/assets/objects/Tree.png");
+
     int selected = selectCharacter(renderer);
 
     switch (selected) {
-        case 0: // Panda
+        case 0:
             walkRight = IMG_LoadTexture(renderer, "lib/assets/animal/panda/panda_right_walk_spritesheet.png");
             walkLeft  = IMG_LoadTexture(renderer, "lib/assets/animal/panda/panda_left_walk_spritesheet.png");
             walkDown  = IMG_LoadTexture(renderer, "lib/assets/animal/panda/panda_front_walk_spritesheet.png");
             walkUp    = IMG_LoadTexture(renderer, "lib/assets/animal/panda/panda_back_walk_spritesheet.png");
             idleFront = IMG_LoadTexture(renderer, "lib/assets/animal/panda/panda_front.png");
             break;
-        case 1: // Giraffe
+        case 1:
             walkRight = IMG_LoadTexture(renderer, "lib/assets/animal/giraffe/giraffe_right_walk_spritesheet.png");
             walkLeft  = IMG_LoadTexture(renderer, "lib/assets/animal/giraffe/giraffe_left_walk_spritesheet.png");
             walkDown  = IMG_LoadTexture(renderer, "lib/assets/animal/giraffe/giraffe_front_walk_spritesheet.png");
             walkUp    = IMG_LoadTexture(renderer, "lib/assets/animal/giraffe/giraffe_back_walk_spritesheet.png");
             idleFront = IMG_LoadTexture(renderer, "lib/assets/animal/giraffe/giraffe_front.png");
             break;
-        case 2: // Fox
+        case 2:
             walkRight = IMG_LoadTexture(renderer, "lib/assets/animal/fox/fox_right_walk_spritesheet.png");
             walkLeft  = IMG_LoadTexture(renderer, "lib/assets/animal/fox/fox_left_walk_spritesheet.png");
             walkDown  = IMG_LoadTexture(renderer, "lib/assets/animal/fox/fox_front_walk_spritesheet.png");
             walkUp    = IMG_LoadTexture(renderer, "lib/assets/animal/fox/fox_back_walk_spritesheet.png");
             idleFront = IMG_LoadTexture(renderer, "lib/assets/animal/fox/fox_front.png");
             break;
-        case 3: // Bear
+        case 3:
             walkRight = IMG_LoadTexture(renderer, "lib/assets/animal/bear/bear_right_walk_spritesheet.png");
             walkLeft  = IMG_LoadTexture(renderer, "lib/assets/animal/bear/bear_left_walk_spritesheet.png");
             walkDown  = IMG_LoadTexture(renderer, "lib/assets/animal/bear/bear_front_walk_spritesheet.png");
             walkUp    = IMG_LoadTexture(renderer, "lib/assets/animal/bear/bear_back_walk_spritesheet.png");
             idleFront = IMG_LoadTexture(renderer, "lib/assets/animal/bear/bear_front.png");
             break;
-        case 4: // Bunny
+        case 4:
             walkRight = IMG_LoadTexture(renderer, "lib/assets/animal/bunny/bunny_right_walk_spritesheet.png");
             walkLeft  = IMG_LoadTexture(renderer, "lib/assets/animal/bunny/bunny_left_walk_spritesheet.png");
             walkDown  = IMG_LoadTexture(renderer, "lib/assets/animal/bunny/bunny_front_walk_spritesheet.png");
             walkUp    = IMG_LoadTexture(renderer, "lib/assets/animal/bunny/bunny_back_walk_spritesheet.png");
             idleFront = IMG_LoadTexture(renderer, "lib/assets/animal/bunny/bunny_front.png");
             break;
-        case 5: // Lion
-            walkRight = IMG_LoadTexture(renderer, "lib/assets/animal/animal/lion/lion_right_walk_spritesheet.png");
+        case 5:
+            walkRight = IMG_LoadTexture(renderer, "lib/assets/animal/lion/lion_right_walk_spritesheet.png");
             walkLeft  = IMG_LoadTexture(renderer, "lib/assets/animal/lion/lion_left_walk_spritesheet.png");
             walkDown  = IMG_LoadTexture(renderer, "lib/assets/animal/lion/lion_front_walk_spritesheet.png");
             walkUp    = IMG_LoadTexture(renderer, "lib/assets/animal/lion/lion_back_walk_spritesheet.png");
@@ -163,12 +154,10 @@ int main(int argc, char* argv[]) {
             IMG_Quit();
             SDL_Quit();
             return 1;
-        // osv...
     }
 
-
     if (!walkRight || !walkLeft || !walkDown || !walkUp || !idleFront) {
-        printf("Kunde inte ladda panda sprites.\n");
+        printf("Kunde inte ladda sprites.\n");
         return 1;
     }
 
@@ -222,7 +211,7 @@ int main(int argc, char* argv[]) {
             lastFrameTime = currentTime;
         }
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
         SDL_RenderClear(renderer);
 
         for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -231,6 +220,9 @@ int main(int argc, char* argv[]) {
                 SDL_RenderCopy(renderer, tileTextures[map[y][x]], NULL, &dst);
             }
         }
+
+        SDL_Rect treeRect = {300, 300, 128, 128};
+        SDL_RenderCopy(renderer, treeTexture, NULL, &treeRect);
 
         SDL_Rect srcRect = { frame * 64, 0, 64, 90 };
         SDL_Rect destRect = { playerX, playerY, 128, 128 };
@@ -248,6 +240,7 @@ int main(int argc, char* argv[]) {
         SDL_Delay(30);
     }
 
+    SDL_DestroyTexture(treeTexture);
     SDL_DestroyTexture(walkRight);
     SDL_DestroyTexture(walkLeft);
     SDL_DestroyTexture(walkDown);
