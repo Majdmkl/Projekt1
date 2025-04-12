@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
         SDL_Log("IMG_Init Error: %s", IMG_GetError());
         SDL_Quit();
         return -1;
-    }
+    }   
 
     SDL_Window* window = SDL_CreateWindow("Cute Bunny",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
