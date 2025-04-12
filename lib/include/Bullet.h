@@ -25,7 +25,7 @@ Bullet* createBullet(SDL_Renderer *renderer, float startX, float startY, int who
 void destroyBullet(Bullet *bullet);
 void moveBullet(Bullet *bullet);
 SDL_Rect getBulletRect(Bullet *bullet);
-  void drawBullet(Bullet *bullet, SDL_Renderer *renderer);
+void drawBullet(Bullet *bullet, SDL_Renderer *renderer);
 float xBullet(Bullet *bullet);
 float DxBullet(Bullet *bullet);
 float yBullet(Bullet *bullet);
