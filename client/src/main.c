@@ -21,11 +21,11 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
 
 int selectCharacter(SDL_Renderer* renderer) {
     // Ladda meny och gräs
-    SDL_Surface* menuSurface = IMG_Load("assets/meny.png");
+    SDL_Surface* menuSurface = IMG_Load("lib/assets/meny.png");
     SDL_Texture* menuTexture = SDL_CreateTextureFromSurface(renderer, menuSurface);
     SDL_FreeSurface(menuSurface);
 
-    SDL_Surface* grassSurface = IMG_Load("assets/grass.png");
+    SDL_Surface* grassSurface = IMG_Load("lib/assets/grass.png");
     SDL_Texture* grassTexture = SDL_CreateTextureFromSurface(renderer, grassSurface);
     SDL_FreeSurface(grassSurface);
 
@@ -100,8 +100,8 @@ int main(int argc, char* argv[]) {
     int selectCharacter(SDL_Renderer* renderer);
 
     SDL_Surface* tileSurfaces[2];
-    tileSurfaces[0] = IMG_Load("assets/grass.png");
-    tileSurfaces[1] = IMG_Load("assets/water.png");
+    tileSurfaces[0] = IMG_Load("lib/assets/grass.png");
+    tileSurfaces[1] = IMG_Load("lib/assets/water.png");
 
     SDL_Texture* tileTextures[2];
     for (int i = 0; i < 2; ++i) {
@@ -115,46 +115,46 @@ int main(int argc, char* argv[]) {
 
     switch (selected) {
         case 0: // Panda
-            walkRight = IMG_LoadTexture(renderer, "assets/panda/panda_right_walk_spritesheet.png");
-            walkLeft  = IMG_LoadTexture(renderer, "assets/panda/panda_left_walk_spritesheet.png");
-            walkDown  = IMG_LoadTexture(renderer, "assets/panda/panda_front_walk_spritesheet.png");
-            walkUp    = IMG_LoadTexture(renderer, "assets/panda/panda_back_walk_spritesheet.png");
-            idleFront = IMG_LoadTexture(renderer, "assets/panda/panda_front.png");
+            walkRight = IMG_LoadTexture(renderer, "lib/assets/panda/panda_right_walk_spritesheet.png");
+            walkLeft  = IMG_LoadTexture(renderer, "lib/assets/panda/panda_left_walk_spritesheet.png");
+            walkDown  = IMG_LoadTexture(renderer, "lib/assets/panda/panda_front_walk_spritesheet.png");
+            walkUp    = IMG_LoadTexture(renderer, "lib/assets/panda/panda_back_walk_spritesheet.png");
+            idleFront = IMG_LoadTexture(renderer, "lib/assets/panda/panda_front.png");
             break;
         case 1: // Giraffe
-            walkRight = IMG_LoadTexture(renderer, "assets/giraffe/giraffe_right_walk_spritesheet.png");
-            walkLeft  = IMG_LoadTexture(renderer, "assets/giraffe/giraffe_left_walk_spritesheet.png");
-            walkDown  = IMG_LoadTexture(renderer, "assets/giraffe/giraffe_front_walk_spritesheet.png");
-            walkUp    = IMG_LoadTexture(renderer, "assets/giraffe/giraffe_back_walk_spritesheet.png");
-            idleFront = IMG_LoadTexture(renderer, "assets/giraffe/giraffe_front.png");
+            walkRight = IMG_LoadTexture(renderer, "lib/assets/giraffe/giraffe_right_walk_spritesheet.png");
+            walkLeft  = IMG_LoadTexture(renderer, "lib/assets/giraffe/giraffe_left_walk_spritesheet.png");
+            walkDown  = IMG_LoadTexture(renderer, "lib/assets/giraffe/giraffe_front_walk_spritesheet.png");
+            walkUp    = IMG_LoadTexture(renderer, "lib/assets/giraffe/giraffe_back_walk_spritesheet.png");
+            idleFront = IMG_LoadTexture(renderer, "lib/assets/giraffe/giraffe_front.png");
             break;
         case 2: // Fox
-            walkRight = IMG_LoadTexture(renderer, "assets/fox/fox_right_walk_spritesheet.png");
-            walkLeft  = IMG_LoadTexture(renderer, "assets/fox/fox_left_walk_spritesheet.png");
-            walkDown  = IMG_LoadTexture(renderer, "assets/fox/fox_front_walk_spritesheet.png");
-            walkUp    = IMG_LoadTexture(renderer, "assets/fox/fox_back_walk_spritesheet.png");
-            idleFront = IMG_LoadTexture(renderer, "assets/fox/fox_front.png");
+            walkRight = IMG_LoadTexture(renderer, "lib/assets/fox/fox_right_walk_spritesheet.png");
+            walkLeft  = IMG_LoadTexture(renderer, "lib/assets/fox/fox_left_walk_spritesheet.png");
+            walkDown  = IMG_LoadTexture(renderer, "lib/assets/fox/fox_front_walk_spritesheet.png");
+            walkUp    = IMG_LoadTexture(renderer, "lib/assets/fox/fox_back_walk_spritesheet.png");
+            idleFront = IMG_LoadTexture(renderer, "lib/assets/fox/fox_front.png");
             break;
         case 3: // Bear
-            walkRight = IMG_LoadTexture(renderer, "assets/bear/bear_right_walk_spritesheet.png");
-            walkLeft  = IMG_LoadTexture(renderer, "assets/bear/bear_left_walk_spritesheet.png");
-            walkDown  = IMG_LoadTexture(renderer, "assets/bear/bear_front_walk_spritesheet.png");
-            walkUp    = IMG_LoadTexture(renderer, "assets/bear/bear_back_walk_spritesheet.png");
-            idleFront = IMG_LoadTexture(renderer, "assets/bear/bear_front.png");
+            walkRight = IMG_LoadTexture(renderer, "lib/assets/bear/bear_right_walk_spritesheet.png");
+            walkLeft  = IMG_LoadTexture(renderer, "lib/assets/bear/bear_left_walk_spritesheet.png");
+            walkDown  = IMG_LoadTexture(renderer, "lib/assets/bear/bear_front_walk_spritesheet.png");
+            walkUp    = IMG_LoadTexture(renderer, "lib/assets/bear/bear_back_walk_spritesheet.png");
+            idleFront = IMG_LoadTexture(renderer, "lib/assets/bear/bear_front.png");
             break;
         case 4: // Bunny
-            walkRight = IMG_LoadTexture(renderer, "assets/bunny/bunny_right_walk_spritesheet.png");
-            walkLeft  = IMG_LoadTexture(renderer, "assets/bunny/bunny_left_walk_spritesheet.png");
-            walkDown  = IMG_LoadTexture(renderer, "assets/bunny/bunny_front_walk_spritesheet.png");
-            walkUp    = IMG_LoadTexture(renderer, "assets/bunny/bunny_back_walk_spritesheet.png");
-            idleFront = IMG_LoadTexture(renderer, "assets/bunny/bunny_front.png");
+            walkRight = IMG_LoadTexture(renderer, "lib/assets/bunny/bunny_right_walk_spritesheet.png");
+            walkLeft  = IMG_LoadTexture(renderer, "lib/assets/bunny/bunny_left_walk_spritesheet.png");
+            walkDown  = IMG_LoadTexture(renderer, "lib/assets/bunny/bunny_front_walk_spritesheet.png");
+            walkUp    = IMG_LoadTexture(renderer, "lib/assets/bunny/bunny_back_walk_spritesheet.png");
+            idleFront = IMG_LoadTexture(renderer, "lib/assets/bunny/bunny_front.png");
             break;
         case 5: // Lion
-            walkRight = IMG_LoadTexture(renderer, "assets/lion/lion_right_walk_spritesheet.png");
-            walkLeft  = IMG_LoadTexture(renderer, "assets/lion/lion_left_walk_spritesheet.png");
-            walkDown  = IMG_LoadTexture(renderer, "assets/lion/lion_front_walk_spritesheet.png");
-            walkUp    = IMG_LoadTexture(renderer, "assets/lion/lion_back_walk_spritesheet.png");
-            idleFront = IMG_LoadTexture(renderer, "assets/lion/lion_front.png");
+            walkRight = IMG_LoadTexture(renderer, "lib/assets/lion/lion_right_walk_spritesheet.png");
+            walkLeft  = IMG_LoadTexture(renderer, "lib/assets/lion/lion_left_walk_spritesheet.png");
+            walkDown  = IMG_LoadTexture(renderer, "lib/assets/lion/lion_front_walk_spritesheet.png");
+            walkUp    = IMG_LoadTexture(renderer, "lib/assets/lion/lion_back_walk_spritesheet.png");
+            idleFront = IMG_LoadTexture(renderer, "lib/assets/lion/lion_front.png");
             break;
         default:
             printf("Ogiltigt val av karaktär.\n");
