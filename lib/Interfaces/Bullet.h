@@ -5,9 +5,9 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 
-#include "../include/Game_logic.h"
-#include "../include/Character.h"
-#include "../include/Map.h"
+#include "../Interfaces/Game_logic.h"
+#include "../Interfaces/Character.h"
+#include "../Interfaces/Map.h"
 
 #define BULLET_WIDTH 5
 #define BULLET_HEIGHT 5
@@ -15,10 +15,10 @@
 #define BULLETLIFETIME 60
 
 typedef struct {
-  float x, y, dx, dy;
   int whoShot;
-  // Wall *walls[23];
+  float x, y, dx, dy;
   SDL_Texture *texture;
+  Wall *walls[23];
 } Bullet;
 
 Bullet* createBullet(SDL_Renderer *renderer, float startX, float startY, int whoShot);

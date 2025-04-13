@@ -1,8 +1,8 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include "../include/Character.h"
-#include "../include/Bullet.h"
+#include "../Interfaces/Character.h"
+#include "../Interfaces/Bullet.h"
 
 #define MAP_WIDTH 1024
 #define MAP_HEIGHT 1024
@@ -11,13 +11,8 @@
 #define PLAYABLE_AREA_Y_MIN 55
 #define PLAYABLE_AREA_Y_MAX 763
 
-…
-typedef struct {
-    int x_min;
-    int x_max;
-    int y_min;
-    int y_max;
-} Wall;
+
+typedef struct { int x_min, y_min, x_max, y_max;} Wall;
 
 extern Wall walls[23];
 

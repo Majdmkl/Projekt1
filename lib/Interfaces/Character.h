@@ -12,14 +12,6 @@
 #define CHARACTER_WIDTH 46
 #define MAX_HEALTH 4
 
-#include <stdbool.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include "Network.h"
-#include "Bullet.h"
-#include "Map.h"
-
-
 typedef struct character Character;
 
 Character *createCharacter(SDL_Renderer *renderer, int characterNumber);
