@@ -1,6 +1,7 @@
+#include <stdio.h>
+#include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <stdio.h>
 
 #define SCREEN_WIDTH 1750
 #define SCREEN_HEIGHT 1000
@@ -84,9 +85,8 @@ int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
 
-    SDL_Window* window = SDL_CreateWindow("Cozy delivery", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                          SCREEN_WIDTH, SCREEN_HEIGHT, 0);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Window* window = SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     SDL_Surface* tileSurfaces[2];
     tileSurfaces[0] = IMG_Load("lib/assets/grass.png");
@@ -167,10 +167,10 @@ int main(int argc, char* argv[]) {
     Uint32 lastFrameTime = SDL_GetTicks();
 
     SDL_Event event;
-    int running = 1;
+    bool running = true;
     while (running)
     {
-        while (SDL_PollEvent(&event)) if (event.type == SDL_QUIT) running = 0;
+        while (SDL_PollEvent(&event)) if (event.type == SDL_QUIT) running = false;
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         int prevX = playerX, prevY = playerY;
