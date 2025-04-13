@@ -104,7 +104,7 @@ void loadCharacterTextures(SDL_Renderer* renderer, int selected, SDL_Texture** t
     sprintf(path, "lib/assets/animal/%s/%s_front.png", character, character);
     textures[4] = IMG_LoadTexture(renderer, path);
 }
-
+// movement needs improvement
 void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture, SDL_Texture** playerTextures) {
     SDL_Texture *walkRight = playerTextures[0];
     SDL_Texture *walkLeft = playerTextures[1];
