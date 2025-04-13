@@ -168,10 +168,9 @@ int main(int argc, char* argv[]) {
 
     SDL_Event event;
     int running = 1;
-    while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) running = 0;
-        }
+    while (running)
+    {
+        while (SDL_PollEvent(&event)) if (event.type == SDL_QUIT) running = 0;
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         int prevX = playerX, prevY = playerY;
@@ -232,12 +231,12 @@ int main(int argc, char* argv[]) {
             else if (walkingUp)   SDL_RenderCopy(renderer, walkUp, &srcRect, &destRect);
             else if (facingLeft)  SDL_RenderCopy(renderer, walkLeft, &srcRect, &destRect);
             else                  SDL_RenderCopy(renderer, walkRight, &srcRect, &destRect);
-        } else {
-            SDL_RenderCopy(renderer, idleFront, NULL, &destRect);
-        }
+        } else SDL_RenderCopy(renderer, idleFront, NULL, &destRect);
+
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(30);
+        SDL_Delay(16);
+
     }
 
     SDL_DestroyTexture(treeTexture);
