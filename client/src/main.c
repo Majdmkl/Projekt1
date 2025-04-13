@@ -20,66 +20,8 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-int selectCharacter(SDL_Renderer* renderer) {
-    SDL_Surface* menuSurface = IMG_Load("lib/assets/meny.png");
-    SDL_Texture* menuTexture = SDL_CreateTextureFromSurface(renderer, menuSurface);
-    SDL_FreeSurface(menuSurface);
-
-    SDL_Surface* grassSurface = IMG_Load("lib/assets/grass.png");
-    SDL_Texture* grassTexture = SDL_CreateTextureFromSurface(renderer, grassSurface);
-    SDL_FreeSurface(grassSurface);
-
-    SDL_Event event;
-    int selected = -1;
-
-    SDL_Rect menuRect = {
-        (SCREEN_WIDTH - 384) / 2,
-        (SCREEN_HEIGHT - 384) / 2,
-        384, 384
-    };
-
-    int menuX = menuRect.x;
-    int menuY = menuRect.y;
-
-    SDL_Rect characters[6] = {
-        {menuX + 32,  menuY + 140,  64, 64},
-        {menuX + 185, menuY + 140,  64, 64},
-        {menuX + 288, menuY + 150,  64, 64},
-        {menuX + 43,  menuY + 280,  64, 64},
-        {menuX + 160, menuY + 270,  64, 64},
-        {menuX + 280, menuY + 280,  64, 64}
-    };
-
-    while (selected == -1) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) return -1;
-            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
-                int mouseX = event.button.x;
-                int mouseY = event.button.y;
-                for (int i = 0; i < 6; ++i) {
-                    if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &characters[i])) {
-                        selected = i;
-                        break;
-                    }
-                }
-            }
-        }
-
-        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
-            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
-                SDL_Rect dst = { x, y, 64, 64 };
-                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
-            }
-        }
-
-        SDL_RenderCopy(renderer, menuTexture, NULL, &menuRect);
-        SDL_RenderPresent(renderer);
-    }
-
-    SDL_DestroyTexture(menuTexture);
-    SDL_DestroyTexture(grassTexture);
-    return selected;
-}
+int selectCharacter(SDL_Renderer* renderer);
+SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath);
 
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
@@ -100,7 +42,7 @@ int main(int argc, char* argv[]) {
 
     SDL_Texture *walkRight, *walkLeft, *walkDown, *walkUp, *idleFront;
 
-    SDL_Texture* treeTexture = IMG_LoadTexture(renderer, "lib/assets/objects/Tree.png");
+    SDL_Texture* treeTexture = loadTexture(renderer, "lib/assets/tree.png");
 
     int selected = selectCharacter(renderer);
 
@@ -156,10 +98,7 @@ int main(int argc, char* argv[]) {
             return 1;
     }
 
-    if (!walkRight || !walkLeft || !walkDown || !walkUp || !idleFront) {
-        printf("Kunde inte ladda sprites.\n");
-        return 1;
-    }
+    if (!walkRight || !walkLeft || !walkDown || !walkUp || !idleFront) { SDL_Log("Kunde inte ladda sprites."); return NULL; return 1;}
 
     int playerX = 100, playerY = 100;
     int speed = 5, frame = 0;
@@ -252,4 +191,73 @@ int main(int argc, char* argv[]) {
     SDL_Quit();
 
     return 0;
+}
+
+SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath){
+    SDL_Surface* surface = IMG_Load(filePath);
+    if (!surface) { SDL_Log("Failed to load image: %s\n", IMG_GetError()); return NULL; }
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+    return texture;
+}
+
+int selectCharacter(SDL_Renderer* renderer) {
+    SDL_Surface* menuSurface = IMG_Load("lib/assets/meny.png");
+    SDL_Texture* menuTexture = SDL_CreateTextureFromSurface(renderer, menuSurface);
+    SDL_FreeSurface(menuSurface);
+
+    SDL_Surface* grassSurface = IMG_Load("lib/assets/grass.png");
+    SDL_Texture* grassTexture = SDL_CreateTextureFromSurface(renderer, grassSurface);
+    SDL_FreeSurface(grassSurface);
+
+    SDL_Event event;
+    int selected = -1;
+
+    SDL_Rect menuRect = {
+        (SCREEN_WIDTH - 384) / 2,
+        (SCREEN_HEIGHT - 384) / 2,
+        384, 384
+    };
+
+    int menuX = menuRect.x;
+    int menuY = menuRect.y;
+
+    SDL_Rect characters[6] = {
+        {menuX + 32,  menuY + 140,  64, 64},
+        {menuX + 185, menuY + 140,  64, 64},
+        {menuX + 288, menuY + 150,  64, 64},
+        {menuX + 43,  menuY + 280,  64, 64},
+        {menuX + 160, menuY + 270,  64, 64},
+        {menuX + 280, menuY + 280,  64, 64}
+    };
+
+    while (selected == -1) {
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) return -1;
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                int mouseX = event.button.x;
+                int mouseY = event.button.y;
+                for (int i = 0; i < 6; ++i) {
+                    if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &characters[i])) {
+                        selected = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
+            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
+                SDL_Rect dst = { x, y, 64, 64 };
+                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
+            }
+        }
+
+        SDL_RenderCopy(renderer, menuTexture, NULL, &menuRect);
+        SDL_RenderPresent(renderer);
+    }
+
+    SDL_DestroyTexture(menuTexture);
+    SDL_DestroyTexture(grassTexture);
+    return selected;
 }
