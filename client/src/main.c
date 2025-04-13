@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
             return 1;
     }
 
-    if (!walkRight || !walkLeft || !walkDown || !walkUp || !idleFront) { SDL_Log("Kunde inte ladda sprites."); return NULL; return 1;}
+    if (!walkRight || !walkLeft || !walkDown || !walkUp || !idleFront) { SDL_Log("Kunde inte ladda sprites."); return 1;}
 
     int playerX = 100, playerY = 100;
     int speed = 5, frame = 0;
