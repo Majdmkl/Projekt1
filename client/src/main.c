@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
 }
 
 void initSDL() { SDL_Init(SDL_INIT_VIDEO); IMG_Init(IMG_INIT_PNG); }
-SDL_Window* createWindow() { return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); }
+SDL_Window* createWindow() { return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_BORDERLESS); }
 SDL_Renderer* createRenderer(SDL_Window* window) { return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC); }
 
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath) {
@@ -120,7 +120,8 @@ void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* t
     SDL_Event event;
     bool running = true;
     while (running) {
-        while (SDL_PollEvent(&event)) if (event.type == SDL_QUIT) running = false;
+        while (SDL_PollEvent(&event)) if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_0) running = false;
+
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         int prevX = playerX, prevY = playerY;
@@ -169,7 +170,7 @@ void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* t
         SDL_RenderCopy(renderer, treeTexture, NULL, &treeRect);
 
         SDL_Rect srcRect = { frame * 64, 0, 64, 90 };
-        SDL_Rect destRect = { playerX, playerY, 128, 128 };
+        SDL_Rect destRect = { playerX, playerY, 90, 90 };
 
         if (moving) {
             if (walkingDown)      SDL_RenderCopy(renderer, walkDown, &srcRect, &destRect);
