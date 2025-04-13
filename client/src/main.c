@@ -20,19 +20,21 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
-SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath);
+void initSDL();
+SDL_Window* createWindow();
 int selectCharacter(SDL_Renderer* renderer);
+SDL_Renderer* createRenderer(SDL_Window* window);
+SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath);
 void loadCharacterTextures(SDL_Renderer* renderer, int selected, SDL_Texture** textures);
 void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture, SDL_Texture** playerTextures);
 void cleanup(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture, SDL_Texture** playerTextures);
 
 int main(int argc, char* argv[]) {
-    SDL_Init(SDL_INIT_VIDEO);
-    IMG_Init(IMG_INIT_PNG);
 
-    SDL_Window* window = SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                        SCREEN_WIDTH, SCREEN_HEIGHT, 0);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    initSDL();
+
+    SDL_Window* window = createWindow();
+    SDL_Renderer* renderer = createRenderer(window);
 
     SDL_Texture* tileTextures[2];
     tileTextures[0] = loadTexture(renderer, "lib/assets/grass.png");
@@ -41,10 +43,7 @@ int main(int argc, char* argv[]) {
     SDL_Texture* treeTexture = loadTexture(renderer, "lib/assets/objects/Tree.png");
 
     int selected = selectCharacter(renderer);
-    if (selected == -1) {
-        cleanup(window, renderer, tileTextures, treeTexture, NULL);
-        return 1;
-    }
+    if (selected == -1) { cleanup(window, renderer, tileTextures, treeTexture, NULL); return 1; }
 
     SDL_Texture* playerTextures[5] = {NULL};
     loadCharacterTextures(renderer, selected, playerTextures);
@@ -58,17 +57,18 @@ int main(int argc, char* argv[]) {
     }
 
     gameLoop(renderer, tileTextures, treeTexture, playerTextures);
-
     cleanup(window, renderer, tileTextures, treeTexture, playerTextures);
+
     return 0;
 }
 
+void initSDL() { SDL_Init(SDL_INIT_VIDEO); IMG_Init(IMG_INIT_PNG); }
+SDL_Window* createWindow() { return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); }
+SDL_Renderer* createRenderer(SDL_Window* window) { return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC); }
+
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
-    if (!surface) {
-        SDL_Log("Failed to load image: %s\n", IMG_GetError());
-        return NULL;
-    }
+    if (!surface) { SDL_Log("Failed to load image: %s\n", IMG_GetError()); return NULL; }
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
     return texture;
@@ -120,9 +120,7 @@ void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* t
     SDL_Event event;
     bool running = true;
     while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) running = false;
-        }
+        while (SDL_PollEvent(&event)) if (event.type == SDL_QUIT) running = false;
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         int prevX = playerX, prevY = playerY;
@@ -152,16 +150,10 @@ void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* t
 
         int tileX = playerX / TILE_SIZE;
         int tileY = playerY / TILE_SIZE;
-        if (tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT || map[tileY][tileX] == 1) {
-            playerX = prevX;
-            playerY = prevY;
-        }
+        if (tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT || map[tileY][tileX] == 1) { playerX = prevX; playerY = prevY; }
 
         Uint32 currentTime = SDL_GetTicks();
-        if (moving && currentTime > lastFrameTime + FRAME_DELAY) {
-            frame = (frame + 1) % FRAME_COUNT;
-            lastFrameTime = currentTime;
-        }
+        if (moving && currentTime > lastFrameTime + FRAME_DELAY) { frame = (frame + 1) % FRAME_COUNT; lastFrameTime = currentTime; }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
         SDL_RenderClear(renderer);
@@ -184,9 +176,7 @@ void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* t
             else if (walkingUp)   SDL_RenderCopy(renderer, walkUp, &srcRect, &destRect);
             else if (facingLeft)  SDL_RenderCopy(renderer, walkLeft, &srcRect, &destRect);
             else                  SDL_RenderCopy(renderer, walkRight, &srcRect, &destRect);
-        } else {
-            SDL_RenderCopy(renderer, idleFront, NULL, &destRect);
-        }
+        } else SDL_RenderCopy(renderer, idleFront, NULL, &destRect);
 
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
@@ -250,20 +240,10 @@ int selectCharacter(SDL_Renderer* renderer) {
 }
 
 void cleanup(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture, SDL_Texture** playerTextures) {
-    if (playerTextures) {
-        for (int i = 0; i < 5; i++) {
-            if (playerTextures[i]) SDL_DestroyTexture(playerTextures[i]);
-        }
-    }
 
-    if (tileTextures) {
-        for (int i = 0; i < 2; i++) {
-            if (tileTextures[i]) SDL_DestroyTexture(tileTextures[i]);
-        }
-    }
-
+    if (playerTextures) for (int i = 0; i < 5; i++) if (playerTextures[i]) SDL_DestroyTexture(playerTextures[i]);
+    if (tileTextures) for (int i = 0; i < 2; i++) if (tileTextures[i]) SDL_DestroyTexture(tileTextures[i]);
     if (treeTexture) SDL_DestroyTexture(treeTexture);
-
     if (renderer) SDL_DestroyRenderer(renderer);
     if (window) SDL_DestroyWindow(window);
 
