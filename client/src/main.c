@@ -5,6 +5,8 @@
 
 #define SCREEN_WIDTH 1750
 #define SCREEN_HEIGHT 1000
+#define CHARACTER_WIDTH 90
+#define CHARACTER_HEIGHT 80
 #define TILE_SIZE 128
 #define MAP_WIDTH 14
 #define MAP_HEIGHT 8
@@ -173,7 +175,7 @@ void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* t
         SDL_RenderCopy(renderer, treeTexture, NULL, &treeRect);
 
         SDL_Rect srcRect = { frame * 64, 0, 64, 90 };
-        SDL_Rect destRect = { playerX, playerY, 90, 90 };
+        SDL_Rect destRect = { playerX, playerY, CHARACTER_WIDTH , CHARACTER_HEIGHT + 16 };
 
         if (moving) {
             if (walkingDown)      SDL_RenderCopy(renderer, walkDown, &srcRect, &destRect);
