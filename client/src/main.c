@@ -13,6 +13,15 @@
 #define FRAME_COUNT 2
 #define FRAME_DELAY 100
 
+
+enum PlayerState {
+    IDLE,
+    WALKING_UP,
+    WALKING_DOWN,
+    WALKING_LEFT,
+    WALKING_RIGHT
+};
+
 int map[MAP_HEIGHT][MAP_WIDTH] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -23,7 +32,6 @@ int map[MAP_HEIGHT][MAP_WIDTH] = {
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 };
-
 
 void initSDL();
 SDL_Window* createWindow();
@@ -71,7 +79,7 @@ int main(int argc, char* argv[]) {
 
     gameLoop(renderer, tileTextures, treeTexture, cottageTexture, playerTextures);
     cleanup(window, renderer, tileTextures, treeTexture, playerTextures);
-    
+
     gameLoop(renderer, tileTextures, treeTexture, cottageTexture, playerTextures);
     cleanup(window, renderer, tileTextures, cottageTexture, playerTextures);
 
@@ -120,59 +128,79 @@ void loadCharacterTextures(SDL_Renderer* renderer, int selected, SDL_Texture** t
     sprintf(path, "lib/assets/animal/%s/%s_front.png", character, character);
     textures[4] = IMG_LoadTexture(renderer, path);
 }
-// movement needs improvement
-void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture, SDL_Texture* cottageTexture, SDL_Texture** playerTextures) {
+
+void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture,
+              SDL_Texture* cottageTexture, SDL_Texture** playerTextures) {
+
     SDL_Texture *walkRight = playerTextures[0];
-    SDL_Texture *walkLeft = playerTextures[1];
-    SDL_Texture *walkDown = playerTextures[2];
-    SDL_Texture *walkUp = playerTextures[3];
+    SDL_Texture *walkLeft  = playerTextures[1];
+    SDL_Texture *walkDown  = playerTextures[2];
+    SDL_Texture *walkUp    = playerTextures[3];
     SDL_Texture *idleFront = playerTextures[4];
 
     int playerX = 500, playerY = 500;
     int speed = 5, frame = 0;
-    int facingLeft = 0, walkingDown = 0, walkingUp = 0, moving = 0;
     Uint32 lastFrameTime = SDL_GetTicks();
 
     SDL_Event event;
     bool running = true;
+
     while (running) {
-        while (SDL_PollEvent(&event)) if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_0) running = false;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT ||
+                (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_0)) {
+                running = false;
+            }
+        }
 
-
+        // --- Input Handling
         const Uint8* keys = SDL_GetKeyboardState(NULL);
-        int prevX = playerX, prevY = playerY;
-        moving = walkingDown = walkingUp = 0;
-        int moveX = 0, moveY = 0;
+        float prevX = playerX, prevY = playerY;
+        float moveX = 0, moveY = 0;
+        enum PlayerState playerState = IDLE;
 
         if (keys[SDL_SCANCODE_W]) {
             moveY -= speed;
-            walkingUp = moving = 1;
-        } else if (keys[SDL_SCANCODE_S]) {
-            moveY += speed;
-            walkingDown = moving = 1;
+            playerState = WALKING_UP;
         }
-
+        if (keys[SDL_SCANCODE_S]) {
+            moveY += speed;
+            playerState = WALKING_DOWN;
+        }
         if (keys[SDL_SCANCODE_A]) {
             moveX -= speed;
-            facingLeft = 1;
-            moving = 1;
-        } else if (keys[SDL_SCANCODE_D]) {
+            playerState = WALKING_LEFT;
+        }
+        if (keys[SDL_SCANCODE_D]) {
             moveX += speed;
-            facingLeft = 0;
-            moving = 1;
+            playerState = WALKING_RIGHT;
+        }
+
+        if (moveX != 0 && moveY != 0) {
+            float diagSpeed = speed / 1.4142f;
+            moveX = (moveX > 0) ? diagSpeed : -diagSpeed;
+            moveY = (moveY > 0) ? diagSpeed : -diagSpeed;
         }
 
         playerX += moveX;
         playerY += moveY;
-
+        // collision needs improvement, this is just a temp fix
         int tileX = playerX / TILE_SIZE;
         int tileY = playerY / TILE_SIZE;
-        if (tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT || map[tileY][tileX] == 1) { playerX = prevX; playerY = prevY; }
+        if (tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT || map[tileY][tileX] == 1) {
+            playerX = prevX;
+            playerY = prevY;
+            playerState = IDLE;
+        }
 
         Uint32 currentTime = SDL_GetTicks();
-        if (moving && currentTime > lastFrameTime + FRAME_DELAY) { frame = (frame + 1) % FRAME_COUNT; lastFrameTime = currentTime; }
+        bool isMoving = (playerState != IDLE);
+        if (isMoving && currentTime > lastFrameTime + FRAME_DELAY) {
+            frame = (frame + 1) % FRAME_COUNT;
+            lastFrameTime = currentTime;
+        }
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
         for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -182,26 +210,38 @@ void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* t
             }
         }
 
-        SDL_Rect treeRect = {300, 300, 128, 128};
+        SDL_Rect treeRect = { 300, 300, 128, 128 };
+        SDL_Rect cottageRect = { 600, 600, 145, 130 };
         SDL_RenderCopy(renderer, treeTexture, NULL, &treeRect);
-
-        SDL_Rect cottageRect = {600, 600, 145, 130};
         SDL_RenderCopy(renderer, cottageTexture, NULL, &cottageRect);
 
         SDL_Rect srcRect = { frame * 64, 0, 64, 90 };
-        SDL_Rect destRect = { playerX, playerY, CHARACTER_WIDTH , CHARACTER_HEIGHT + 16 };
+        SDL_Rect destRect = { playerX, playerY, CHARACTER_WIDTH, CHARACTER_HEIGHT + 16 };
 
-        if (moving) {
-            if (walkingDown)      SDL_RenderCopy(renderer, walkDown, &srcRect, &destRect);
-            else if (walkingUp)   SDL_RenderCopy(renderer, walkUp, &srcRect, &destRect);
-            else if (facingLeft)  SDL_RenderCopy(renderer, walkLeft, &srcRect, &destRect);
-            else                  SDL_RenderCopy(renderer, walkRight, &srcRect, &destRect);
-        } else SDL_RenderCopy(renderer, idleFront, NULL, &destRect);
+        switch (playerState) {
+            case WALKING_DOWN:
+                SDL_RenderCopy(renderer, walkDown, &srcRect, &destRect);
+                break;
+            case WALKING_UP:
+                SDL_RenderCopy(renderer, walkUp, &srcRect, &destRect);
+                break;
+            case WALKING_LEFT:
+                SDL_RenderCopy(renderer, walkLeft, &srcRect, &destRect);
+                break;
+            case WALKING_RIGHT:
+                SDL_RenderCopy(renderer, walkRight, &srcRect, &destRect);
+                break;
+            case IDLE:
+            default:
+                SDL_RenderCopy(renderer, idleFront, NULL, &destRect);
+                break;
+        }
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(16);
+        SDL_Delay(16); // ca 60 pfs
     }
 }
+
 
 int selectCharacter(SDL_Renderer* renderer) {
     SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/meny.png");
