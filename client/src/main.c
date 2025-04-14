@@ -31,7 +31,7 @@ int selectCharacter(SDL_Renderer* renderer);
 SDL_Renderer* createRenderer(SDL_Window* window);
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath);
 void loadCharacterTextures(SDL_Renderer* renderer, int selected, SDL_Texture** textures);
-void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture, SDL_Texture** playerTextures);
+void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture, SDL_Texture* cottageTexture, SDL_Texture** playerTextures);
 void cleanup(SDL_Window* window, SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture, SDL_Texture** playerTextures);
 
 int main(int argc, char* argv[]) {
@@ -46,6 +46,13 @@ int main(int argc, char* argv[]) {
     tileTextures[1] = loadTexture(renderer, "lib/assets/water.png");
 
     SDL_Texture* treeTexture = loadTexture(renderer, "lib/assets/objects/Tree.png");
+    SDL_Texture* cottageTexture = loadTexture(renderer, "lib/assets/objects/Cottage.png");
+    //SDL_Texture* fountainTexture = loadTexture(renderer, "lib/assets/objects/Fountain.png");
+    //SDL_Texture* bushTexture = loadTexture(renderer, "lib/assets/objects/Bush.png");
+    //SDL_Texture* riverTexture = loadTexture(renderer, "lib/assets/objects/River.png");
+    //SDL_Texture* bridgeTexture = loadTexture(renderer, "lib/assets/objects/Bridge.png");
+    //SDL_Texture* mailboxTexture = loadTexture(renderer, "lib/assets/objects/Mailbox.png");
+    //SDL_Texture* street_lampTexture = loadTexture(renderer, "lib/assets/objects/Street_lamp.png");
 
     int selected = selectCharacter(renderer);
     if (selected == -1) { cleanup(window, renderer, tileTextures, treeTexture, NULL); return 1; }
@@ -57,12 +64,16 @@ int main(int argc, char* argv[]) {
         if (!playerTextures[i]) {
             SDL_Log("Could not load all character sprites.");
             cleanup(window, renderer, tileTextures, treeTexture, playerTextures);
+            cleanup(window, renderer, tileTextures, cottageTexture, playerTextures);
             return 1;
         }
     }
 
-    gameLoop(renderer, tileTextures, treeTexture, playerTextures);
+    gameLoop(renderer, tileTextures, treeTexture, cottageTexture, playerTextures);
     cleanup(window, renderer, tileTextures, treeTexture, playerTextures);
+    
+    gameLoop(renderer, tileTextures, treeTexture, cottageTexture, playerTextures);
+    cleanup(window, renderer, tileTextures, cottageTexture, playerTextures);
 
     return 0;
 }
@@ -110,7 +121,7 @@ void loadCharacterTextures(SDL_Renderer* renderer, int selected, SDL_Texture** t
     textures[4] = IMG_LoadTexture(renderer, path);
 }
 // movement needs improvement
-void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture, SDL_Texture** playerTextures) {
+void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* treeTexture, SDL_Texture* cottageTexture, SDL_Texture** playerTextures) {
     SDL_Texture *walkRight = playerTextures[0];
     SDL_Texture *walkLeft = playerTextures[1];
     SDL_Texture *walkDown = playerTextures[2];
@@ -173,6 +184,9 @@ void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* t
 
         SDL_Rect treeRect = {300, 300, 128, 128};
         SDL_RenderCopy(renderer, treeTexture, NULL, &treeRect);
+
+        SDL_Rect cottageRect = {600, 600, 145, 130};
+        SDL_RenderCopy(renderer, cottageTexture, NULL, &cottageRect);
 
         SDL_Rect srcRect = { frame * 64, 0, 64, 90 };
         SDL_Rect destRect = { playerX, playerY, CHARACTER_WIDTH , CHARACTER_HEIGHT + 16 };
