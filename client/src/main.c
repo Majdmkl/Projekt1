@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 }
 
 void initSDL() { SDL_Init(SDL_INIT_VIDEO); IMG_Init(IMG_INIT_PNG); }
-SDL_Window* createWindow() { return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_BORDERLESS); }
+SDL_Window* createWindow() { return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); }
 SDL_Renderer* createRenderer(SDL_Window* window) { return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC); }
 
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath) {
@@ -146,14 +146,8 @@ void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* t
     bool running = true;
 
     while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT ||
-                (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_0)) {
-                running = false;
-            }
-        }
+        while (SDL_PollEvent(&event)) if(event.type == SDL_QUIT) running = false;
 
-        // --- Input Handling
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         float prevX = playerX, prevY = playerY;
         float moveX = 0, moveY = 0;
