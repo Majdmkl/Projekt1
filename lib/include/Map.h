@@ -1,8 +1,8 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include "../include/Character.h"
-#include "../include/Bullet.h"
+#include "Character.h"
+#include "Bullet.h"
 
 #define MAP_WIDTH 1024
 #define MAP_HEIGHT 1024

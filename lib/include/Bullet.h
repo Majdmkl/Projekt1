@@ -5,9 +5,9 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 
-#include "../include/Game_logic.h"
-#include "../include/Character.h"
-#include "../include/Map.h"
+#include "Game_logic.h"
+#include "Character.h"
+#include "Map.h"
 
 #define BULLET_WIDTH 5
 #define BULLET_HEIGHT 5
