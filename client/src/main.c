@@ -3,8 +3,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#define SCREEN_WIDTH 1750
-#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH 1920
+#define SCREEN_HEIGHT 1080
 #define CHARACTER_WIDTH 90
 #define CHARACTER_HEIGHT 80
 #define TILE_SIZE 128
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 }
 
 void initSDL() { SDL_Init(SDL_INIT_VIDEO); IMG_Init(IMG_INIT_PNG); }
-SDL_Window* createWindow() { return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); }
+SDL_Window* createWindow() { return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); } //SDL_WINDOW_FULLSCREEN
 SDL_Renderer* createRenderer(SDL_Window* window) { return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC); }
 
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath) {
