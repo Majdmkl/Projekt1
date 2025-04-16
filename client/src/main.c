@@ -138,8 +138,8 @@ void gameLoop(SDL_Renderer* renderer, SDL_Texture** tileTextures, SDL_Texture* t
     SDL_Texture *walkUp    = playerTextures[3];
     SDL_Texture *idleFront = playerTextures[4];
 
-    int playerX = 500, playerY = 500;
-    int speed = 5, frame = 0;
+    float speed = 5;
+    int playerX = 500, playerY = 500, frame = 0;;
     Uint32 lastFrameTime = SDL_GetTicks();
 
     SDL_Event event;
