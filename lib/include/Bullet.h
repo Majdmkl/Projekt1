@@ -5,7 +5,6 @@
 #include <SDL2/SDL_image.h>
 #include <stdbool.h>
 
-#include "Game_logic.h"
 #include "Character.h"
 #include "Map.h"
 
@@ -15,21 +14,21 @@
 #define BULLETLIFETIME 60
 
 typedef struct {
-  float x, y, dx, dy;
   int whoShot;
-  // Wall *walls[23];
+  MAP *walls[23];
+  float x, y, dx, dy;
   SDL_Texture *texture;
 } Bullet;
 
-Bullet* createBullet(SDL_Renderer *renderer, float startX, float startY, int whoShot);
-void destroyBullet(Bullet *bullet);
+float xBullet(Bullet *bullet);
+float yBullet(Bullet *bullet);
+float DxBullet(Bullet *bullet);
+float DyBullet(Bullet *bullet);
 void moveBullet(Bullet *bullet);
+void destroyBullet(Bullet *bullet);
 SDL_Rect getBulletRect(Bullet *bullet);
 void drawBullet(Bullet *bullet, SDL_Renderer *renderer);
-float xBullet(Bullet *bullet);
-float DxBullet(Bullet *bullet);
-float yBullet(Bullet *bullet);
-float DyBullet(Bullet *bullet);
-bool checkCollisionBulletWall(Bullet *bullet, Wall *walls, int num_walls);
+bool checkCollisionBulletWall(Bullet *bullet, MAP *walls, int num_walls);
+Bullet* createBullet(SDL_Renderer *renderer, float startX, float startY, int whoShot);
 
 #endif

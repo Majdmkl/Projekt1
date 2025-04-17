@@ -1,5 +1,10 @@
 {
-    "files.associations": {
-        "stdbool.h": "c"
-    }
+  "files.associations": {
+    "*.sqlbook": "sql",
+    "*.ndjson": "jsonl",
+    "*.dbclient-js": "javascript",
+    "stdbool.h": "c",
+    "stdio.h": "c",
+    "character.h": "c"
+  }
 }

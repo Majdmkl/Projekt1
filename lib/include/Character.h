@@ -8,29 +8,29 @@
 #include "Bullet.h"
 #include "Map.h"
 
-#define CHARACTER_HEIGHT 46
-#define CHARACTER_WIDTH 46
 #define MAX_HEALTH 4
+#define MOVE_SPEED 5
+#define CHARACTER_WIDTH 46
+#define CHARACTER_HEIGHT 46
 
 typedef struct character Character;
 
-Character *createCharacter(SDL_Renderer *renderer, int characterNumber);
+void turnUp(Character *pCharacter);
+void turnLeft(Character *pCharacter);
+void turnDown(Character *pCharacter);
+void turnRight(Character *pCharacter);
+int playerHealth(Character *character);
 void decreaseHealth(Character *pCharacter);
 int isCharacterAlive(Character *pCharacter);
-void turnLeft(Character *pCharacter);
-void turnRight(Character *pCharacter);
-void turnUp(Character *pCharacter);
-void turnDown(Character *pCharacter);
-void updateCharacterAnimation(Character *pCharacter, Uint32 deltaTime);
-void renderCharacter(Character *pCharacter, SDL_Renderer *renderer);
 void destroyCharacter(Character *pCharacter);
-void characterSendData(Character *pCharacter, MonkeyData *pMonkeyData);
-void updateCharacterFromServer(Character *pCharacter, MonkeyData *pMonkeyData);
 void healthBar(Character *pCharacter, SDL_Renderer *renderer);
+int howManyPlayersAlive(Character *players[], int num_players);
+void renderCharacter(Character *pCharacter, SDL_Renderer *renderer);
+bool checkCollision(Character *character, MAP *walls, int num_walls);
+void updateCharacterAnimation(Character *pCharacter, Uint32 deltaTime);
+Character *createCharacter(SDL_Renderer *renderer, int characterNumber);
 bool checkCollisionCharacterBullet(Character *pCharacter, Bullet *bullet);
 void setBulletStartPosition(Character *pCharacter, float *startX, float *startY);
-bool checkCollision(Character *character, Wall *walls, int num_walls);
-int howManyPlayersAlive(Character *players[], int num_players);
-int playerHealth(Character *character);
+void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount);
 
 #endif

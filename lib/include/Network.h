@@ -1,5 +1,5 @@
-#ifndef NETDATA_H
-#define NETDATA_H
+#ifndef NETWORK_H
+#define NETWORK_H
 
 #define MAX_ANIMALS 6
 #define MAX_BULLETS 200
