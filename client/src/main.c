@@ -10,9 +10,9 @@ void initSDL();
 SDL_Window* createWindow();
 int selectCharacter(SDL_Renderer* renderer);
 SDL_Renderer* createRenderer(SDL_Window* window);
-SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath);
 void gameLoop(SDL_Renderer* renderer, Character* player);
 void cleanup(SDL_Window* window, SDL_Renderer* renderer);
+SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath);
 
 int main(int argc, char* argv[]) {
     initSDL();
