@@ -44,7 +44,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
         SDL_Log("Failed to allocate memory for character");
         return NULL;
     }
-
+    // test for plaeyer one 
     character->x = 500;
     character->y = 500;
     character->speed = MOVE_SPEED;

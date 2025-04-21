@@ -8,7 +8,7 @@
 #include "Bullet.h"
 #include "Map.h"
 
-#define MAX_HEALTH 4
+#define MAX_HEALTH 3
 #define MOVE_SPEED 5
 #define CHARACTER_WIDTH 46
 #define CHARACTER_HEIGHT 46
