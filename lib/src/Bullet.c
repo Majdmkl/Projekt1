@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <Map.h>
 #include "Bullet.h"
 #include <Character.h>
-#include <Map.h>
 
 float xBullet(Bullet *bullet) {
     return bullet->x;

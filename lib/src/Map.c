@@ -1,8 +1,9 @@
-#include "Map.h"
-#include "Character.h"
+#include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <stdio.h>
+
+#include "Map.h"
+#include "Character.h"
 
 #define TILE_SIZE 64
 

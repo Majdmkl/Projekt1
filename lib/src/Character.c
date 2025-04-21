@@ -1,4 +1,3 @@
-#include "Character.h"
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -6,6 +5,7 @@
 #define FRAME_COUNT 2
 #define FRAME_DELAY 100
 
+#include "Character.h"
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);

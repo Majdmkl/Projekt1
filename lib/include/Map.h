@@ -1,8 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include <SDL2/SDL.h>
 #include <stdbool.h>
+#include <SDL2/SDL.h>
 
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1024

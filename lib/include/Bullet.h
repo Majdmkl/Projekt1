@@ -1,12 +1,12 @@
 #ifndef BULLET_H
 #define BULLET_H
 
+#include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <stdbool.h>
 
-#include "Character.h"
 #include "Map.h"
+#include "Character.h"
 
 #define BULLET_WIDTH 3
 #define BULLET_HEIGHT 3

@@ -4,15 +4,15 @@
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "Network.h"
-#include "Bullet.h"
-#include "Map.h"
 
+#include "Map.h"
+#include "Bullet.h"
+#include "Network.h
+"
 #define MAX_HEALTH 3
 #define MOVE_SPEED 5
 #define CHARACTER_WIDTH 46
 #define CHARACTER_HEIGHT 46
-
 
 typedef struct character {
   float x;
