@@ -6,26 +6,6 @@
 #define FRAME_COUNT 2
 #define FRAME_DELAY 100
 
-struct character {
-    float x;
-    float y;
-    float speed;
-    int health;
-    int frame;
-    Uint32 lastFrameTime;
-    enum {
-        IDLE,
-        WALKING_UP,
-        WALKING_DOWN,
-        WALKING_LEFT,
-        WALKING_RIGHT
-    } state;
-    SDL_Texture *walkRight;
-    SDL_Texture *walkLeft;
-    SDL_Texture *walkDown;
-    SDL_Texture *walkUp;
-    SDL_Texture *idleFront;
-};
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
@@ -44,7 +24,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
         SDL_Log("Failed to allocate memory for character");
         return NULL;
     }
-    // test for plaeyer one 
+    // test for plaeyer one
     character->x = 500;
     character->y = 500;
     character->speed = MOVE_SPEED;
@@ -93,53 +73,42 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     return character;
 }
 
-void decreaseHealth(Character* character) {
-    if (character->health > 0) {
-        character->health--;
-    }
-}
-
-int isCharacterAlive(Character* character) {
-    return character->health > 0;
+void turnUp(Character* character) {
+    character->state = WALKING_UP;
 }
 
 void turnLeft(Character* character) {
     character->state = WALKING_LEFT;
 }
 
-void turnRight(Character* character) {
-    character->state = WALKING_RIGHT;
-}
-
-void turnUp(Character* character) {
-    character->state = WALKING_UP;
-}
-
 void turnDown(Character* character) {
     character->state = WALKING_DOWN;
 }
 
-void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount) {
-    float prevX = character->x;
-    float prevY = character->y;
+void turnRight(Character* character) {
+    character->state = WALKING_RIGHT;
+}
 
-    character->x += moveX;
-    character->y += moveY;
+int playerHealth(Character* character) {
+    return character->health;
+}
 
-    bool collision = false;
-    for (int i = 0; i < wallCount; i++) {
-        if (character->x + CHARACTER_WIDTH > walls[i].x_min &&
-            character->x < walls[i].x_max &&
-            character->y + CHARACTER_HEIGHT > walls[i].y_min &&
-            character->y < walls[i].y_max) {
-            collision = true;
-            break;
-        }
-    }
+void decreaseHealth(Character* character) {
+    if (isCharacterAlive) character->health--;
+}
 
-    if (collision) {
-        character->x = prevX;
-        character->y = prevY;
+bool isCharacterAlive(Character* character) {
+    return character->health > 0;
+}
+
+void destroyCharacter(Character* character) {
+    if (character) {
+        if (character->walkRight) SDL_DestroyTexture(character->walkRight);
+        if (character->walkLeft) SDL_DestroyTexture(character->walkLeft);
+        if (character->walkDown) SDL_DestroyTexture(character->walkDown);
+        if (character->walkUp) SDL_DestroyTexture(character->walkUp);
+        if (character->idleFront) SDL_DestroyTexture(character->idleFront);
+        free(character);
     }
 }
 
@@ -177,17 +146,6 @@ void renderCharacter(Character* character, SDL_Renderer* renderer) {
     }
 }
 
-void destroyCharacter(Character* character) {
-    if (character) {
-        if (character->walkRight) SDL_DestroyTexture(character->walkRight);
-        if (character->walkLeft) SDL_DestroyTexture(character->walkLeft);
-        if (character->walkDown) SDL_DestroyTexture(character->walkDown);
-        if (character->walkUp) SDL_DestroyTexture(character->walkUp);
-        if (character->idleFront) SDL_DestroyTexture(character->idleFront);
-        free(character);
-    }
-}
-
 void healthBar(Character* character, SDL_Renderer* renderer) {
     SDL_Rect healthRect = {
         character->x,
@@ -198,6 +156,12 @@ void healthBar(Character* character, SDL_Renderer* renderer) {
 
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &healthRect);
+}
+
+int howManyPlayersAlive(Character* players[], int num_players) {
+    int aliveCount = 0;
+    for (int i = 0; i < num_players; i++) if (isCharacterAlive(players[i])) aliveCount++;
+    return aliveCount;
 }
 
 bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
@@ -212,6 +176,26 @@ void setBulletStartPosition(Character* character, float* startX, float* startY) 
     *startY = character->y + CHARACTER_HEIGHT / 2;
 }
 
-int playerHealth(Character* character) {
-    return character->health;
+void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount) {
+    float prevX = character->x;
+    float prevY = character->y;
+
+    character->x += moveX;
+    character->y += moveY;
+
+    bool collision = false;
+    for (int i = 0; i < wallCount; i++) {
+        if (character->x + CHARACTER_WIDTH > walls[i].x_min &&
+            character->x < walls[i].x_max &&
+            character->y + CHARACTER_HEIGHT > walls[i].y_min &&
+            character->y < walls[i].y_max) {
+            collision = true;
+            break;
+        }
+    }
+
+    if (collision) {
+        character->x = prevX;
+        character->y = prevY;
+    }
 }

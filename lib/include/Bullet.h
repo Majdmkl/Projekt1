@@ -8,10 +8,10 @@
 #include "Character.h"
 #include "Map.h"
 
-#define BULLET_WIDTH 5
-#define BULLET_HEIGHT 5
-#define BULLET_SPEED 5
-#define BULLETLIFETIME 60
+#define BULLET_WIDTH 3
+#define BULLET_HEIGHT 3
+#define BULLET_SPEED 10
+#define BULLETLIFETIME 3000 // 3 seconds
 
 typedef struct {
   int whoShot;
