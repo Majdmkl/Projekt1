@@ -1,8 +1,0 @@
-#define WINDOW_WIDTH 1700
-#define WINDOW_HEIGHT 900
-
-#define PLAYER_WIDTH 800
-#define PLAYER_HEIGHT 600
-
-#define MAX_PLAYERS 4
-#define MOVE_SPEED 1
