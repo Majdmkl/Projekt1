@@ -164,7 +164,7 @@ int howManyPlayersAlive(Character* players[], int num_players) {
     return aliveCount;
 }
 
-bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
+bool checkCollisionCharacterBullet(Character* character, BulletData* bullet) {
     return (character->x < bullet->x + 10 &&
             character->x + CHARACTER_WIDTH > bullet->x &&
             character->y < bullet->y + 10 &&
