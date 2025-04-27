@@ -18,7 +18,6 @@ typedef struct {
   MAP *walls[23];
   float x, y, dx, dy;
   SDL_Texture *texture;
-  Wall *walls[23];
 } Bullet;
 
 float xBullet(Bullet *bullet);
