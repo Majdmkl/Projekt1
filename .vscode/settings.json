@@ -5,6 +5,7 @@
     "*.dbclient-js": "javascript",
     "stdbool.h": "c",
     "stdio.h": "c",
-    "character.h": "c"
+    "character.h": "c",
+    "map.h": "c"
   }
 }
