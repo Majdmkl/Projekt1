@@ -78,11 +78,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     bool running = true;
 
     while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                running = false;
-            }
-        }
+        while (SDL_PollEvent(&event)) if (event.type == SDL_QUIT) running = false;
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         float moveX = 0, moveY = 0;

@@ -11,8 +11,8 @@
 
 #define MAX_HEALTH 3
 #define MOVE_SPEED 5
-#define CHARACTER_WIDTH 46
-#define CHARACTER_HEIGHT 46
+#define CHARACTER_WIDTH 54
+#define CHARACTER_HEIGHT 54
 
 typedef struct character {
   float x;

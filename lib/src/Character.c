@@ -6,6 +6,7 @@
 #define FRAME_DELAY 100
 
 #include "Character.h"
+#include "Bullet.h"
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
@@ -24,7 +25,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
         SDL_Log("Failed to allocate memory for character");
         return NULL;
     }
-    // test for plaeyer one
+    // test for player one
     character->x = 500;
     character->y = 500;
     character->speed = MOVE_SPEED;
@@ -63,7 +64,6 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     sprintf(path, "lib/assets/animal/%s/%s_front.png", characterType, characterType);
     character->idleFront = loadCharacterTexture(renderer, path);
 
-    // Check if all textures were loaded successfully
     if (!character->walkRight || !character->walkLeft || !character->walkDown ||
         !character->walkUp || !character->idleFront) {
         destroyCharacter(character);
@@ -94,7 +94,7 @@ int playerHealth(Character* character) {
 }
 
 void decreaseHealth(Character* character) {
-    if (isCharacterAlive) character->health--;
+    if (character && character->health > 0) character->health--;
 }
 
 bool isCharacterAlive(Character* character) {

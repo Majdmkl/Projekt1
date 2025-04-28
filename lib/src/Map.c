@@ -7,26 +7,35 @@
 
 #define TILE_SIZE 64
 
-MAP walls[23] = {
-    {0, SCREEN_WIDTH, 0, PLAYABLE_AREA_Y_MIN}, // Top border
-    {0, PLAYABLE_AREA_X_MIN, 0, SCREEN_HEIGHT}, // Left border
-    {PLAYABLE_AREA_X_MAX, SCREEN_WIDTH, 0, SCREEN_HEIGHT}, // Right border
-    {0, SCREEN_WIDTH, PLAYABLE_AREA_Y_MAX, SCREEN_HEIGHT}, // Bottom border
+MAP walls[] = {
+    {0, SCREEN_WIDTH, 0, 0},
+    {0, 0, 0, SCREEN_HEIGHT},
+    {SCREEN_WIDTH, SCREEN_WIDTH, 0, SCREEN_HEIGHT},
+    {0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_HEIGHT},
 
-    {300, 428, 300, 428}, // Tree
-    {600, 745, 600, 730}  // Cottage
+    {300, 428, 300, 428}, // Tree obstacle
+    {600, 745, 600, 730}  // Cottage obstacle
 };
 
-static int mapData[8][14] = {
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+static int mapData[NR_X][NR_Y] = {
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 };
+
 
 MAP* createMap(SDL_Renderer* renderer) {
     MAP* map = (MAP*)malloc(sizeof(MAP));
@@ -35,8 +44,8 @@ MAP* createMap(SDL_Renderer* renderer) {
         return NULL;
     }
 
-    map->width = 14;
-    map->height = 8;
+    map->width = NR_Y;
+    map->height = NR_X;
 
     map->tileTextures = (SDL_Texture**)malloc(2 * sizeof(SDL_Texture*));
     if (!map->tileTextures) {
@@ -107,28 +116,18 @@ void renderMap(MAP* map, SDL_Renderer* renderer) {
     SDL_RenderCopy(renderer, map->cottageTexture, NULL, &cottageRect);
 }
 
-bool isValidPosition(float x, float y) {
+bool isValidPosition(float x, float y)
+{
     int tileX = x / TILE_SIZE;
     int tileY = y / TILE_SIZE;
-
     // Check map boundaries
-    if (tileX < 0 || tileX >= 14 || tileY < 0 || tileY >= 8) {
-        return false;
-    }
+    if (tileX < 0 || tileX >= 14 || tileY < 0 || tileY >= 8) return false;
+    if (mapData[tileY][tileX] == 1) return false;
 
-    if (mapData[tileY][tileX] == 1) {
-        return false;
+    for (int i = 0; i < 23; i++)
+    {
+        if (x + CHARACTER_WIDTH > walls[i].x_min && x < walls[i].x_max && y + CHARACTER_HEIGHT > walls[i].y_min && y < walls[i].y_max) return false;
     }
-
-    for (int i = 0; i < 23; i++) {
-        if (x + CHARACTER_WIDTH > walls[i].x_min &&
-            x < walls[i].x_max &&
-            y + CHARACTER_HEIGHT > walls[i].y_min &&
-            y < walls[i].y_max) {
-            return false;
-        }
-    }
-
     return true;
 }
 
