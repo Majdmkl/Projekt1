@@ -2,34 +2,24 @@
 #define BULLET_H
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <stdbool.h>
-
-#include "Game_logic.h"
-#include "Character.h"
 #include "Map.h"
 
-#define BULLET_WIDTH 5
-#define BULLET_HEIGHT 5
-#define BULLET_SPEED 5
-#define BULLETLIFETIME 60
+
+#define BULLET_SPEED 6.0f
+#define BULLETLIFETIME 3000
 
 typedef struct {
-  float x, y, dx, dy;
-  int whoShot;
-  // Wall *walls[23];
-  SDL_Texture *texture;
+    int whoShot;
+    float x, y;
+    float dx, dy;
+    Uint32 bornTime;
+    SDL_Texture* texture;
 } Bullet;
 
-Bullet* createBullet(SDL_Renderer *renderer, float startX, float startY, int whoShot);
-void destroyBullet(Bullet *bullet);
-void moveBullet(Bullet *bullet);
-SDL_Rect getBulletRect(Bullet *bullet);
-void drawBullet(Bullet *bullet, SDL_Renderer *renderer);
-float xBullet(Bullet *bullet);
-float DxBullet(Bullet *bullet);
-float yBullet(Bullet *bullet);
-float DyBullet(Bullet *bullet);
-bool checkCollisionBulletWall(Bullet *bullet, Wall *walls, int num_walls);
+Bullet* createBullet(SDL_Renderer* renderer, float startX, float startY, float dirX, float dirY, int whoShot);
+void moveBullet(Bullet* bullet);
+void drawBullet(Bullet* bullet, SDL_Renderer* renderer);
+void destroyBullet(Bullet* bullet);
+int checkCollisionBulletWall(Bullet* bullet, MAP* walls, int numWalls);
 
 #endif

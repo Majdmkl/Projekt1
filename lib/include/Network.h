@@ -1,56 +1,40 @@
-#ifndef NETDATA_H
-#define NETDATA_H
+#ifndef NETWORK_H
+#define NETWORK_H
 
 #define MAX_ANIMALS 6
-#define MAX_BULLETS 200
 
-typedef enum {
-    READY,
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    FIRE,
-    BLOCKED
-} ClientCommand;
+typedef enum { READY, UP, DOWN, LEFT, RIGHT, FIRE, BLOCKED } ClientCommand;
 
-typedef enum {
-    MENU,
-    ONGOING
-} GameState;
-
+typedef enum { MENU, ONGOING  } GameState;
 
 typedef struct {
+    int health;
     float x, y;
     float speed_x, speed_y;
-    int health;
 } Animal;
 
 typedef struct {
-    ClientCommand command[7];
     Animal animals;
     int playerNumber;
     int slotsTaken[4];
     int numberOfBullets;
-    float bulletStartX, bulletStartY;
+    ClientCommand command[7];
     float bulletDx, bulletDy;
+    float bulletStartX, bulletStartY;
 } ClientData;
 
-typedef struct {
-    float x, y;
-    float dx, dy;
-} BulletData;
+typedef struct { float x, y, dx, dy; } BulletData;
 
 typedef struct {
-    Animal animals[MAX_ANIMALS];
     int fire;
+    int whoShot;
+    GameState gState;
     int slotsTaken[4];
     int numberOfBullets;
     int numberOfPlayers;
-    int whoShot;
-    GameState gState;
-    float bulletStartX, bulletStartY;
     float bulletDx, bulletDy;
+    Animal animals[MAX_ANIMALS];
+    float bulletStartX, bulletStartY;
 } ServerData;
 
 #endif
