@@ -87,8 +87,8 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
 
-                float startX = player->x + CHARACTER_WIDTH / 2.0f;
-                float startY = player->y + CHARACTER_HEIGHT / 2.0f;
+                float startX = getX(player) + CHARACTER_WIDTH / 2.0f;
+                float startY = getY(player) + CHARACTER_HEIGHT / 2.0f;
 
                 if (bulletCount < MAX_BULLETS) {
                     bullets[bulletCount++] = createBullet(renderer, startX, startY, mouseX - startX, mouseY - startY, 0);
@@ -101,8 +101,8 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
 
-                float startX = player->x + CHARACTER_WIDTH / 2.0f;
-                float startY = player->y + CHARACTER_HEIGHT / 2.0f;
+                float startX = getX(player) + CHARACTER_WIDTH / 2.0f;
+                float startY = getY(player) + CHARACTER_HEIGHT / 2.0f;
 
                 if (bulletCount < MAX_BULLETS) {
                     bullets[bulletCount++] = createBullet(renderer, startX, startY, mouseX - startX, mouseY - startY, 0);
@@ -143,7 +143,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         Uint32 now = SDL_GetTicks();
         for (int i = 0; i < bulletCount; ) {
             Bullet* b = bullets[i];
-            if ((now - b->bornTime > BULLETLIFETIME) || checkCollisionBulletWall(b, walls, 23)) {
+            if ((now - getBulletBornTime(b) > BULLETLIFETIME) || checkCollisionBulletWall(b, walls, 23)) {
                 destroyBullet(b);
                 bullets[i] = bullets[--bulletCount];
             } else {

@@ -2,6 +2,14 @@
 #include <stdlib.h>
 #include <math.h>
 
+struct Bullet {
+    int whoShot;
+    float x, y;
+    float dx, dy;
+    Uint32 bornTime;
+    SDL_Texture* texture;
+};
+
 Bullet* createBullet(SDL_Renderer* renderer, float startX, float startY, float dirX, float dirY, int whoShot) {
     Bullet* bullet = (Bullet*)malloc(sizeof(Bullet));
     if (!bullet) return NULL;
@@ -52,4 +60,8 @@ int checkCollisionBulletWall(Bullet* bullet, MAP* walls, int numWalls) {
     (void)walls;
     (void)numWalls;
     return 0;
+}
+
+Uint32 getBulletBornTime(Bullet* bullet) {
+    return bullet->bornTime;
 }

@@ -14,21 +14,10 @@
 #define CHARACTER_WIDTH 54
 #define CHARACTER_HEIGHT 54
 
-typedef struct character {
-  float x;
-  float y;
-  float speed;
-  int health;
-  int frame;
-  Uint32 lastFrameTime;
-  SDL_Texture *walkRight;
-  SDL_Texture *walkLeft;
-  SDL_Texture *walkDown;
-  SDL_Texture *walkUp;
-  SDL_Texture *idleFront;
-  enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;
-} Character;
+typedef struct Character Character;
 
+float getX(Character *pCharacter);
+float getY(Character *pCharacter);
 void turnUp(Character *pCharacter);
 void turnLeft(Character *pCharacter);
 void turnDown(Character *pCharacter);

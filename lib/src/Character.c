@@ -8,6 +8,29 @@
 #include "Character.h"
 #include "Bullet.h"
 
+struct Character {
+    float x;
+    float y;
+    float speed;
+    int health;
+    int frame;
+    Uint32 lastFrameTime;
+    SDL_Texture *walkRight;
+    SDL_Texture *walkLeft;
+    SDL_Texture *walkDown;
+    SDL_Texture *walkUp;
+    SDL_Texture *idleFront;
+    enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;
+};
+
+float getX(Character* character) {
+    return character->x;
+}
+
+float getY(Character* character) {
+    return character->y;
+}
+
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
     if (!surface) {
