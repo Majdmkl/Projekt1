@@ -95,6 +95,20 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 }
             }
         }
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) running = false;
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+                int mouseX, mouseY;
+                SDL_GetMouseState(&mouseX, &mouseY);
+
+                float startX = player->x + CHARACTER_WIDTH / 2.0f;
+                float startY = player->y + CHARACTER_HEIGHT / 2.0f;
+
+                if (bulletCount < MAX_BULLETS) {
+                    bullets[bulletCount++] = createBullet(renderer, startX, startY, mouseX - startX, mouseY - startY, 0);
+                }
+            }
+        }
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         float moveX = 0, moveY = 0;
@@ -159,6 +173,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     }
     destroyMap(gameMap);
 }
+
 
 
 int selectCharacter(SDL_Renderer* renderer) {
