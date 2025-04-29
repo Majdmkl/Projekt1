@@ -113,21 +113,32 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         float moveX = 0, moveY = 0;
 
+        bool isMoving = false;
+
         if (keys[SDL_SCANCODE_W]) {
             moveY -= MOVE_SPEED;
             turnUp(player);
+            isMoving = true;
         }
         if (keys[SDL_SCANCODE_S]) {
             moveY += MOVE_SPEED;
             turnDown(player);
+            isMoving = true;
         }
         if (keys[SDL_SCANCODE_A]) {
             moveX -= MOVE_SPEED;
             turnLeft(player);
+            isMoving = true;
         }
         if (keys[SDL_SCANCODE_D]) {
             moveX += MOVE_SPEED;
             turnRight(player);
+            isMoving = true;
+        }
+
+        // Om ingen rörelse skedde → ställ spelaren till IDLE
+        if (!isMoving) {
+            player->state = IDLE;
         }
 
         if (moveX != 0 && moveY != 0) {

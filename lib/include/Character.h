@@ -21,11 +21,7 @@ typedef struct character {
   int health;
   int frame;
   Uint32 lastFrameTime;
-  SDL_Texture *walkRight;
-  SDL_Texture *walkLeft;
-  SDL_Texture *walkDown;
-  SDL_Texture *walkUp;
-  SDL_Texture *idleFront;
+  SDL_Texture* fullSheet;
   enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;
 } Character;
 
