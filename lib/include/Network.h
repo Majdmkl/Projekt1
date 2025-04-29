@@ -2,7 +2,6 @@
 #define NETWORK_H
 
 #define MAX_ANIMALS 6
-#define MAX_BULLETS 200
 
 typedef enum { READY, UP, DOWN, LEFT, RIGHT, FIRE, BLOCKED } ClientCommand;
 
