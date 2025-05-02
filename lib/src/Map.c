@@ -39,19 +39,13 @@ static int mapData[NR_X][NR_Y] = {
 
 MAP* createMap(SDL_Renderer* renderer) {
     MAP* map = (MAP*)malloc(sizeof(MAP));
-    if (!map) {
-        SDL_Log("Failed to allocate memory for map");
-        return NULL;
-    }
+    if (!map) { SDL_Log("Failed to allocate memory for map"); return NULL; }
 
     map->width = NR_Y;
     map->height = NR_X;
 
     map->tileTextures = (SDL_Texture**)malloc(2 * sizeof(SDL_Texture*));
-    if (!map->tileTextures) {
-        free(map);
-        return NULL;
-    }
+    if (!map->tileTextures) { free(map); return NULL; }
 
     SDL_Surface* surface = IMG_Load("lib/assets/grass.png");
     if (!surface) {
@@ -60,6 +54,7 @@ MAP* createMap(SDL_Renderer* renderer) {
         free(map);
         return NULL;
     }
+
     map->tileTextures[0] = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
 
@@ -71,6 +66,7 @@ MAP* createMap(SDL_Renderer* renderer) {
         free(map);
         return NULL;
     }
+
     map->tileTextures[1] = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
 
@@ -120,14 +116,13 @@ bool isValidPosition(float x, float y)
 {
     int tileX = x / TILE_SIZE;
     int tileY = y / TILE_SIZE;
-    // Check map boundaries
+
     if (tileX < 0 || tileX >= 14 || tileY < 0 || tileY >= 8) return false;
     if (mapData[tileY][tileX] == 1) return false;
 
     for (int i = 0; i < 23; i++)
-    {
         if (x + CHARACTER_WIDTH > walls[i].x_min && x < walls[i].x_max && y + CHARACTER_HEIGHT > walls[i].y_min && y < walls[i].y_max) return false;
-    }
+
     return true;
 }
 

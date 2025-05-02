@@ -39,10 +39,7 @@ Bullet* createBullet(SDL_Renderer* renderer, float startX, float startY, float d
     return bullet;
 }
 
-void moveBullet(Bullet* bullet) {
-    bullet->x += bullet->dx;
-    bullet->y += bullet->dy;
-}
+void moveBullet(Bullet* bullet) { bullet->x += bullet->dx; bullet->y += bullet->dy; }
 
 void drawBullet(Bullet* bullet, SDL_Renderer* renderer) {
     SDL_Rect rect = { (int)bullet->x, (int)bullet->y, 8, 8 };

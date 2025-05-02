@@ -96,33 +96,21 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     return character;
 }
 
-void turnUp(Character* character) {
-    character->state = WALKING_UP;
-}
+void turnUp(Character* character) { character->state = WALKING_UP; }
 
-void turnLeft(Character* character) {
-    character->state = WALKING_LEFT;
-}
+void turnLeft(Character* character) { character->state = WALKING_LEFT; }
 
-void turnDown(Character* character) {
-    character->state = WALKING_DOWN;
-}
+void turnDown(Character* character) { character->state = WALKING_DOWN; }
 
-void turnRight(Character* character) {
-    character->state = WALKING_RIGHT;
-}
+void turnDown(Character* character) { character->state = WALKING_DOWN; }
 
-int playerHealth(Character* character) {
-    return character->health;
-}
+void turnRight(Character* character) { character->state = WALKING_RIGHT; }
 
-void decreaseHealth(Character* character) {
-    if (character && character->health > 0) character->health--;
-}
+int playerHealth(Character* character) { return character->health; }
 
-bool isCharacterAlive(Character* character) {
-    return character->health > 0;
-}
+void decreaseHealth(Character* character) { if (character && character->health > 0) character->health--; }
+
+bool isCharacterAlive(Character* character) { return character->health > 0; }
 
 void destroyCharacter(Character* character) {
     if (character) {
@@ -150,33 +138,17 @@ void renderCharacter(Character* character, SDL_Renderer* renderer) {
     SDL_Rect destRect = { character->x, character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
 
     switch (character->state) {
-        case WALKING_DOWN:
-            SDL_RenderCopy(renderer, character->walkDown, &srcRect, &destRect);
-            break;
-        case WALKING_UP:
-            SDL_RenderCopy(renderer, character->walkUp, &srcRect, &destRect);
-            break;
-        case WALKING_LEFT:
-            SDL_RenderCopy(renderer, character->walkLeft, &srcRect, &destRect);
-            break;
-        case WALKING_RIGHT:
-            SDL_RenderCopy(renderer, character->walkRight, &srcRect, &destRect);
-            break;
+        case WALKING_DOWN: SDL_RenderCopy(renderer, character->walkDown, &srcRect, &destRect); break;
+        case WALKING_UP: SDL_RenderCopy(renderer, character->walkUp, &srcRect, &destRect); break;
+        case WALKING_LEFT: SDL_RenderCopy(renderer, character->walkLeft, &srcRect, &destRect); break;
+        case WALKING_RIGHT: SDL_RenderCopy(renderer, character->walkRight, &srcRect, &destRect); break;
         case IDLE:
-        default:
-            SDL_RenderCopy(renderer, character->idleFront, NULL, &destRect);
-            break;
+        default: SDL_RenderCopy(renderer, character->idleFront, NULL, &destRect); break;
     }
 }
 
 void healthBar(Character* character, SDL_Renderer* renderer) {
-    SDL_Rect healthRect = {
-        character->x,
-        character->y - 10,
-        (CHARACTER_WIDTH * character->health) / MAX_HEALTH,
-        5
-    };
-
+    SDL_Rect healthRect = { character->x, character->y - 10, (CHARACTER_WIDTH * character->health) / MAX_HEALTH, 5 };
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &healthRect);
 }
@@ -188,10 +160,7 @@ int howManyPlayersAlive(Character* players[], int num_players) {
 }
 
 bool checkCollisionCharacterBullet(Character* character, BulletData* bullet) {
-    return (character->x < bullet->x + 10 &&
-            character->x + CHARACTER_WIDTH > bullet->x &&
-            character->y < bullet->y + 10 &&
-            character->y + CHARACTER_HEIGHT > bullet->y);
+    return (character->x < bullet->x + 10 && character->x + CHARACTER_WIDTH > bullet->x && character->y < bullet->y + 10 && character->y + CHARACTER_HEIGHT > bullet->y);
 }
 
 void setBulletStartPosition(Character* character, float* startX, float* startY) {
@@ -217,8 +186,5 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
         }
     }
 
-    if (collision) {
-        character->x = prevX;
-        character->y = prevY;
-    }
+    if (collision) { character->x = prevX; character->y = prevY; }
 }
