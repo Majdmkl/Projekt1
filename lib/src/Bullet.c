@@ -57,11 +57,9 @@ void destroyBullet(Bullet* bullet) {
 }
 
 int checkCollisionBulletWall(Bullet* bullet, MAP* walls, int numWalls) {
-    (void)walls;
-    (void)numWalls;
+    for (int i = 0; i < numWalls; i++)
+        if (bullet->x >= walls[i].x_min && bullet->x <= walls[i].x_max && bullet->y >= walls[i].y_min && bullet->y <= walls[i].y_max) return 1;
     return 0;
 }
 
-Uint32 getBulletBornTime(Bullet* bullet) {
-    return bullet->bornTime;
-}
+Uint32 getBulletBornTime(Bullet* bullet) { return bullet->bornTime; }
