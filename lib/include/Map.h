@@ -8,6 +8,7 @@
 #define SCREEN_HEIGHT 1024
 #define NR_X 16
 #define NR_Y 30
+#define TILE_SIZE 64
 
 typedef struct MAP{
     int x_min, x_max;

@@ -5,8 +5,6 @@
 #include "Map.h"
 #include "Character.h"
 
-#define TILE_SIZE 64
-
 MAP walls[] = {
     {0, SCREEN_WIDTH, 0, 0},
     {0, 0, 0, SCREEN_HEIGHT},

@@ -4,8 +4,8 @@
 #include <SDL2/SDL.h>
 #include "Map.h"
 
-#define BULLET_SPEED 6.0f
-#define BULLETLIFETIME 3000
+#define BULLET_SPEED 10.0f
+#define BULLET_LIFETIME 3000
 
 typedef struct Bullet Bullet;
 

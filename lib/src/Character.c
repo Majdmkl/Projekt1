@@ -98,11 +98,9 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
 
 void turnUp(Character* character) { character->state = WALKING_UP; }
 
+void turnDown(Character* character) { character->state = WALKING_DOWN; }
+
 void turnLeft(Character* character) { character->state = WALKING_LEFT; }
-
-void turnDown(Character* character) { character->state = WALKING_DOWN; }
-
-void turnDown(Character* character) { character->state = WALKING_DOWN; }
 
 void turnRight(Character* character) { character->state = WALKING_RIGHT; }
 

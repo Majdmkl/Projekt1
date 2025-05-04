@@ -20,11 +20,9 @@ int main(int argc, char* argv[]) {
     SDL_Window* window = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
 
+    //! Start menu - Start game
     int selected = selectCharacter(renderer);
-    if (selected == -1) {
-        cleanup(window, renderer);
-        return 1;
-    }
+    if (selected == -1) { cleanup(window, renderer); return 1; }
 
     Character* player = createCharacter(renderer, selected);
     if (!player) {
@@ -46,21 +44,13 @@ void initSDL() {
     IMG_Init(IMG_INIT_PNG);
 }
 
-SDL_Window* createWindow() {
-    return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                            SCREEN_WIDTH, SCREEN_HEIGHT, 0);
-}
+SDL_Window* createWindow() { return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); }
 
-SDL_Renderer* createRenderer(SDL_Window* window) {
-    return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-}
+SDL_Renderer* createRenderer(SDL_Window* window) { return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC); }
 
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
-    if (!surface) {
-        SDL_Log("Failed to load image: %s\n", IMG_GetError());
-        return NULL;
-    }
+    if (!surface) { SDL_Log("Failed to load image: %s\n", IMG_GetError()); return NULL; }
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
     return texture;
@@ -68,10 +58,7 @@ SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath) {
 
 void gameLoop(SDL_Renderer* renderer, Character* player) {
     MAP* gameMap = createMap(renderer);
-    if (!gameMap) {
-        SDL_Log("Failed to create map");
-        return;
-    }
+    if (!gameMap) { SDL_Log("Failed to create map"); return; }
 
     #define MAX_BULLETS 100
     Bullet* bullets[MAX_BULLETS];
@@ -81,20 +68,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     bool running = true;
 
     while (running) {
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) running = false;
-            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
-                int mouseX, mouseY;
-                SDL_GetMouseState(&mouseX, &mouseY);
-
-                float startX = getX(player) + CHARACTER_WIDTH / 2.0f;
-                float startY = getY(player) + CHARACTER_HEIGHT / 2.0f;
-
-                if (bulletCount < MAX_BULLETS) {
-                    bullets[bulletCount++] = createBullet(renderer, startX, startY, mouseX - startX, mouseY - startY, 0);
-                }
-            }
-        }
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) running = false;
             if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
@@ -143,13 +116,10 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         Uint32 now = SDL_GetTicks();
         for (int i = 0; i < bulletCount; ) {
             Bullet* b = bullets[i];
-            if ((now - getBulletBornTime(b) > BULLETLIFETIME) || checkCollisionBulletWall(b, walls, 23)) {
+            if ((now - getBulletBornTime(b) > BULLET_LIFETIME) || checkCollisionBulletWall(b, walls, 23)) {
                 destroyBullet(b);
                 bullets[i] = bullets[--bulletCount];
-            } else {
-                moveBullet(b);
-                ++i;
-            }
+            } else { moveBullet(b); ++i; }
         }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -158,9 +128,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         renderMap(gameMap, renderer);
         renderCharacter(player, renderer);
 
-        for (int i = 0; i < bulletCount; i++) {
-            drawBullet(bullets[i], renderer);
-        }
+        for (int i = 0; i < bulletCount; i++) drawBullet(bullets[i], renderer);
 
         healthBar(player, renderer);
 
@@ -168,9 +136,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         SDL_Delay(16); // ~60 fps
     }
 
-    for (int i = 0; i < bulletCount; i++) {
-        destroyBullet(bullets[i]);
-    }
+    for (int i = 0; i < bulletCount; i++) destroyBullet(bullets[i]);
     destroyMap(gameMap);
 }
 
@@ -183,11 +149,7 @@ int selectCharacter(SDL_Renderer* renderer) {
     SDL_Event event;
     int selected = -1;
 
-    SDL_Rect menuRect = {
-        (SCREEN_WIDTH - 384) / 2,
-        (SCREEN_HEIGHT - 384) / 2,
-        384, 384
-    };
+    SDL_Rect menuRect = { (SCREEN_WIDTH - 384) / 2, (SCREEN_HEIGHT - 384) / 2, 384, 384 };
 
     int menuX = menuRect.x;
     int menuY = menuRect.y;
@@ -216,9 +178,9 @@ int selectCharacter(SDL_Renderer* renderer) {
             }
         }
 
-        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
-            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
-                SDL_Rect dst = { x, y, 64, 64 };
+        for (int y = 0; y < SCREEN_HEIGHT; y += TILE_SIZE) {
+            for (int x = 0; x < SCREEN_WIDTH; x += TILE_SIZE) {
+                SDL_Rect dst = { x, y, TILE_SIZE, TILE_SIZE };
                 SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
             }
         }
