@@ -139,8 +139,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     destroyMap(gameMap);
 }
 
-
-
 int selectCharacter(SDL_Renderer* renderer) {
     SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/meny.png");
     SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/grass.png");

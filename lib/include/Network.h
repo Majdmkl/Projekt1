@@ -9,32 +9,24 @@ typedef enum { MENU, ONGOING  } GameState;
 
 typedef struct {
     int health;
-    float x, y;
-    float speed_x, speed_y;
+    float x, y, speed_x, speed_y;
 } Animal;
 
 typedef struct {
     Animal animals;
-    int playerNumber;
-    int slotsTaken[4];
-    int numberOfBullets;
     ClientCommand command[7];
-    float bulletDx, bulletDy;
-    float bulletStartX, bulletStartY;
+    int playerNumber, slotsTaken[6], numberOfBullets;
+    float bulletDx, bulletDy, bulletStartX, bulletStartY;
 } ClientData;
 
 typedef struct { float x, y, dx, dy; } BulletData;
 
 typedef struct {
-    int fire;
-    int whoShot;
-    GameState gState;
-    int slotsTaken[4];
-    int numberOfBullets;
-    int numberOfPlayers;
-    float bulletDx, bulletDy;
+    GameState gameState;
     Animal animals[MAX_ANIMALS];
-    float bulletStartX, bulletStartY;
+    int fire, whoShot, slotsTaken[6];;
+    int numberOfBullets, numberOfPlayers;
+    float bulletDx, bulletDy, bulletStartX, bulletStartY;;
 } ServerData;
 
 #endif
