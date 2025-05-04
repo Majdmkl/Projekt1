@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <stdbool.h>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "Character.h"
+
 #include "Map.h"
+#include "Text.h"
+#include "Bullet.h"
+#include "Character.h"
 
 void initSDL();
 SDL_Window* createWindow();
@@ -76,9 +80,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 float startX = getX(player) + CHARACTER_WIDTH / 2.0f;
                 float startY = getY(player) + CHARACTER_HEIGHT / 2.0f;
 
-                if (bulletCount < MAX_BULLETS) {
-                    bullets[bulletCount++] = createBullet(renderer, startX, startY, mouseX - startX, mouseY - startY, 0);
-                }
+                if (bulletCount < MAX_BULLETS) bullets[bulletCount++] = createBullet(renderer, startX, startY, mouseX - startX, mouseY - startY, 0);
             }
         }
 
@@ -139,11 +141,9 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     destroyMap(gameMap);
 }
 
-
-
 int selectCharacter(SDL_Renderer* renderer) {
-    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/meny.png");
-    SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/grass.png");
+    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/objects/meny.png");
+    SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/objects/grass.png");
 
     SDL_Event event;
     int selected = -1;
@@ -194,9 +194,8 @@ int selectCharacter(SDL_Renderer* renderer) {
 }
 
 void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
-    if (renderer) SDL_DestroyRenderer(renderer);
-    if (window) SDL_DestroyWindow(window);
-
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
     IMG_Quit();
     SDL_Quit();
 }

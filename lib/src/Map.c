@@ -45,7 +45,7 @@ MAP* createMap(SDL_Renderer* renderer) {
     map->tileTextures = (SDL_Texture**)malloc(2 * sizeof(SDL_Texture*));
     if (!map->tileTextures) { free(map); return NULL; }
 
-    SDL_Surface* surface = IMG_Load("lib/assets/grass.png");
+    SDL_Surface* surface = IMG_Load("lib/assets/objects/grass.png");
     if (!surface) {
         SDL_Log("Failed to load grass texture: %s", IMG_GetError());
         free(map->tileTextures);
@@ -56,7 +56,7 @@ MAP* createMap(SDL_Renderer* renderer) {
     map->tileTextures[0] = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
 
-    surface = IMG_Load("lib/assets/water.png");
+    surface = IMG_Load("lib/assets/objects/water.png");
     if (!surface) {
         SDL_Log("Failed to load water texture: %s", IMG_GetError());
         SDL_DestroyTexture(map->tileTextures[0]);
