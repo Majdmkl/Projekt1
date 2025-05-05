@@ -46,7 +46,6 @@ int main(int argc, char* argv[]) {
     SDL_Window* window = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
 
-    // Connect to server - could be from command line or configuration
     if (argc > 1) {
         if (!connectToServer(argv[1])) {
             SDL_Log("Failed to connect to server at %s", argv[1]);
@@ -79,7 +78,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Send character selection to server
     ClientData initialData = {0};
     initialData.playerNumber = selected;
     initialData.command[0] = CONNECTING;
@@ -88,12 +86,10 @@ int main(int argc, char* argv[]) {
     sendPacket->len = sizeof(ClientData);
     SDLNet_UDP_Send(clientSocket, -1, sendPacket);
 
-    // Wait for server to acknowledge and assign playerID
     Uint32 startTime = SDL_GetTicks();
     while (playerID == -1 && SDL_GetTicks() - startTime < 5000) { // 5 second timeout
         if (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
             memcpy(&serverData, receivePacket->data, sizeof(ServerData));
-            // Find our ID in the server's slots array
             for (int i = 0; i < MAX_PLAYERS; i++) {
                 if (serverData.slotsTaken[i] && serverData.animals[i].health > 0 && serverData.animals[i].type == selected) {
                     playerID = i;
@@ -178,7 +174,6 @@ void sendPlayerData(Character* player, int action) {
     clientData.animals.x = getX(player);
     clientData.animals.y = getY(player);
 
-    // Set the appropriate command
     switch (action) {
         case 1: clientData.command[1] = UP; break;
         case 2: clientData.command[2] = DOWN; break;
@@ -186,11 +181,9 @@ void sendPlayerData(Character* player, int action) {
         case 4: clientData.command[4] = RIGHT; break;
         case 5:
             clientData.command[5] = FIRE;
-            // Set bullet starting position and direction based on player position
             clientData.bulletStartX = getX(player) + CHARACTER_WIDTH / 2.0f;
             clientData.bulletStartY = getY(player) + CHARACTER_HEIGHT / 2.0f;
 
-            // You'll need to get mouse position to set these properly
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
             clientData.bulletDx = mouseX - clientData.bulletStartX;
@@ -234,7 +227,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     Bullet* bullets[MAX_BULLETS];
     int bulletCount = 0;
 
-    // Network variables
     Character* otherPlayers[MAX_PLAYERS - 1] = {NULL};
     bool playerActive[MAX_PLAYERS] = {false};
 
@@ -242,7 +234,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     bool running = true;
     Uint32 lastNetworkUpdate = 0;
 
-    // Initialize other player characters if needed
     for (int i = 0; i < MAX_PLAYERS; i++) {
         if (i != playerID && serverData.slotsTaken[i]) {
             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
@@ -260,7 +251,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 float startX = getX(player) + CHARACTER_WIDTH / 2.0f;
                 float startY = getY(player) + CHARACTER_HEIGHT / 2.0f;
 
-                // Create local bullet AND send fire command to server
                 if (bulletCount < MAX_BULLETS) {
                     bullets[bulletCount++] = createBullet(renderer, startX, startY, mouseX - startX, mouseY - startY, 0);
                     sendPlayerData(player, 5); // 5 = FIRE command
@@ -305,27 +295,22 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         Uint32 now = SDL_GetTicks();
         if (now - lastNetworkUpdate > 50) { // 20 updates per second
             if (receiveServerData()) {
-                // Update other player positions and states
                 for (int i = 0; i < MAX_PLAYERS; i++) {
                     if (i != playerID && serverData.slotsTaken[i]) {
                         if (!playerActive[i]) {
-                            // New player joined, create their character
                             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
                             playerActive[i] = true;
                         }
 
-                        // Update position
                         setPosition(otherPlayers[i], serverData.animals[i].x, serverData.animals[i].y);
                         setDirection(otherPlayers[i]);
                     } else if (i != playerID && !serverData.slotsTaken[i] && playerActive[i]) {
-                        // Player left, remove them
                         destroyCharacter(otherPlayers[i]);
                         otherPlayers[i] = NULL;
                         playerActive[i] = false;
                     }
                 }
 
-                // Handle new bullets from server
                 if (serverData.fire && serverData.whoShot != playerID) {
                     if (bulletCount < MAX_BULLETS) {
                         bullets[bulletCount++] = createBullet(renderer,
@@ -340,7 +325,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             lastNetworkUpdate = now;
         }
 
-        // Update bullets
         for (int i = 0; i < bulletCount; ) {
             Bullet* b = bullets[i];
             if ((now - getBulletBornTime(b) > BULLET_LIFETIME) || checkCollisionBulletWall(b, walls, 23)) {
