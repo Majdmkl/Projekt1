@@ -8,7 +8,7 @@
 #define BULLET_WIDTH 8
 #define BULLET_HEIGHT 8
 #define BULLET_SPEED 10.0f
-#define BULLET_LIFETIME 120
+#define BULLET_LIFETIME 1200
 
 typedef struct Bullet {
   int whoShot;
