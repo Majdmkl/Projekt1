@@ -16,23 +16,27 @@
 
 typedef struct Character Character;
 
+int getType(Character* character);
 float getX(Character *pCharacter);
 float getY(Character *pCharacter);
 void turnUp(Character *pCharacter);
+float getSpeed(Character* character);
 void turnLeft(Character *pCharacter);
 void turnDown(Character *pCharacter);
 void turnRight(Character *pCharacter);
 int playerHealth(Character *character);
+void setDirection(Character *pCharacter);
 void decreaseHealth(Character *pCharacter);
 bool isCharacterAlive(Character *pCharacter);
 void destroyCharacter(Character *pCharacter);
+void setPosition(Character *pCharacter, float x, float y);
 void healthBar(Character *pCharacter, SDL_Renderer *renderer);
 int howManyPlayersAlive(Character *players[], int num_players);
 void renderCharacter(Character *pCharacter, SDL_Renderer *renderer);
 bool checkCollision(Character *character, MAP *walls, int num_walls);
 void updateCharacterAnimation(Character *pCharacter, Uint32 deltaTime);
 Character *createCharacter(SDL_Renderer *renderer, int characterNumber);
-bool checkCollisionCharacterBullet(Character *character, BulletData *bullet); // changed from Bullet to BulletData
+bool checkCollisionCharacterBullet(Character *character, Bullet *bullet);
 void setBulletStartPosition(Character *pCharacter, float *startX, float *startY);
 void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount);
 
