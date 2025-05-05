@@ -2,13 +2,12 @@
 #include <stdlib.h>
 #include <math.h>
 
-struct Bullet {
-    int whoShot;
-    float x, y;
-    float dx, dy;
-    Uint32 bornTime;
-    SDL_Texture* texture;
-};
+// struct Bullet {
+//     int whoShot;
+//     Uint32 bornTime;
+//     float x, y, dx, dy;
+//     SDL_Texture* texture;
+// };
 
 Bullet* createBullet(SDL_Renderer* renderer, float startX, float startY, float dirX, float dirY, int whoShot) {
     Bullet* bullet = (Bullet*)malloc(sizeof(Bullet));
@@ -38,6 +37,11 @@ Bullet* createBullet(SDL_Renderer* renderer, float startX, float startY, float d
 
     return bullet;
 }
+
+float xBullet(Bullet* bullet) { return bullet->x; }
+float yBullet(Bullet* bullet) { return bullet->y; }
+float DxBullet(Bullet* bullet) { return bullet->dx; }
+float DyBullet(Bullet* bullet) { return bullet->dy; }
 
 void moveBullet(Bullet* bullet) { bullet->x += bullet->dx; bullet->y += bullet->dy; }
 

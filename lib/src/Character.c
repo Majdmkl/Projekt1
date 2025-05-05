@@ -9,11 +9,8 @@
 #include "Bullet.h"
 
 struct Character {
-    float x;
-    float y;
-    float speed;
-    int health;
-    int frame;
+    float x, y, speed;
+    int health, frame, type;
     Uint32 lastFrameTime;
     SDL_Texture *walkRight;
     SDL_Texture *walkLeft;
@@ -30,6 +27,9 @@ float getX(Character* character) {
 float getY(Character* character) {
     return character->y;
 }
+
+int getType(Character* character) { return character->type; }
+float getSpeed(Character* character) { return character->speed; }
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
@@ -49,8 +49,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
         return NULL;
     }
     // test for player one
-    character->x = 500;
-    character->y = 500;
+    setPosition(character, 500, 500);
     character->speed = MOVE_SPEED;
     character->health = MAX_HEALTH;
     character->frame = 0;
@@ -130,6 +129,13 @@ void updateCharacterAnimation(Character* character, Uint32 deltaTime) {
         character->lastFrameTime = currentTime;
     }
 }
+
+void setPosition(Character* character, float x, float y) {
+    character->x = x;
+    character->y = y;
+}
+
+void setDirection(Character* character) {   character->state = IDLE; }
 
 void renderCharacter(Character* character, SDL_Renderer* renderer) {
     SDL_Rect srcRect = { character->frame * 64, 0, 64, 90 };
