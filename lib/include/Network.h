@@ -1,7 +1,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#define MAX_ANIMALS 6
+#define MAX_ANIMALS 2
 #define SERVER_PORT 2000
 
 typedef enum { MENU, ONGOING  } GameState;
