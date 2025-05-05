@@ -5,6 +5,7 @@
 #include "Map.h"
 #include "Character.h"
 
+//! when map is finished remove 90% of code
 MAP walls[] = {
     {0, SCREEN_WIDTH, 0, 0},
     {0, 0, 0, SCREEN_HEIGHT},

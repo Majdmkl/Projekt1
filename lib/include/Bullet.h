@@ -4,9 +4,11 @@
 #include <SDL2/SDL.h>
 #include "Map.h"
 
-#define MAX_BULLETS 100
+#define MAX_BULLETS 20
+#define BULLET_WIDTH 8
+#define BULLET_HEIGHT 8
 #define BULLET_SPEED 10.0f
-#define BULLET_LIFETIME 3000
+#define BULLET_LIFETIME 120
 
 typedef struct Bullet {
   int whoShot;
@@ -21,6 +23,7 @@ float DxBullet(Bullet* bullet);
 float DyBullet(Bullet* bullet);
 void moveBullet(Bullet* bullet);
 void destroyBullet(Bullet* bullet);
+SDL_Rect getBulletRect(Bullet* bullet);
 Uint32 getBulletBornTime(Bullet* bullet);
 void drawBullet(Bullet* bullet, SDL_Renderer* renderer);
 int checkCollisionBulletWall(Bullet* bullet, MAP* walls, int numWalls);

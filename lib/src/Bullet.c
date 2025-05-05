@@ -2,47 +2,26 @@
 #include <stdlib.h>
 #include <math.h>
 
-// struct Bullet {
-//     int whoShot;
-//     Uint32 bornTime;
-//     float x, y, dx, dy;
-//     SDL_Texture* texture;
-// };
-
 Bullet* createBullet(SDL_Renderer* renderer, float startX, float startY, float dirX, float dirY, int whoShot) {
     Bullet* bullet = (Bullet*)malloc(sizeof(Bullet));
     if (!bullet) return NULL;
 
-    float length = sqrtf(dirX * dirX + dirY * dirY);
-    if (length > 0.0f) {
-        bullet->dx = (dirX / length) * BULLET_SPEED;
-        bullet->dy = (dirY / length) * BULLET_SPEED;
-    } else {
-        bullet->dx = BULLET_SPEED;
-        bullet->dy = 0;
-    }
-
     bullet->x = startX;
     bullet->y = startY;
+    bullet->dx = 0;
+    bullet->dy = 0;
     bullet->whoShot = whoShot;
     bullet->bornTime = SDL_GetTicks();
-
-    bullet->texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 8, 8);
-    if (bullet->texture) {
-        SDL_SetRenderTarget(renderer, bullet->texture);
-        SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-        SDL_RenderClear(renderer);
-        SDL_SetRenderTarget(renderer, NULL);
-    }
 
     return bullet;
 }
 
+void destroyBullet(Bullet* bullet) { free(bullet); }
 float xBullet(Bullet* bullet) { return bullet->x; }
 float yBullet(Bullet* bullet) { return bullet->y; }
 float DxBullet(Bullet* bullet) { return bullet->dx; }
 float DyBullet(Bullet* bullet) { return bullet->dy; }
-
+Uint32 getBulletBornTime(Bullet* bullet) { return bullet->bornTime; }
 void moveBullet(Bullet* bullet) { bullet->x += bullet->dx; bullet->y += bullet->dy; }
 
 void drawBullet(Bullet* bullet, SDL_Renderer* renderer) {
@@ -50,17 +29,17 @@ void drawBullet(Bullet* bullet, SDL_Renderer* renderer) {
     SDL_RenderCopy(renderer, bullet->texture, NULL, &rect);
 }
 
-void destroyBullet(Bullet* bullet) {
-    if (bullet) {
-        if (bullet->texture) SDL_DestroyTexture(bullet->texture);
-        free(bullet);
-    }
+SDL_Rect getBulletRect(Bullet* bullet) {
+    SDL_Rect rect = { bullet->x, bullet->y, BULLET_WIDTH, BULLET_HEIGHT };
+    return rect;
 }
 
 int checkCollisionBulletWall(Bullet* bullet, MAP* walls, int numWalls) {
+    SDL_Rect bulletRect = getBulletRect(bullet);
+    SDL_Rect wallRects[numWalls];
+
+    convertWallsToRects(walls, wallRects, numWalls);
     for (int i = 0; i < numWalls; i++)
-        if (bullet->x >= walls[i].x_min && bullet->x <= walls[i].x_max && bullet->y >= walls[i].y_min && bullet->y <= walls[i].y_max) return 1;
+        if (SDL_HasIntersection(&bulletRect, &wallRects[i])) return 1;
     return 0;
 }
-
-Uint32 getBulletBornTime(Bullet* bullet) { return bullet->bornTime; }

@@ -36,7 +36,7 @@ void renderCharacter(Character *pCharacter, SDL_Renderer *renderer);
 bool checkCollision(Character *character, MAP *walls, int num_walls);
 void updateCharacterAnimation(Character *pCharacter, Uint32 deltaTime);
 Character *createCharacter(SDL_Renderer *renderer, int characterNumber);
-bool checkCollisionCharacterBullet(Character *character, BulletData *bullet); // changed from Bullet to BulletData
+bool checkCollisionCharacterBullet(Character *character, Bullet *bullet);
 void setBulletStartPosition(Character *pCharacter, float *startX, float *startY);
 void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount);
 

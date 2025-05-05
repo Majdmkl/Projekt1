@@ -6,7 +6,6 @@
 #define FRAME_DELAY 100
 
 #include "Character.h"
-#include "Bullet.h"
 
 struct Character {
     float x, y, speed;
@@ -163,7 +162,7 @@ int howManyPlayersAlive(Character* players[], int num_players) {
     return aliveCount;
 }
 
-bool checkCollisionCharacterBullet(Character* character, BulletData* bullet) {
+bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
     return (character->x < bullet->x + 10 && character->x + CHARACTER_WIDTH > bullet->x && character->y < bullet->y + 10 && character->y + CHARACTER_HEIGHT > bullet->y);
 }
 
