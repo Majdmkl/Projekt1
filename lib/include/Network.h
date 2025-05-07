@@ -1,12 +1,14 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#include "Bullet.h"
+
 #define MIN_PLAYERS 2
 #define MAX_ANIMALS 6
 #define SERVER_PORT 2000
 
 typedef enum { MENU, ONGOING  } GameState;
-typedef struct { float x, y, dx, dy; } BulletData;
+typedef struct { float x, y, dx, dy; int whoShot; } BulletData;
 typedef enum { READY, UP, DOWN, LEFT, RIGHT, FIRE, BLOCKED, CONNECTING } ClientCommand;
 
 typedef struct {
@@ -24,9 +26,10 @@ typedef struct {
 typedef struct {
     GameState gameState;
     Animal animals[MAX_ANIMALS];
-    int fire, whoShot, slotsTaken[MAX_ANIMALS];
-    int numberOfBullets, numberOfPlayers;
-    float bulletDx, bulletDy, bulletStartX, bulletStartY;
+    int slotsTaken[MAX_ANIMALS];
+    int numberOfPlayers;
+    int numberOfBullets;
+    BulletData bullets[MAX_BULLETS];
 } ServerData;
 
 #endif

@@ -251,6 +251,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
     SDL_Event event;
     bool running = true;
+    bool spectating = false;
     Uint32 lastNetworkUpdate = 0;
 
     for (int i = 0; i < MAX_ANIMALS; i++) {
@@ -273,10 +274,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 float startX = getX(player) + CHARACTER_WIDTH / 2.0f;
                 float startY = getY(player) + CHARACTER_HEIGHT / 2.0f;
 
-                if (bulletCount < MAX_BULLETS) {
-                    bullets[bulletCount++] = createBullet(renderer, startX, startY, mouseX - startX, mouseY - startY, playerID);
-                    sendPlayerData(player, 5); // 5 = FIRE command
-                }
+                sendPlayerData(player, 5);
             }
         }
 
@@ -284,25 +282,27 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         float moveX = 0, moveY = 0;
         int actionSent = 0;
 
-        if (keys[SDL_SCANCODE_W]) {
-            moveY -= MOVE_SPEED;
-            turnUp(player);
-            if (!actionSent) { sendPlayerData(player, 1); actionSent = 1; } // UP
-        }
-        if (keys[SDL_SCANCODE_S]) {
-            moveY += MOVE_SPEED;
-            turnDown(player);
-            if (!actionSent) { sendPlayerData(player, 2); actionSent = 1; } // DOWN
-        }
-        if (keys[SDL_SCANCODE_A]) {
-            moveX -= MOVE_SPEED;
-            turnLeft(player);
-            if (!actionSent) { sendPlayerData(player, 3); actionSent = 1; } // LEFT
-        }
-        if (keys[SDL_SCANCODE_D]) {
-            moveX += MOVE_SPEED;
-            turnRight(player);
-            if (!actionSent) { sendPlayerData(player, 4); actionSent = 1; } // RIGHT
+        if (!spectating) {
+            if (keys[SDL_SCANCODE_W]) {
+                moveY -= MOVE_SPEED;
+                turnUp(player);
+                if (!actionSent) { sendPlayerData(player, 1); actionSent = 1; } // UP
+            }
+            if (keys[SDL_SCANCODE_S]) {
+                moveY += MOVE_SPEED;
+                turnDown(player);
+                if (!actionSent) { sendPlayerData(player, 2); actionSent = 1; } // DOWN
+            }
+            if (keys[SDL_SCANCODE_A]) {
+                moveX -= MOVE_SPEED;
+                turnLeft(player);
+                if (!actionSent) { sendPlayerData(player, 3); actionSent = 1; } // LEFT
+            }
+            if (keys[SDL_SCANCODE_D]) {
+                moveX += MOVE_SPEED;
+                turnRight(player);
+                if (!actionSent) { sendPlayerData(player, 4); actionSent = 1; } // RIGHT
+            }
         }
 
         if (moveX != 0 && moveY != 0) {
@@ -311,11 +311,23 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             moveY = (moveY > 0) ? diagSpeed : -diagSpeed;
         }
 
+        float prevPlayerX = getX(player);
+        float prevPlayerY = getY(player);
         moveCharacter(player, moveX, moveY, walls, MAX_WALLS);
+        for (int i = 0; i < MAX_ANIMALS; i++) {
+            if (i != playerID && playerActive[i] && otherPlayers[i]) {
+                SDL_Rect pRect = { getX(player), getY(player), CHARACTER_WIDTH, CHARACTER_HEIGHT };
+                SDL_Rect oRect = { getX(otherPlayers[i]), getY(otherPlayers[i]), CHARACTER_WIDTH, CHARACTER_HEIGHT };
+                if (SDL_HasIntersection(&pRect, &oRect)) {
+                    setPosition(player, prevPlayerX, prevPlayerY);
+                    break;
+                }
+            }
+        }
         updateCharacterAnimation(player, SDL_GetTicks());
 
         Uint32 now = SDL_GetTicks();
-        if (now - lastNetworkUpdate > 50) { // 20 updates per second
+        if (now - lastNetworkUpdate > 50) {
             if (receiveServerData()) {
                 for (int i = 0; i < MAX_ANIMALS; i++) {
                     if (i != playerID && serverData.slotsTaken[i]) {
@@ -341,26 +353,34 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                     while (getPlayerHP(player) > srvHP) decreaseHealth(player);
                 }
 
-                if (serverData.fire && serverData.whoShot != playerID) {
-                    if (bulletCount < MAX_BULLETS) {
-                        bullets[bulletCount++] = createBullet(renderer,
-                                                              serverData.bulletStartX,
-                                                              serverData.bulletStartY,
-                                                              serverData.bulletDx,
-                                                              serverData.bulletDy,
-                                                              serverData.whoShot);
-                    }
+                // Rebuild bullet list from server
+                for (int i = 0; i < bulletCount; ++i) destroyBullet(bullets[i]);
+                bulletCount = 0;
+                for (int i = 0; i < serverData.numberOfBullets && i < MAX_BULLETS; ++i) {
+                    BulletData *bd = &serverData.bullets[i];
+                    bullets[bulletCount++] = createBullet(renderer, bd->x, bd->y, bd->dx, bd->dy, bd->whoShot);
                 }
             }
+            if (!spectating && (!serverData.slotsTaken[playerID] || getPlayerHP(player) <= 0)) {
+                spectating = true;
+            }
+
+            if (!spectating) sendPlayerData(player, 0);
+
+
             lastNetworkUpdate = now;
-            sendPlayerData(player, 0);
+
+            if (serverData.slotsTaken[playerID] == false || getPlayerHP(player) <= 0) {
+                running = false;
+                break;
+            }
         }
 
         for (int i = 0; i < bulletCount; ) {
             Bullet* b = bullets[i];
             bool bulletHit = false;
 
-            if (checkCollisionCharacterBullet(player, b)) {
+            if (b->whoShot != playerID && checkCollisionCharacterBullet(player, b)) {
                 decreaseHealth(player);
                 bulletHit = true;
             }

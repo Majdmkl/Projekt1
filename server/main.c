@@ -248,7 +248,12 @@ void acceptClients(Game *game, ClientData clientData) {
 }
 
 void renderCharacters(Game *game) {
-    for (int i = 0; i < game->numPlayers; i++) renderCharacter(game->players[i], game->renderer);
+    for (int i = 0; i < MAX_ANIMALS; i++) {
+        if (game->slotsTaken[i]) {
+            renderCharacter(game->players[i], game->renderer);
+            healthBar(game->players[i], game->renderer);
+        }
+    }
 }
 
 void addClient(IPaddress address, IPaddress clients[], int *numClients) {
@@ -260,7 +265,6 @@ void addClient(IPaddress address, IPaddress clients[], int *numClients) {
 void executeCommand(Game *game, ClientData *clientData) {
     Character *player = game->players[clientData->playerNumber];
 
-    // update server-side position from client
     setPosition(player, clientData->animals.x, clientData->animals.y);
     if (clientData->command[1] == UP && clientData->command[6] != BLOCKED) turnUp(player);
     if (clientData->command[2] == DOWN && clientData->command[6] != BLOCKED) turnDown(player);
@@ -296,25 +300,22 @@ void characterSendData(Character *character, Animal *animal) {
 void sendGameData(Game *game, ClientData clientData) {
     ServerData server_data = {0};
     server_data.gameState = game->state;
-    server_data.whoShot = clientData.playerNumber;
-    server_data.fire = game->fire;
-    game->fire = 0;
-
+    server_data.numberOfPlayers = game->numPlayers;
     for (int i = 0; i < MAX_ANIMALS; i++) {
+        if (getPlayerHP(game->players[i]) <= 0) game->slotsTaken[i] = 0;
         server_data.slotsTaken[i] = game->slotsTaken[i];
         characterSendData(game->players[i], &server_data.animals[i]);
     }
 
-    if (game->numBullets > 0) {
-        Bullet *lastBullet = game->bullets[game->numBullets - 1];
-        server_data.bulletDx = DxBullet(lastBullet);
-        server_data.bulletDy = DyBullet(lastBullet);
-        server_data.bulletStartX = xBullet(lastBullet);
-        server_data.bulletStartY = yBullet(lastBullet);
-    }
-
-    server_data.numberOfPlayers = game->numPlayers;
     server_data.numberOfBullets = game->numBullets;
+    for (int i = 0; i < game->numBullets; i++) {
+        Bullet *b = game->bullets[i];
+        server_data.bullets[i].x = xBullet(b);
+        server_data.bullets[i].y = yBullet(b);
+        server_data.bullets[i].dx = DxBullet(b);
+        server_data.bullets[i].dy = DyBullet(b);
+        server_data.bullets[i].whoShot = b->whoShot;
+    }
 
     memcpy(game->packet->data, &server_data, sizeof(ServerData));
     game->packet->len = sizeof(ServerData);
