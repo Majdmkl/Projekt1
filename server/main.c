@@ -262,6 +262,7 @@ void addClient(IPaddress address, IPaddress clients[], int *numClients) {
 }
 
 void executeCommand(Game *game, ClientData *clientData) {
+    game->slotsTaken[clientData->playerNumber] = 1;
     Character *player = game->players[clientData->playerNumber];
 
     setPosition(player, clientData->animals.x, clientData->animals.y);

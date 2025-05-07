@@ -398,25 +398,8 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         for (int i = 0; i < bulletCount; ) {
             Bullet* b = bullets[i];
-            bool bulletHit = false;
-
-            if (!spectating && player && b->whoShot != playerID && checkCollisionCharacterBullet(player, b)) {
-                decreaseHealth(player);
-                bulletHit = true;
-            }
-
-            for (int j = 0; j < MAX_ANIMALS && !bulletHit; j++) {
-                if (j != playerID && playerActive[j] && otherPlayers[j]) {
-                    if (checkCollisionCharacterBullet(otherPlayers[j], b)) {
-                        decreaseHealth(otherPlayers[j]);
-                        bulletHit = true;
-                    }
-                }
-            }
-
             if ((now - getBulletBornTime(b) > BULLET_LIFETIME) ||
-                checkCollisionBulletWall(b, walls, MAX_WALLS) ||
-                bulletHit) {
+                checkCollisionBulletWall(b, walls, MAX_WALLS)) {
                 destroyBullet(b);
                 bullets[i] = bullets[--bulletCount];
             } else {
