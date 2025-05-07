@@ -412,7 +412,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         SDL_RenderClear(renderer);
 
         renderMap(gameMap, renderer);
-        // render local player or death marker
         if (player && getPlayerHP(player) > 0) {
             renderCharacter(player, renderer);
             healthBar(player, renderer);
