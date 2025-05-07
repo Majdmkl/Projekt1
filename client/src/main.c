@@ -15,6 +15,7 @@
 void initSDL();
 bool initNetwork();
 void cleanupNetwork();
+bool receiveServerData();
 SDL_Window* createWindow();
 bool connectToServer(const char* serverIP);
 int selectCharacter(SDL_Renderer* renderer);
@@ -23,7 +24,6 @@ void sendPlayerData(Character* player, int action);
 void gameLoop(SDL_Renderer* renderer, Character* player);
 void cleanup(SDL_Window* window, SDL_Renderer* renderer);
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath);
-bool receiveServerData();
 Character* createSelectedCharacter(SDL_Renderer* renderer, int selected);
 
 UDPsocket clientSocket;
