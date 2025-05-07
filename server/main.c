@@ -44,7 +44,6 @@ typedef struct {
     int numBullets, numPlayers, slotsTaken[MAX_ANIMALS], fire;
 } Game;
 
-// Function Prototypes
 void run(Game *game);
 void close(Game *game);
 int initiate(Game *game);
@@ -180,7 +179,6 @@ void run(Game *game) {
                     moveBullet(game->bullets[i]);
                     drawBullet(game->bullets[i], game->renderer);
                 }
-                // handle server-side bullet collisions and HP
                 for (int b = 0; b < game->numBullets; ) {
                     Bullet* bullet = game->bullets[b];
                     bool hit = false;

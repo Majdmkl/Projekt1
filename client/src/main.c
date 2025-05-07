@@ -328,7 +328,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         Uint32 now = SDL_GetTicks();
         if (now - lastNetworkUpdate > 16) { // ~60fps network tick
-            // process all server packets
             int gotData = 0;
             while (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
                 memcpy(&serverData, receivePacket->data, sizeof(ServerData));
@@ -356,7 +355,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                             }
                             setPosition(otherPlayers[i], newX, newY);
                             updateCharacterAnimation(otherPlayers[i], SDL_GetTicks());
-                            // sync HP
                             int targetHP = serverData.animals[i].health;
                             while (getPlayerHP(otherPlayers[i]) > targetHP) decreaseHealth(otherPlayers[i]);
                         }
@@ -372,7 +370,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                     while (getPlayerHP(player) > srvHP) decreaseHealth(player);
                 }
 
-                // Rebuild bullet list from server
                 for (int i = 0; i < bulletCount; ++i) destroyBullet(bullets[i]);
                 bulletCount = 0;
                 for (int i = 0; i < serverData.numberOfBullets && i < MAX_BULLETS; ++i) {
@@ -382,7 +379,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             }
             if (!spectating && (!serverData.slotsTaken[playerID] || getPlayerHP(player) <= 0)) {
                 spectating = true;
-                // record death and destroy character
                 deathX = getX(player);
                 deathY = getY(player);
                 destroyCharacter(player);
@@ -394,7 +390,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
             lastNetworkUpdate = now;
         }
-        // Update remote animations every frame
         for (int i = 0; i < MAX_ANIMALS; ++i) {
             if (i != playerID && playerActive[i] && otherPlayers[i]) {
                 updateCharacterAnimation(otherPlayers[i], now);
@@ -444,7 +439,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             SDL_RenderFillRect(renderer, &deathRect);
         }
 
-        // render others
         for (int i = 0; i < MAX_ANIMALS; i++) {
             if (i != playerID && playerActive[i] && otherPlayers[i]) {
                 if (getPlayerHP(otherPlayers[i]) > 0) renderCharacter(otherPlayers[i], renderer);
