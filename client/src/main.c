@@ -214,7 +214,7 @@ SDL_Window* createWindow() {
 }
 
 SDL_Renderer* createRenderer(SDL_Window* window) {
-    return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 }
 
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath) {

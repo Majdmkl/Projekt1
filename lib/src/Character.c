@@ -102,11 +102,8 @@ void turnRight(Character* character) { character->state = WALKING_RIGHT; }
 int getPlayerHP(Character* character) { return character->health; }
 
 void decreaseHealth(Character* character) {
-        character->health -= BULLET_DAMAGE;
-        character->isHit = TRUE;
-        character->hitTimer = SDL_GetTicks();
-        if(character->isHit) SDL_SetTextureColorMod(character->tex, 255, 0, 0);
-        if (character->health == 0) character->isDead = TRUE;
+    character->health -= BULLET_DAMAGE;
+    if (character->health < 0) character->health = 0;
 }
 
 bool isCharacterAlive(Character* character) { return character->health > 0; }
