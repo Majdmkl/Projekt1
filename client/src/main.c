@@ -327,7 +327,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         updateCharacterAnimation(player, SDL_GetTicks());
 
         Uint32 now = SDL_GetTicks();
-        if (now - lastNetworkUpdate > 50) {
+        if (now - lastNetworkUpdate > 16) { // ~60fps network tick
             // process all server packets
             int gotData = 0;
             while (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
@@ -375,10 +375,11 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
 
             lastNetworkUpdate = now;
-
-            if (serverData.slotsTaken[playerID] == false || getPlayerHP(player) <= 0) {
-                running = false;
-                break;
+        }
+        // Update remote animations every frame
+        for (int i = 0; i < MAX_ANIMALS; ++i) {
+            if (i != playerID && playerActive[i] && otherPlayers[i]) {
+                updateCharacterAnimation(otherPlayers[i], now);
             }
         }
 
