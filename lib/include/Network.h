@@ -27,9 +27,8 @@ typedef struct {
     GameState gameState;
     Animal animals[MAX_ANIMALS];
     int slotsTaken[MAX_ANIMALS];
-    int numberOfPlayers;
-    int numberOfBullets;
     BulletData bullets[MAX_BULLETS];
+    int numberOfPlayers, numberOfBullets;
 } ServerData;
 
 #endif

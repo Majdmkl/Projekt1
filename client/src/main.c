@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_net.h>
 
 #include "Map.h"
-#include "Text.h"
 #include "Bullet.h"
 #include "Character.h"
 #include "Network.h"
@@ -15,7 +15,6 @@
 void initSDL();
 bool initNetwork();
 void cleanupNetwork();
-bool receiveServerData();
 SDL_Window* createWindow();
 bool connectToServer(const char* serverIP);
 int selectCharacter(SDL_Renderer* renderer);
@@ -191,22 +190,22 @@ void sendPlayerData(Character* player, int action) {
 
             int mouseX, mouseY;
             SDL_GetMouseState(&mouseX, &mouseY);
-            clientData.bulletDx = mouseX - clientData.bulletStartX;
-            clientData.bulletDy = mouseY - clientData.bulletStartY;
+            float ddx = mouseX - clientData.bulletStartX;
+            float ddy = mouseY - clientData.bulletStartY;
+            float mag = sqrtf(ddx * ddx + ddy * ddy);
+            if (mag > 0.0f) {
+                clientData.bulletDx = ddx / mag * 10.0f; // normalized to speed 10
+                clientData.bulletDy = ddy / mag * 10.0f;
+            } else {
+                clientData.bulletDx = 0;
+                clientData.bulletDy = 0;
+            }
             break;
     }
 
     memcpy(sendPacket->data, &clientData, sizeof(ClientData));
     sendPacket->len = sizeof(ClientData);
     SDLNet_UDP_Send(clientSocket, -1, sendPacket);
-}
-
-bool receiveServerData() {
-    if (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
-        memcpy(&serverData, receivePacket->data, sizeof(ServerData));
-        return true;
-    }
-    return false;
 }
 
 SDL_Window* createWindow() {
@@ -252,6 +251,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     SDL_Event event;
     bool running = true;
     bool spectating = false;
+    float deathX = 0, deathY = 0;  // record death position
     Uint32 lastNetworkUpdate = 0;
 
     for (int i = 0; i < MAX_ANIMALS; i++) {
@@ -267,7 +267,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) running = false;
-            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
+            if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT && !spectating) {
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
 
@@ -339,11 +339,24 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                     if (i != playerID && serverData.slotsTaken[i]) {
                         if (!playerActive[i] || !otherPlayers[i]) {
                             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
-                            if (otherPlayers[i]) playerActive[i] = true;
+                            playerActive[i] = otherPlayers[i] != NULL;
                         }
-
-                        if (playerActive[i] && otherPlayers[i]) {
-                            setPosition(otherPlayers[i], serverData.animals[i].x, serverData.animals[i].y);
+                        if (playerActive[i]) {
+                            float oldX = getX(otherPlayers[i]);
+                            float oldY = getY(otherPlayers[i]);
+                            float newX = serverData.animals[i].x;
+                            float newY = serverData.animals[i].y;
+                            float dx = newX - oldX, dy = newY - oldY;
+                            if (fabsf(dx) < 0.1f && fabsf(dy) < 0.1f) {
+                                setDirection(otherPlayers[i]);
+                            } else if (fabsf(dx) > fabsf(dy)) {
+                                (dx > 0 ? turnRight : turnLeft)(otherPlayers[i]);
+                            } else {
+                                (dy > 0 ? turnDown : turnUp)(otherPlayers[i]);
+                            }
+                            setPosition(otherPlayers[i], newX, newY);
+                            updateCharacterAnimation(otherPlayers[i], SDL_GetTicks());
+                            // sync HP
                             int targetHP = serverData.animals[i].health;
                             while (getPlayerHP(otherPlayers[i]) > targetHP) decreaseHealth(otherPlayers[i]);
                         }
@@ -369,6 +382,11 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             }
             if (!spectating && (!serverData.slotsTaken[playerID] || getPlayerHP(player) <= 0)) {
                 spectating = true;
+                // record death and destroy character
+                deathX = getX(player);
+                deathY = getY(player);
+                destroyCharacter(player);
+                player = NULL;
             }
 
             if (!spectating) sendPlayerData(player, 0);
@@ -387,7 +405,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             Bullet* b = bullets[i];
             bool bulletHit = false;
 
-            if (b->whoShot != playerID && checkCollisionCharacterBullet(player, b)) {
+            if (!spectating && player && b->whoShot != playerID && checkCollisionCharacterBullet(player, b)) {
                 decreaseHealth(player);
                 bulletHit = true;
             }
@@ -416,17 +434,24 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         SDL_RenderClear(renderer);
 
         renderMap(gameMap, renderer);
-        renderCharacter(player, renderer);
+        // render local player or death marker
+        if (player && getPlayerHP(player) > 0) {
+            renderCharacter(player, renderer);
+            healthBar(player, renderer);
+        } else if (spectating) {
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_Rect deathRect = { (int)deathX, (int)deathY, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+            SDL_RenderFillRect(renderer, &deathRect);
+        }
 
+        // render others
         for (int i = 0; i < MAX_ANIMALS; i++) {
             if (i != playerID && playerActive[i] && otherPlayers[i]) {
-                renderCharacter(otherPlayers[i], renderer);
+                if (getPlayerHP(otherPlayers[i]) > 0) renderCharacter(otherPlayers[i], renderer);
                 healthBar(otherPlayers[i], renderer);
             }
         }
         for (int i = 0; i < bulletCount; i++) drawBullet(bullets[i], renderer);
-
-        healthBar(player, renderer);
 
         SDL_RenderPresent(renderer);
         SDL_Delay(16); // ~60 fps

@@ -143,7 +143,7 @@ int initiate(Game *game) {
     game->joinedText = createText(game->renderer, 255, 255, 255, game->font, "Player requirements met - Starting Game", SCREEN_WIDTH / 2 - 255, SCREEN_HEIGHT / 2 - 25);
     SDL_Log("Text objects created.");
 
-    game->state = MENU;
+    game->state = MAIN;
     game->numPlayers = 0;
 
     SDL_Log("Initialization completed successfully.");
@@ -162,7 +162,7 @@ void run(Game *game) {
 
     while (running) {
         switch (game->state) {
-            case ONGOING:
+            case INGAME:
                 SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
                 SDL_RenderClear(game->renderer);
                 SDL_RenderCopy(game->renderer, game->background, NULL, NULL);
@@ -207,7 +207,7 @@ void run(Game *game) {
                 SDL_Delay(16);
                 break;
 
-            case MENU:
+            case MAIN:
                 SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
                 SDL_RenderClear(game->renderer);
 
@@ -222,7 +222,7 @@ void run(Game *game) {
                             game->numPlayers++;
                             sendGameData(game, clientData);
                             if (game->numPlayers >= MIN_PLAYERS) {
-                                game->state = ONGOING;
+                                game->state = INGAME;
                                 destroyText(game->waitingText);
                                 drawText(game->joinedText);
                             }
