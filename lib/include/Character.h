@@ -9,14 +9,13 @@
 #include "Bullet.h"
 #include "Network.h"
 
-#define MAX_HEALTH 3
 #define MOVE_SPEED 5
+#define MAX_HEALTH 100
 #define CHARACTER_WIDTH 54
 #define CHARACTER_HEIGHT 54
 
-typedef struct Character Character;
+typedef struct Character;
 
-int getType(Character* character);
 float getX(Character *pCharacter);
 float getY(Character *pCharacter);
 void turnUp(Character *pCharacter);
@@ -24,7 +23,8 @@ float getSpeed(Character* character);
 void turnLeft(Character *pCharacter);
 void turnDown(Character *pCharacter);
 void turnRight(Character *pCharacter);
-int playerHealth(Character *character);
+int getPlayerHP(Character *character);
+int getcharacterID(Character* character);
 void setDirection(Character *pCharacter);
 void decreaseHealth(Character *pCharacter);
 bool isCharacterAlive(Character *pCharacter);

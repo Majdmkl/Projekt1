@@ -90,11 +90,7 @@ int initiate(Game *game) {
     }
     SDL_Log("Font loaded.");
 
-    game->window = SDL_CreateWindow(
-        "COZY TOWN Server",
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        SCREEN_WIDTH, SCREEN_HEIGHT, 0
-    );
+    game->window = SDL_CreateWindow("COZY TOWN Server", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     if (!game->window) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_CreateWindow Error: %s", SDL_GetError());
         return 0;
@@ -107,7 +103,7 @@ int initiate(Game *game) {
         return 0;
     }
     SDL_Log("Renderer created.");
-
+    //! map here
     game->background = IMG_LoadTexture(game->renderer, "lib/assets/objects/Apartment.png");
     if (!game->background) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "IMG_LoadTexture Error: %s", IMG_GetError());
@@ -143,8 +139,8 @@ int initiate(Game *game) {
     }
     SDL_Log("Characters created.");
 
-    game->waitingText = createText(game->renderer, 255, 255, 255, game->font, "Waiting for players...", 400, 400);
-    game->joinedText = createText(game->renderer, 255, 255, 255, game->font, "Player requirements met - Starting Game", 400, 400);
+    game->waitingText = createText(game->renderer, 255, 255, 255, game->font, "Waiting for players...", SCREEN_WIDTH / 2 - 255, SCREEN_HEIGHT / 2 - 25);
+    game->joinedText = createText(game->renderer, 255, 255, 255, game->font, "Player requirements met - Starting Game", SCREEN_WIDTH / 2 - 255, SCREEN_HEIGHT / 2 - 25);
     SDL_Log("Text objects created.");
 
     game->state = MENU;

@@ -9,7 +9,7 @@
 
 struct Character {
     float x, y, speed;
-    int health, frame, type;
+    int health, frame, characterID;
     Uint32 lastFrameTime;
     SDL_Texture *walkRight;
     SDL_Texture *walkLeft;
@@ -27,7 +27,8 @@ float getY(Character* character) {
     return character->y;
 }
 
-int getType(Character* character) { return character->type; }
+int getcharacterID(Character* character) { return character->characterID; }
+
 float getSpeed(Character* character) { return character->speed; }
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
@@ -47,8 +48,6 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
         SDL_Log("Failed to allocate memory for character");
         return NULL;
     }
-    // test for player one
-    setPosition(character, 500, 500);
     character->speed = MOVE_SPEED;
     character->health = MAX_HEALTH;
     character->frame = 0;
@@ -57,15 +56,13 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
 
     const char* characterType = NULL;
     switch (characterNumber) {
-        case 0: characterType = "panda"; break;
-        case 1: characterType = "giraffe"; break;
-        case 2: characterType = "fox"; break;
-        case 3: characterType = "bear"; break;
-        case 4: characterType = "bunny"; break;
-        case 5: characterType = "lion"; break;
-        default:
-            free(character);
-            return NULL;
+        case 0: setPosition(character, 0, 0); characterType = "panda"; character->characterID = 0; break;
+        case 1: setPosition(character, 0, SCREEN_HEIGHT); characterType = "giraffe"; character->characterID = 1; break;
+        case 2: setPosition(character, SCREEN_WIDTH, 0); characterType = "fox"; character->characterID = 2; break;
+        case 3: setPosition(character, SCREEN_WIDTH, SCREEN_HEIGHT); characterType = "bear"; character->characterID = 3; break;
+        case 4: setPosition(character, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2); characterType = "bunny"; character->characterID = 4; break;
+        case 5: setPosition(character, SCREEN_WIDTH / 2 - 200, SCREEN_HEIGHT / 2 - 200); characterType = "lion"; character->characterID = 5; break;
+        default: free(character); return NULL;
     }
 
     char path[100];
@@ -102,7 +99,7 @@ void turnLeft(Character* character) { character->state = WALKING_LEFT; }
 
 void turnRight(Character* character) { character->state = WALKING_RIGHT; }
 
-int playerHealth(Character* character) { return character->health; }
+int getPlayerHP(Character* character) { return character->health; }
 
 void decreaseHealth(Character* character) { if (character && character->health > 0) character->health--; }
 
@@ -163,7 +160,10 @@ int howManyPlayersAlive(Character* players[], int num_players) {
 }
 
 bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
-    return (character->x < bullet->x + 10 && character->x + CHARACTER_WIDTH > bullet->x && character->y < bullet->y + 10 && character->y + CHARACTER_HEIGHT > bullet->y);
+    SDL_Rect characterRect = { character->x, character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    SDL_Rect bulletRect = getBulletRect(bullet);
+
+    return SDL_HasIntersection(&characterRect, &bulletRect);
 }
 
 void setBulletStartPosition(Character* character, float* startX, float* startY) {
