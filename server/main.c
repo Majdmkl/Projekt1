@@ -177,8 +177,8 @@ void run(Game *game) {
 
                 for (int i = 0; i < game->numBullets; i++) {
                     if (!game->bullets[i]) continue;
+                    moveBullet(game->bullets[i]);
                     drawBullet(game->bullets[i], game->renderer);
-                    for (int j = 0; j < 3; j++) moveBullet(game->bullets[i]);
                 }
                 // handle server-side bullet collisions and HP
                 for (int b = 0; b < game->numBullets; ) {
@@ -204,6 +204,7 @@ void run(Game *game) {
                 if (SDL_PollEvent(&event) && event.type == SDL_QUIT) running = 0;
 
                 SDL_RenderPresent(game->renderer);
+                SDL_Delay(16);
                 break;
 
             case MENU:

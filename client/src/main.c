@@ -328,7 +328,13 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         Uint32 now = SDL_GetTicks();
         if (now - lastNetworkUpdate > 50) {
-            if (receiveServerData()) {
+            // process all server packets
+            int gotData = 0;
+            while (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
+                memcpy(&serverData, receivePacket->data, sizeof(ServerData));
+                gotData = 1;
+            }
+            if (gotData) {
                 for (int i = 0; i < MAX_ANIMALS; i++) {
                     if (i != playerID && serverData.slotsTaken[i]) {
                         if (!playerActive[i] || !otherPlayers[i]) {
