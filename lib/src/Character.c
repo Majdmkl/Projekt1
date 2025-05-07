@@ -57,10 +57,10 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     const char* characterType = NULL;
     switch (characterNumber) {
         case 0: setPosition(character, 0, 0); characterType = "panda"; character->characterID = 0; break;
-        case 1: setPosition(character, 0, SCREEN_HEIGHT); characterType = "giraffe"; character->characterID = 1; break;
-        case 2: setPosition(character, SCREEN_WIDTH, 0); characterType = "fox"; character->characterID = 2; break;
-        case 3: setPosition(character, SCREEN_WIDTH, SCREEN_HEIGHT); characterType = "bear"; character->characterID = 3; break;
-        case 4: setPosition(character, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2); characterType = "bunny"; character->characterID = 4; break;
+        case 1: setPosition(character, 0, SCREEN_HEIGHT - CHARACTER_HEIGHT); characterType = "giraffe"; character->characterID = 1; break;
+        case 2: setPosition(character, SCREEN_WIDTH - CHARACTER_WIDTH, 0); characterType = "fox"; character->characterID = 2; break;
+        case 3: setPosition(character, SCREEN_WIDTH - CHARACTER_WIDTH, SCREEN_HEIGHT - CHARACTER_HEIGHT); characterType = "bear"; character->characterID = 3; break;
+        case 4: setPosition(character, (SCREEN_WIDTH - CHARACTER_WIDTH) / 2 , (SCREEN_HEIGHT - CHARACTER_HEIGHT) / 2); characterType = "bunny"; character->characterID = 4; break;
         case 5: setPosition(character, SCREEN_WIDTH / 2 - 200, SCREEN_HEIGHT / 2 - 200); characterType = "lion"; character->characterID = 5; break;
         default: free(character); return NULL;
     }
@@ -101,7 +101,13 @@ void turnRight(Character* character) { character->state = WALKING_RIGHT; }
 
 int getPlayerHP(Character* character) { return character->health; }
 
-void decreaseHealth(Character* character) { if (character && character->health > 0) character->health--; }
+void decreaseHealth(Character* character) {
+        character->health -= BULLET_DAMAGE;
+        character->isHit = TRUE;
+        character->hitTimer = SDL_GetTicks();
+        if(character->isHit) SDL_SetTextureColorMod(character->tex, 255, 0, 0);
+        if (character->health == 0) character->isDead = TRUE;
+}
 
 bool isCharacterAlive(Character* character) { return character->health > 0; }
 

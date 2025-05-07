@@ -153,6 +153,7 @@ int initiate(Game *game) {
 void run(Game *game) {
     SDL_Event event;
     ClientData clientData = {0};
+    ClientData lastClientData = {0};
 
     memset(game->slotsTaken, 0, sizeof(game->slotsTaken));
     game->numBullets = 0;
@@ -167,10 +168,10 @@ void run(Game *game) {
                 SDL_RenderCopy(game->renderer, game->background, NULL, NULL);
                 renderCharacters(game);
 
-                if (SDLNet_UDP_Recv(game->socket, game->packet) == 1) {
+                while (SDLNet_UDP_Recv(game->socket, game->packet) == 1) {
                     memcpy(&clientData, game->packet->data, sizeof(ClientData));
+                    lastClientData = clientData;
                     executeCommand(game, &clientData);
-                    sendGameData(game, clientData);
                     memset(&clientData, 0, sizeof(clientData));
                 }
 
@@ -197,6 +198,8 @@ void run(Game *game) {
                         b++;
                     }
                 }
+
+                sendGameData(game, lastClientData);
 
                 if (SDL_PollEvent(&event) && event.type == SDL_QUIT) running = 0;
 
@@ -257,6 +260,8 @@ void addClient(IPaddress address, IPaddress clients[], int *numClients) {
 void executeCommand(Game *game, ClientData *clientData) {
     Character *player = game->players[clientData->playerNumber];
 
+    // update server-side position from client
+    setPosition(player, clientData->animals.x, clientData->animals.y);
     if (clientData->command[1] == UP && clientData->command[6] != BLOCKED) turnUp(player);
     if (clientData->command[2] == DOWN && clientData->command[6] != BLOCKED) turnDown(player);
     if (clientData->command[3] == LEFT && clientData->command[6] != BLOCKED) turnLeft(player);

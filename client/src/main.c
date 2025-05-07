@@ -12,7 +12,6 @@
 #include "Character.h"
 #include "Network.h"
 
-
 void initSDL();
 bool initNetwork();
 void cleanupNetwork();
@@ -275,7 +274,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 float startY = getY(player) + CHARACTER_HEIGHT / 2.0f;
 
                 if (bulletCount < MAX_BULLETS) {
-                    bullets[bulletCount++] = createBullet(renderer, startX, startY, mouseX - startX, mouseY - startY, 0);
+                    bullets[bulletCount++] = createBullet(renderer, startX, startY, mouseX - startX, mouseY - startY, playerID);
                     sendPlayerData(player, 5); // 5 = FIRE command
                 }
             }
@@ -312,7 +311,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             moveY = (moveY > 0) ? diagSpeed : -diagSpeed;
         }
 
-        moveCharacter(player, moveX, moveY, walls, 23);
+        moveCharacter(player, moveX, moveY, walls, MAX_WALLS);
         updateCharacterAnimation(player, SDL_GetTicks());
 
         Uint32 now = SDL_GetTicks();
@@ -337,7 +336,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                     }
                 }
 
-                // update local player health
                 if (serverData.slotsTaken[playerID]) {
                     int srvHP = serverData.animals[playerID].health;
                     while (getPlayerHP(player) > srvHP) decreaseHealth(player);
@@ -355,20 +353,18 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 }
             }
             lastNetworkUpdate = now;
+            sendPlayerData(player, 0);
         }
 
-        // Check bullet collisions with characters
         for (int i = 0; i < bulletCount; ) {
             Bullet* b = bullets[i];
             bool bulletHit = false;
 
-            // Check collision with player
             if (checkCollisionCharacterBullet(player, b)) {
                 decreaseHealth(player);
                 bulletHit = true;
             }
 
-            // Check collision with other players
             for (int j = 0; j < MAX_ANIMALS && !bulletHit; j++) {
                 if (j != playerID && playerActive[j] && otherPlayers[j]) {
                     if (checkCollisionCharacterBullet(otherPlayers[j], b)) {
@@ -379,7 +375,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             }
 
             if ((now - getBulletBornTime(b) > BULLET_LIFETIME) ||
-                checkCollisionBulletWall(b, walls, 23) ||
+                checkCollisionBulletWall(b, walls, MAX_WALLS) ||
                 bulletHit) {
                 destroyBullet(b);
                 bullets[i] = bullets[--bulletCount];
@@ -395,9 +391,12 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         renderMap(gameMap, renderer);
         renderCharacter(player, renderer);
 
-        // Render other players
-        for (int i = 0; i < MAX_ANIMALS; i++)
-            if (i != playerID && playerActive[i]) renderCharacter(otherPlayers[i], renderer);
+        for (int i = 0; i < MAX_ANIMALS; i++) {
+            if (i != playerID && playerActive[i] && otherPlayers[i]) {
+                renderCharacter(otherPlayers[i], renderer);
+                healthBar(otherPlayers[i], renderer);
+            }
+        }
         for (int i = 0; i < bulletCount; i++) drawBullet(bullets[i], renderer);
 
         healthBar(player, renderer);
