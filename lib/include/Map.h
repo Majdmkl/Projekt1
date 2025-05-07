@@ -6,6 +6,7 @@
 
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1024
+#define MAX_WALLS 6
 //! same here
 #define NR_X 16
 #define NR_Y 30
@@ -23,7 +24,7 @@ typedef struct MAP{
     //! when real map is used remove this
 } MAP;
 
-extern MAP walls[23];
+extern MAP walls[MAX_WALLS];
 //! 👇
 void destroyMap(MAP* map);
 MAP* createMap(SDL_Renderer* renderer);

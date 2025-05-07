@@ -1,7 +1,8 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#define MAX_ANIMALS 2
+#define MIN_PLAYERS 2
+#define MAX_ANIMALS 6
 #define SERVER_PORT 2000
 
 typedef enum { MENU, ONGOING  } GameState;
@@ -25,7 +26,7 @@ typedef struct {
     Animal animals[MAX_ANIMALS];
     int fire, whoShot, slotsTaken[MAX_ANIMALS];
     int numberOfBullets, numberOfPlayers;
-    float bulletDx, bulletDy, bulletStartX, bulletStartY;;
+    float bulletDx, bulletDy, bulletStartX, bulletStartY;
 } ServerData;
 
 #endif

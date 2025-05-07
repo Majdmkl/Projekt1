@@ -14,7 +14,7 @@
 #define CHARACTER_WIDTH 54
 #define CHARACTER_HEIGHT 54
 
-typedef struct Character;
+typedef struct Character Character;
 
 float getX(Character *pCharacter);
 float getY(Character *pCharacter);

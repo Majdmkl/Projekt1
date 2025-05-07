@@ -41,7 +41,7 @@ typedef struct {
     Text *waitingText, *joinedText;
     Character *players[MAX_ANIMALS];
     IPaddress serverAddress[MAX_ANIMALS];
-    int numBullets, numPlayers, slotsTaken[6], fire;
+    int numBullets, numPlayers, slotsTaken[MAX_ANIMALS], fire;
 } Game;
 
 // Function Prototypes
@@ -162,7 +162,8 @@ void run(Game *game) {
     while (running) {
         switch (game->state) {
             case ONGOING:
-                sendGameData(game, clientData);
+                SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
+                SDL_RenderClear(game->renderer);
                 SDL_RenderCopy(game->renderer, game->background, NULL, NULL);
                 renderCharacters(game);
 
@@ -178,6 +179,24 @@ void run(Game *game) {
                     drawBullet(game->bullets[i], game->renderer);
                     for (int j = 0; j < 3; j++) moveBullet(game->bullets[i]);
                 }
+                // handle server-side bullet collisions and HP
+                for (int b = 0; b < game->numBullets; ) {
+                    Bullet* bullet = game->bullets[b];
+                    bool hit = false;
+                    for (int p = 0; p < MAX_ANIMALS; p++) {
+                        if (p != bullet->whoShot && checkCollisionCharacterBullet(game->players[p], bullet)) {
+                            decreaseHealth(game->players[p]);
+                            hit = true;
+                            break;
+                        }
+                    }
+                    if (hit || SDL_GetTicks() - getBulletBornTime(bullet) > BULLET_LIFETIME || checkCollisionBulletWall(bullet, walls, MAX_WALLS)) {
+                        destroyBullet(bullet);
+                        game->bullets[b] = game->bullets[--game->numBullets];
+                    } else {
+                        b++;
+                    }
+                }
 
                 if (SDL_PollEvent(&event) && event.type == SDL_QUIT) running = 0;
 
@@ -185,23 +204,32 @@ void run(Game *game) {
                 break;
 
             case MENU:
-                acceptClients(game, clientData);
-                drawText(game->waitingText);
-                SDL_RenderPresent(game->renderer);
-                sendGameData(game, clientData);
-
-                if (SDL_PollEvent(&event) && event.type == SDL_QUIT) running = 0;
+                SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
+                SDL_RenderClear(game->renderer);
 
                 if (SDLNet_UDP_Recv(game->socket, game->packet) == 1) {
-                    addClient(game->packet->address, game->serverAddress, &game->numPlayers);
-                    sendGameData(game, clientData);
-                    game->slotsTaken[game->numPlayers - 1] = 1;
+                    memcpy(&clientData, game->packet->data, sizeof(ClientData));
 
-                    if (game->numPlayers == MAX_ANIMALS) {
-                        game->state = ONGOING;
-                        destroyText(game->waitingText);
+                    if (clientData.command[0] == CONNECTING && clientData.playerNumber >= 0 && clientData.playerNumber < MAX_ANIMALS) {
+                        int id = clientData.playerNumber;
+                        if (!game->slotsTaken[id]) {
+                            game->slotsTaken[id] = 1;
+                            game->serverAddress[id] = game->packet->address;
+                            game->numPlayers++;
+                            sendGameData(game, clientData);
+                            if (game->numPlayers >= MIN_PLAYERS) {
+                                game->state = ONGOING;
+                                destroyText(game->waitingText);
+                                drawText(game->joinedText);
+                            }
+                        }
                     }
                 }
+
+                drawText(game->waitingText);
+                SDL_RenderPresent(game->renderer);
+
+                if (SDL_PollEvent(&event) && event.type == SDL_QUIT) running = 0;
                 break;
         }
     }
@@ -254,9 +282,8 @@ void executeCommand(Game *game, ClientData *clientData) {
 void characterSendData(Character *character, Animal *animal) {
     animal->x = getX(character);
     animal->y = getY(character);
-    animal->health = playerHealth(character);
-
-    animal->type = 0;
+    animal->health = getPlayerHP(character);
+    animal->type = getcharacterID(character);
     animal->speed_x = MOVE_SPEED;
     animal->speed_y = MOVE_SPEED;
 }

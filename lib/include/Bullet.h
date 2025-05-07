@@ -4,7 +4,7 @@
 #include <SDL2/SDL.h>
 #include "Map.h"
 
-#define MAX_BULLETS 20
+#define MAX_BULLETS 5
 #define BULLET_WIDTH 8
 #define BULLET_HEIGHT 8
 #define BULLET_SPEED 10.0f
