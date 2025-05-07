@@ -11,8 +11,8 @@
 
 #define MOVE_SPEED 5
 #define MAX_HEALTH 100
-#define CHARACTER_WIDTH 54
-#define CHARACTER_HEIGHT 54
+#define CHARACTER_WIDTH 64
+#define CHARACTER_HEIGHT 64
 
 typedef struct Character Character;
 
