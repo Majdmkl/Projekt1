@@ -17,6 +17,7 @@ struct Character {
     SDL_Texture *walkDown;
     SDL_Texture *walkUp;
     SDL_Texture *idleFront;
+    SDL_Texture *fullSheet;
     enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;
 };
 
@@ -125,10 +126,9 @@ void setPosition(Character* character, float x, float y) {
 void setDirection(Character* character) {   character->state = IDLE; }
 
 void renderCharacter(Character* character, SDL_Renderer* renderer) {
-    int frameWidth = 64;
-    int frameHeight = 64;
+    SDL_Rect srcRect = { character->frame * CHARACTER_WIDTH, 0, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    SDL_Rect destRect = { character->x, character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
 
-    int row;
     switch (character->state) {
         case WALKING_DOWN: SDL_RenderCopy(renderer, character->walkDown, &srcRect, &destRect); break;
         case WALKING_UP: SDL_RenderCopy(renderer, character->walkUp, &srcRect, &destRect); break;
