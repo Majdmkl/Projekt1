@@ -103,7 +103,7 @@ int initiate(Game *game) {
     }
     SDL_Log("Renderer created.");
     //! map here
-    game->background = IMG_LoadTexture(game->renderer, "lib/assets/images/objects//buildings/Apartment.png");
+    game->background = IMG_LoadTexture(game->renderer, "lib/assets/images/objects/buildings/Apartment.png");
     if (!game->background) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "IMG_LoadTexture Error: %s", IMG_GetError());
         return 0;
