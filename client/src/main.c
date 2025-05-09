@@ -441,12 +441,12 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 }
 
 int selectCharacter(SDL_Renderer* renderer) {
-    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/startPage/selChar.png");
+    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/images/objects/ui/selChar.png");
     if (!menuTexture) {
         SDL_Log("Failed to load menu texture");
         return -1;
     }
-    SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/objects/grass.png");
+    SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/images/objects/nature/grass.png");
     if (!grassTexture) {
         SDL_DestroyTexture(menuTexture);
         SDL_Log("Failed to load grass texture");
