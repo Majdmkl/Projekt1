@@ -16,3 +16,9 @@
 
 # Ignorera Makefile
 Makefile
+lib/src/Bullet.d
+lib/src/Bullet.d
+lib/src/Character.d
+lib/src/Map.d
+lib/src/Text.d
+server/main.d

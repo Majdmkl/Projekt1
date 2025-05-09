@@ -441,7 +441,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 }
 
 int selectCharacter(SDL_Renderer* renderer) {
-    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/objects/meny.png");
+    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/startPage/selChar.png");
     if (!menuTexture) {
         SDL_Log("Failed to load menu texture");
         return -1;
