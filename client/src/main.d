@@ -48,5 +48,6 @@ client/src/main.o: client/src/main.c /opt/homebrew/include/SDL2/SDL.h \
   /opt/homebrew/include/SDL2/SDL_version.h \
   /opt/homebrew/include/SDL2/SDL_locale.h \
   /opt/homebrew/include/SDL2/SDL_misc.h \
-  /opt/homebrew/include/SDL2/SDL_image.h lib/include/Character.h \
+  /opt/homebrew/include/SDL2/SDL_image.h \
+  /opt/homebrew/include/SDL2/SDL_ttf.h lib/include/Character.h \
   lib/include/Map.h lib/include/Bullet.h lib/include/Network.h
