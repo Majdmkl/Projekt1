@@ -68,7 +68,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     }
 
     char path[100];
-    sprintf(path, "lib/assets/animal/%s/%s_full_spritesheet.png", characterType, characterType);
+    sprintf(path, "lib/assets/images/character/animal/%s/%s_full_spritesheet.png", characterType, characterType);
     character->fullSheet = loadCharacterTexture(renderer, path);
 
     if (!character->fullSheet) {
