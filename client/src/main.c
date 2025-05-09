@@ -538,7 +538,6 @@ int selectCharacter(SDL_Renderer* renderer) {
     return selected;
 }
 
-
 void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
     if (renderer) SDL_DestroyRenderer(renderer);
     if (window) SDL_DestroyWindow(window);
