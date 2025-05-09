@@ -2,8 +2,9 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#define FRAME_COUNT 2
+#define FRAME_COUNT 3
 #define FRAME_DELAY 100
+#define DIRECTION_COUNT 4
 
 #include "Character.h"
 
@@ -66,24 +67,10 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     }
 
     char path[100];
+    sprintf(path, "lib/assets/animal/%s/%s_full_spritesheet.png", characterType, characterType);
+    character->fullSheet = loadCharacterTexture(renderer, path);
 
-    sprintf(path, "lib/assets/animal/%s/%s_right_walk_spritesheet.png", characterType, characterType);
-    character->walkRight = loadCharacterTexture(renderer, path);
-
-    sprintf(path, "lib/assets/animal/%s/%s_left_walk_spritesheet.png", characterType, characterType);
-    character->walkLeft = loadCharacterTexture(renderer, path);
-
-    sprintf(path, "lib/assets/animal/%s/%s_front_walk_spritesheet.png", characterType, characterType);
-    character->walkDown = loadCharacterTexture(renderer, path);
-
-    sprintf(path, "lib/assets/animal/%s/%s_back_walk_spritesheet.png", characterType, characterType);
-    character->walkUp = loadCharacterTexture(renderer, path);
-
-    sprintf(path, "lib/assets/animal/%s/%s_front.png", characterType, characterType);
-    character->idleFront = loadCharacterTexture(renderer, path);
-
-    if (!character->walkRight || !character->walkLeft || !character->walkDown ||
-        !character->walkUp || !character->idleFront) {
+    if (!character->fullSheet) {
         destroyCharacter(character);
         return NULL;
     }
@@ -110,22 +97,23 @@ bool isCharacterAlive(Character* character) { return character->health > 0; }
 
 void destroyCharacter(Character* character) {
     if (character) {
-        if (character->walkRight) SDL_DestroyTexture(character->walkRight);
-        if (character->walkLeft) SDL_DestroyTexture(character->walkLeft);
-        if (character->walkDown) SDL_DestroyTexture(character->walkDown);
-        if (character->walkUp) SDL_DestroyTexture(character->walkUp);
-        if (character->idleFront) SDL_DestroyTexture(character->idleFront);
+        if (character->fullSheet) SDL_DestroyTexture(character->fullSheet);
         free(character);
     }
 }
 
 void updateCharacterAnimation(Character* character, Uint32 deltaTime) {
     Uint32 currentTime = SDL_GetTicks();
-    bool isMoving = (character->state != IDLE);
+    bool isMoving = (character->state == WALKING_UP ||
+                     character->state == WALKING_DOWN ||
+                     character->state == WALKING_LEFT ||
+                     character->state == WALKING_RIGHT);
 
-    if (isMoving && currentTime > character->lastFrameTime + FRAME_DELAY) {
+    if (isMoving && currentTime - character->lastFrameTime >= FRAME_DELAY) {
         character->frame = (character->frame + 1) % FRAME_COUNT;
         character->lastFrameTime = currentTime;
+    } else if (!isMoving) {
+        character->frame = 0; // stå still i mittenrutan (mitten av 3 frames)
     }
 }
 
@@ -137,9 +125,10 @@ void setPosition(Character* character, float x, float y) {
 void setDirection(Character* character) {   character->state = IDLE; }
 
 void renderCharacter(Character* character, SDL_Renderer* renderer) {
-    SDL_Rect srcRect = { character->frame * 64, 0, 64, 90 };
-    SDL_Rect destRect = { character->x, character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    int frameWidth = 64;
+    int frameHeight = 64;
 
+    int row;
     switch (character->state) {
         case WALKING_DOWN: SDL_RenderCopy(renderer, character->walkDown, &srcRect, &destRect); break;
         case WALKING_UP: SDL_RenderCopy(renderer, character->walkUp, &srcRect, &destRect); break;

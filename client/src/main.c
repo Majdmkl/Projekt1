@@ -113,6 +113,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // 👉 Starta spelet
     gameLoop(renderer, player);
 
     destroyCharacter(player);
@@ -495,7 +496,40 @@ int selectCharacter(SDL_Renderer* renderer) {
             }
         }
 
+        // Mörk overlay ovanpå bakgrunden
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
+        SDL_Rect overlay = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+        SDL_RenderFillRect(renderer, &overlay);
+
+        // Menybakgrund (karaktärsval)
         SDL_RenderCopy(renderer, menuTexture, NULL, &menuRect);
+
+        // Rita outlines runt alla 6 klickrutor
+        // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // vit färg
+        // for (int i = 0; i < 6; i++) {
+        //     SDL_RenderDrawRect(renderer, &characters[i]);
+        // }
+
+        // Vit outline runt karaktärer (om du har)
+        // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        // for (int i = 0; i < 6; i++) {
+        //     SDL_RenderDrawRect(renderer, &characters[i]);
+        // }
+
+        // 🔲 Svart tjock outline runt menyboxen
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        int thickness = 4;
+        for (int i = 0; i < thickness; i++) {
+            SDL_Rect outline = {
+                menuRect.x - i,
+                menuRect.y - i,
+                menuRect.w + 2 * i,
+                menuRect.h + 2 * i
+            };
+            SDL_RenderDrawRect(renderer, &outline);
+        }
+
         SDL_RenderPresent(renderer);
     }
 
@@ -503,6 +537,7 @@ int selectCharacter(SDL_Renderer* renderer) {
     SDL_DestroyTexture(grassTexture);
     return selected;
 }
+
 
 void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
     if (renderer) SDL_DestroyRenderer(renderer);
