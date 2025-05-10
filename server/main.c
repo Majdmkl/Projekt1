@@ -82,7 +82,7 @@ int initiate(Game *game) {
     }
     SDL_Log("SDL_ttf initialized.");
 
-    game->font = TTF_OpenFont("lib/assets/arial.ttf", 60);
+    game->font = TTF_OpenFont("lib/assets/fonts/PressStart2P.ttf", 60);
     if (!game->font) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "TTF_OpenFont Error: %s", TTF_GetError());
         return 0;

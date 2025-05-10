@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_net.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "Map.h"
 #include "Bullet.h"
@@ -165,6 +166,7 @@ int main(int argc, char* argv[]) {
 void initSDL() {
     SDL_Init(SDL_INIT_VIDEO);
     IMG_Init(IMG_INIT_PNG);
+    TTF_Init();
     SDLNet_Init();
 }
 
@@ -474,7 +476,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 }
 char* connectionScreen(SDL_Renderer* renderer) {
     static char ip[64] = "";
-    bool isTyping = false;
+    bool typingActive = false;
 
     SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/images/objects/ui/ip.png");
     SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/images/objects/nature/grass.png");
