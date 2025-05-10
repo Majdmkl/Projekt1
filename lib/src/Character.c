@@ -113,20 +113,30 @@ void setPosition(Character* character, float x, float y) {
 
 void setDirection(Character* character) { character->state = IDLE; }
 
+int getSpriteRowForState(int state) {
+    switch (state) {
+        case WALKING_DOWN:  return 0;
+        case WALKING_LEFT:  return 2;
+        case WALKING_RIGHT: return 3;
+        case WALKING_UP:    return 1;
+        case IDLE:          return 0;
+    }
+}
+
 void renderCharacter(Character* character, SDL_Renderer* renderer) {
     if (!character || !renderer || !character->fullSheet) return;
 
-    SDL_Rect srcRect = { character->frame * CHARACTER_WIDTH, 0, CHARACTER_WIDTH, CHARACTER_HEIGHT };
-    SDL_Rect destRect = { (int)character->x, (int)character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    int spriteRow = getSpriteRowForState(character->state);
 
-    switch (character->state) {
-        case WALKING_DOWN:  SDL_RenderCopy(renderer, character->walkDown, &srcRect, &destRect); break;
-        case WALKING_UP:    SDL_RenderCopy(renderer, character->walkUp, &srcRect, &destRect); break;
-        case WALKING_LEFT:  SDL_RenderCopy(renderer, character->walkLeft, &srcRect, &destRect); break;
-        case WALKING_RIGHT: SDL_RenderCopy(renderer, character->walkRight, &srcRect, &destRect); break;
-        case IDLE:
-        default:            SDL_RenderCopy(renderer, character->idleFront, &srcRect, &destRect); break;
-    }
+    SDL_Rect srcRect = {
+        character->frame * CHARACTER_WIDTH,
+        spriteRow * CHARACTER_HEIGHT,
+        CHARACTER_WIDTH,
+        CHARACTER_HEIGHT
+    };
+
+    SDL_Rect destRect = { (int)character->x, (int)character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    SDL_RenderCopy(renderer, character->fullSheet, &srcRect, &destRect);
 }
 
 void healthBar(Character* character, SDL_Renderer* renderer) {
