@@ -21,13 +21,9 @@ struct Character {
     enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;
 };
 
-float getX(Character* character) {
-    return character->x;
-}
+float getX(Character* character) { return character->x; }
 
-float getY(Character* character) {
-    return character->y;
-}
+float getY(Character* character) { return character->y; }
 
 int getcharacterID(Character* character) { return character->characterID; }
 
@@ -35,10 +31,7 @@ float getSpeed(Character* character) { return character->speed; }
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
-    if (!surface) {
-        SDL_Log("Failed to load image: %s\n", IMG_GetError());
-        return NULL;
-    }
+    if (!surface) { SDL_Log("Failed to load image: %s\n", IMG_GetError()); return NULL; }
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
     return texture;
@@ -46,10 +39,8 @@ SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) 
 
 Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     Character* character = (Character*)malloc(sizeof(Character));
-    if (!character) {
-        SDL_Log("Failed to allocate memory for character");
-        return NULL;
-    }
+    if (!character) { SDL_Log("Failed to allocate memory for character"); return NULL; }
+
     character->speed = MOVE_SPEED;
     character->health = MAX_HEALTH;
     character->frame = 0;
@@ -71,10 +62,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     sprintf(path, "lib/assets/images/character/animal/%s/%s_full_spritesheet.png", characterType, characterType);
     character->fullSheet = loadCharacterTexture(renderer, path);
 
-    if (!character->fullSheet) {
-        destroyCharacter(character);
-        return NULL;
-    }
+    if (!character->fullSheet) { destroyCharacter(character); return NULL; }
 
     return character;
 }
@@ -113,9 +101,7 @@ void updateCharacterAnimation(Character* character, Uint32 deltaTime) {
     if (isMoving && currentTime - character->lastFrameTime >= FRAME_DELAY) {
         character->frame = (character->frame + 1) % FRAME_COUNT;
         character->lastFrameTime = currentTime;
-    } else if (!isMoving) {
-        character->frame = 0; // stå still i mittenrutan (mitten av 3 frames)
-    }
+    } else if (!isMoving) character->frame = 0; // stå still i mittenrutan (mitten av 3 frames)
 }
 
 void setPosition(Character* character, float x, float y) {
@@ -137,6 +123,8 @@ void renderCharacter(Character* character, SDL_Renderer* renderer) {
         case IDLE:
         default: SDL_RenderCopy(renderer, character->idleFront, NULL, &destRect); break;
     }
+
+    SDL_RenderCopy(renderer, character->fullSheet, &srcRect, &destRect);
 }
 
 void healthBar(Character* character, SDL_Renderer* renderer) {
