@@ -5,7 +5,6 @@
 
 #define FRAME_COUNT 3
 #define FRAME_DELAY 100
-#define DIRECTION_COUNT 4
 
 #include "Character.h"
 
@@ -13,11 +12,6 @@ struct Character {
     float x, y, speed;
     int health, frame, characterID;
     Uint32 lastFrameTime;
-    SDL_Texture *walkRight;
-    SDL_Texture *walkLeft;
-    SDL_Texture *walkDown;
-    SDL_Texture *walkUp;
-    SDL_Texture *idleFront;
     SDL_Texture *fullSheet;
     enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;
 };
@@ -29,7 +23,10 @@ float getSpeed(Character* character) { return character->speed; }
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
-    if (!surface) { SDL_Log("Failed to load image: %s\n", IMG_GetError()); return NULL; }
+    if (!surface) {
+        SDL_Log("Failed to load image: %s\n", IMG_GetError());
+        return NULL;
+    }
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
     return texture;
@@ -37,7 +34,10 @@ SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) 
 
 Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     Character* character = (Character*)malloc(sizeof(Character));
-    if (!character) { SDL_Log("Failed to allocate memory for character"); return NULL; }
+    if (!character) {
+        SDL_Log("Failed to allocate memory for character");
+        return NULL;
+    }
 
     character->speed = MOVE_SPEED;
     character->health = MAX_HEALTH;
@@ -51,7 +51,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
         case 1: setPosition(character, 0, SCREEN_HEIGHT - CHARACTER_HEIGHT); characterType = "giraffe"; character->characterID = 1; break;
         case 2: setPosition(character, SCREEN_WIDTH - CHARACTER_WIDTH, 0); characterType = "fox"; character->characterID = 2; break;
         case 3: setPosition(character, SCREEN_WIDTH - CHARACTER_WIDTH, SCREEN_HEIGHT - CHARACTER_HEIGHT); characterType = "bear"; character->characterID = 3; break;
-        case 4: setPosition(character, (SCREEN_WIDTH - CHARACTER_WIDTH) / 2 , (SCREEN_HEIGHT - CHARACTER_HEIGHT) / 2); characterType = "bunny"; character->characterID = 4; break;
+        case 4: setPosition(character, (SCREEN_WIDTH - CHARACTER_WIDTH) / 2, (SCREEN_HEIGHT - CHARACTER_HEIGHT) / 2); characterType = "bunny"; character->characterID = 4; break;
         case 5: setPosition(character, SCREEN_WIDTH / 2 - 200, SCREEN_HEIGHT / 2 - 200); characterType = "lion"; character->characterID = 5; break;
         default: free(character); return NULL;
     }
@@ -59,13 +59,10 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     char path[256];
     sprintf(path, "lib/assets/images/character/animal/%s/%s_full_spritesheet.png", characterType, characterType);
     character->fullSheet = loadCharacterTexture(renderer, path);
-    if (!character->fullSheet) { destroyCharacter(character); return NULL; }
-
-    character->walkDown  = character->fullSheet;
-    character->walkLeft  = character->fullSheet;
-    character->walkRight = character->fullSheet;
-    character->walkUp    = character->fullSheet;
-    character->idleFront = character->fullSheet;
+    if (!character->fullSheet) {
+        destroyCharacter(character);
+        return NULL;
+    }
 
     return character;
 }
@@ -116,10 +113,11 @@ void setDirection(Character* character) { character->state = IDLE; }
 int getSpriteRowForState(int state) {
     switch (state) {
         case WALKING_DOWN:  return 0;
+        case WALKING_UP:    return 1;
         case WALKING_LEFT:  return 2;
         case WALKING_RIGHT: return 3;
-        case WALKING_UP:    return 1;
-        case IDLE:          return 0;
+        case IDLE:
+        default:            return 0;
     }
 }
 
@@ -141,8 +139,12 @@ void renderCharacter(Character* character, SDL_Renderer* renderer) {
 
 void healthBar(Character* character, SDL_Renderer* renderer) {
     if (!character || !renderer) return;
-    SDL_Rect healthRect = { (int)character->x, (int)character->y - 10,
-                            (CHARACTER_WIDTH * character->health) / MAX_HEALTH, 5 };
+    SDL_Rect healthRect = {
+        (int)character->x,
+        (int)character->y - 10,
+        (CHARACTER_WIDTH * character->health) / MAX_HEALTH,
+        5
+    };
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &healthRect);
 }
