@@ -64,70 +64,34 @@ int main(int argc, char* argv[]) {
 int initiate(Game *game) {
     srand((unsigned)time(NULL));
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Init Error: %s", SDL_GetError());
-        return 0;
-    }
-    SDL_Log("SDL initialized.");
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_Init Error: %s", SDL_GetError()); return 0; }
 
-    if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "IMG_Init Error: %s", IMG_GetError());
-        return 0;
-    }
-    SDL_Log("SDL_image initialized.");
+    if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "IMG_Init Error: %s", IMG_GetError()); return 0; }
 
-    if (TTF_Init() == -1) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "TTF_Init Error: %s", TTF_GetError());
-        return 0;
-    }
-    SDL_Log("SDL_ttf initialized.");
+    if (TTF_Init() == -1) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "TTF_Init Error: %s", TTF_GetError()); return 0; }
 
     game->font = TTF_OpenFont("lib/assets/fonts/arial.ttf", 60);
-    if (!game->font) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "TTF_OpenFont Error: %s", TTF_GetError());
-        return 0;
-    }
-    SDL_Log("Font loaded.");
+    if (!game->font) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "TTF_OpenFont Error: %s", TTF_GetError()); return 0; }
 
     game->window = SDL_CreateWindow("COZY TOWN Server", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
-    if (!game->window) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_CreateWindow Error: %s", SDL_GetError());
-        return 0;
-    }
-    SDL_Log("Window created.");
+    if (!game->window) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_CreateWindow Error: %s", SDL_GetError()); return 0; }
 
     game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!game->renderer) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_CreateRenderer Error: %s", SDL_GetError());
-        return 0;
-    }
-    SDL_Log("Renderer created.");
-    //! map here
-    game->background = IMG_LoadTexture(game->renderer, "lib/assets/images/objects/buildings/Apartment.png");
-    if (!game->background) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "IMG_LoadTexture Error: %s", IMG_GetError());
-        return 0;
-    }
-    SDL_Log("Background texture loaded.");
+    if (!game->renderer) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_CreateRenderer Error: %s", SDL_GetError()); return 0; }
 
-    if (SDLNet_Init() == -1) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_Init Error: %s", SDLNet_GetError());
-        return 0;
-    }
-    SDL_Log("SDL_net initialized.");
+    game->background = IMG_LoadTexture(game->renderer, "lib/assets/images/objects/buildings/Apartment.png");
+    if (!game->background) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "IMG_LoadTexture Error: %s", IMG_GetError()); return 0; }
+
+    if (SDLNet_Init() == -1) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_Init Error: %s", SDLNet_GetError()); return 0;}
 
     game->socket = SDLNet_UDP_Open(SERVER_PORT);
-    if (!game->socket) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_UDP_Open Error: %s", SDLNet_GetError());
-        return 0;
-    }
+    if (!game->socket) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_UDP_Open Error: %s", SDLNet_GetError()); return 0; }
 
     game->packet = SDLNet_AllocPacket(512);
-    if (!game->packet) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_AllocPacket Error: %s", SDLNet_GetError());
-        return 0;
-    }
-    SDL_Log("UDP socket opened on port %d.", SERVER_PORT);
+    if (!game->packet) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_AllocPacket Error: %s", SDLNet_GetError()); return 0; }
+
+    game->packet = SDLNet_AllocPacket(512);
+    if (!game->packet) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_AllocPacket Error: %s", SDLNet_GetError()); return 0;}
 
     for (int i = 0; i < MAX_ANIMALS; i++) {
         game->players[i] = createCharacter(game->renderer, i);
@@ -136,16 +100,13 @@ int initiate(Game *game) {
             return 0;
         }
     }
-    SDL_Log("Characters created.");
 
     game->waitingText = createText(game->renderer, 255, 255, 255, game->font, "Waiting for players...", SCREEN_WIDTH / 2 - 255, SCREEN_HEIGHT / 2 - 25);
     game->joinedText = createText(game->renderer, 255, 255, 255, game->font, "Player requirements met - Starting Game", SCREEN_WIDTH / 2 - 255, SCREEN_HEIGHT / 2 - 25);
-    SDL_Log("Text objects created.");
 
     game->state = MAIN;
     game->numPlayers = 0;
 
-    SDL_Log("Initialization completed successfully.");
     return 1;
 }
 
@@ -171,7 +132,7 @@ void run(Game *game) {
                     memcpy(&clientData, game->packet->data, sizeof(ClientData));
                     lastClientData = clientData;
                     executeCommand(game, &clientData);
-                    memset(&clientData, 0, sizeof(clientData));
+                    memset(&clientData, 0, sizeof(ClientData));
                 }
 
                 for (int i = 0; i < game->numBullets; i++) {
@@ -179,22 +140,26 @@ void run(Game *game) {
                     moveBullet(game->bullets[i]);
                     drawBullet(game->bullets[i], game->renderer);
                 }
+
                 for (int b = 0; b < game->numBullets; ) {
                     Bullet* bullet = game->bullets[b];
+                    if (!bullet || bullet->whoShot < 0 || bullet->whoShot >= MAX_ANIMALS) { b++; continue;}
+
                     bool hit = false;
                     for (int p = 0; p < MAX_ANIMALS; p++) {
-                        if (p != bullet->whoShot && checkCollisionCharacterBullet(game->players[p], bullet)) {
-                            decreaseHealth(game->players[p]);
+                        Character* target = game->players[p];
+                        if (p != bullet->whoShot && target && getPlayerHP(target) > 0 && checkCollisionCharacterBullet(target, bullet)) {
+                            decreaseHealth(target);
                             hit = true;
                             break;
                         }
                     }
-                    if (hit || SDL_GetTicks() - getBulletBornTime(bullet) > BULLET_LIFETIME || checkCollisionBulletWall(bullet, walls, MAX_WALLS)) {
+
+                    if (hit || SDL_GetTicks() - getBulletBornTime(bullet) > BULLET_LIFETIME ||
+                        checkCollisionBulletWall(bullet, walls, MAX_WALLS)) {
                         destroyBullet(bullet);
                         game->bullets[b] = game->bullets[--game->numBullets];
-                    } else {
-                        b++;
-                    }
+                    } else b++;
                 }
 
                 sendGameData(game, lastClientData);
@@ -237,18 +202,40 @@ void run(Game *game) {
     }
 }
 
-void acceptClients(Game *game, ClientData clientData) {
-    while (game->numPlayers < MAX_ANIMALS) {
-        if (SDLNet_UDP_Recv(game->socket, game->packet) == 1) {
-            addClient(game->packet->address, game->serverAddress, &game->numPlayers);
-            sendGameData(game, clientData);
-        } else break;
+void executeCommand(Game *game, ClientData *clientData) {
+    if (!clientData || clientData->playerNumber < 0 || clientData->playerNumber >= MAX_ANIMALS) return;
+
+    game->slotsTaken[clientData->playerNumber] = 1;
+    Character *player = game->players[clientData->playerNumber];
+    if (!player) return;
+
+    setPosition(player, clientData->animals.x, clientData->animals.y);
+
+    if (clientData->command[1] == UP && clientData->command[6] != BLOCKED) turnUp(player);
+    if (clientData->command[2] == DOWN && clientData->command[6] != BLOCKED) turnDown(player);
+    if (clientData->command[3] == LEFT && clientData->command[6] != BLOCKED) turnLeft(player);
+    if (clientData->command[4] == RIGHT && clientData->command[6] != BLOCKED) turnRight(player);
+
+    if (clientData->command[5] == FIRE && game->numBullets < MAX_BULLETS) {
+        Bullet *b = createBullet(
+            game->renderer,
+            clientData->bulletStartX, clientData->bulletStartY,
+            clientData->bulletDx, clientData->bulletDy,
+            clientData->playerNumber
+        );
+
+        if (b) {
+            b->dx = clientData->bulletDx;
+            b->dy = clientData->bulletDy;
+            game->bullets[game->numBullets++] = b;
+            game->fire = 1;
+        }
     }
 }
 
 void renderCharacters(Game *game) {
     for (int i = 0; i < MAX_ANIMALS; i++) {
-        if (game->slotsTaken[i]) {
+        if (game->slotsTaken[i] && game->players[i]) {
             renderCharacter(game->players[i], game->renderer);
             healthBar(game->players[i], game->renderer);
         }
@@ -259,33 +246,6 @@ void addClient(IPaddress address, IPaddress clients[], int *numClients) {
     for (int i = 0; i < *numClients; i++)
         if (address.host == clients[i].host && address.port == clients[i].port) return;
     clients[(*numClients)++] = address;
-}
-
-void executeCommand(Game *game, ClientData *clientData) {
-    game->slotsTaken[clientData->playerNumber] = 1;
-    Character *player = game->players[clientData->playerNumber];
-
-    setPosition(player, clientData->animals.x, clientData->animals.y);
-    if (clientData->command[1] == UP && clientData->command[6] != BLOCKED) turnUp(player);
-    if (clientData->command[2] == DOWN && clientData->command[6] != BLOCKED) turnDown(player);
-    if (clientData->command[3] == LEFT && clientData->command[6] != BLOCKED) turnLeft(player);
-    if (clientData->command[4] == RIGHT && clientData->command[6] != BLOCKED) turnRight(player);
-
-    if (clientData->command[5] == FIRE) {
-        game->bullets[game->numBullets] = createBullet(
-            game->renderer,
-            clientData->bulletStartX, clientData->bulletStartY,
-            clientData->bulletDx, clientData->bulletDy,
-            clientData->playerNumber
-        );
-
-        if (game->bullets[game->numBullets]) {
-            game->bullets[game->numBullets]->dx = clientData->bulletDx;
-            game->bullets[game->numBullets]->dy = clientData->bulletDy;
-            game->numBullets++;
-            game->fire = 1;
-        }
-    }
 }
 
 void characterSendData(Character *character, Animal *animal) {
@@ -301,6 +261,7 @@ void sendGameData(Game *game, ClientData clientData) {
     ServerData server_data = {0};
     server_data.gameState = game->state;
     server_data.numberOfPlayers = game->numPlayers;
+
     for (int i = 0; i < MAX_ANIMALS; i++) {
         if (getPlayerHP(game->players[i]) <= 0) game->slotsTaken[i] = 0;
         server_data.slotsTaken[i] = game->slotsTaken[i];
@@ -331,10 +292,13 @@ void close(Game *game) {
     for (int i = 0; i < game->numBullets; i++) if (game->bullets[i]) destroyBullet(game->bullets[i]);
 
     destroyText(game->waitingText);
+    destroyText(game->joinedText);
     TTF_CloseFont(game->font);
 
     SDL_DestroyRenderer(game->renderer);
     SDL_DestroyWindow(game->window);
+    SDL_DestroyTexture(game->background);
+
     SDLNet_FreePacket(game->packet);
     SDLNet_UDP_Close(game->socket);
 

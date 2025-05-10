@@ -119,7 +119,7 @@ bool isValidPosition(float x, float y)
     if (tileX < 0 || tileX >= 14 || tileY < 0 || tileY >= 8) return false;
     if (mapData[tileY][tileX] == 1) return false;
 
-    for (int i = 0; i < 23; i++)
+    for (int i = 0; i < MAX_WALLS; i++)
         if (x + CHARACTER_WIDTH > walls[i].x_min && x < walls[i].x_max && y + CHARACTER_HEIGHT > walls[i].y_min && y < walls[i].y_max) return false;
 
     return true;
