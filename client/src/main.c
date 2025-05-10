@@ -181,8 +181,8 @@ bool initNetwork() {
     clientSocket = SDLNet_UDP_Open(0);
     if (!clientSocket) { SDL_Log("SDLNet_UDP_Open error: %s", SDLNet_GetError()); return false; }
 
-    sendPacket = SDLNet_AllocPacket(512);
-    receivePacket = SDLNet_AllocPacket(512);
+    sendPacket = SDLNet_AllocPacket(sizeof(ClientData));
+    receivePacket = SDLNet_AllocPacket(sizeof(ServerData));
     if (!sendPacket || !receivePacket) { SDL_Log("SDLNet_AllocPacket error: %s", SDLNet_GetError()); return false; }
 
     return true;

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
@@ -22,11 +23,8 @@ struct Character {
 };
 
 float getX(Character* character) { return character->x; }
-
 float getY(Character* character) { return character->y; }
-
 int getcharacterID(Character* character) { return character->characterID; }
-
 float getSpeed(Character* character) { return character->speed; }
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
@@ -58,21 +56,23 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
         default: free(character); return NULL;
     }
 
-    char path[100];
+    char path[256];
     sprintf(path, "lib/assets/images/character/animal/%s/%s_full_spritesheet.png", characterType, characterType);
     character->fullSheet = loadCharacterTexture(renderer, path);
-
     if (!character->fullSheet) { destroyCharacter(character); return NULL; }
+
+    character->walkDown  = character->fullSheet;
+    character->walkLeft  = character->fullSheet;
+    character->walkRight = character->fullSheet;
+    character->walkUp    = character->fullSheet;
+    character->idleFront = character->fullSheet;
 
     return character;
 }
 
-void turnUp(Character* character) { character->state = WALKING_UP; }
-
-void turnDown(Character* character) { character->state = WALKING_DOWN; }
-
-void turnLeft(Character* character) { character->state = WALKING_LEFT; }
-
+void turnUp(Character* character)    { character->state = WALKING_UP; }
+void turnDown(Character* character)  { character->state = WALKING_DOWN; }
+void turnLeft(Character* character)  { character->state = WALKING_LEFT; }
 void turnRight(Character* character) { character->state = WALKING_RIGHT; }
 
 int getPlayerHP(Character* character) { return character->health; }
@@ -101,7 +101,9 @@ void updateCharacterAnimation(Character* character, Uint32 deltaTime) {
     if (isMoving && currentTime - character->lastFrameTime >= FRAME_DELAY) {
         character->frame = (character->frame + 1) % FRAME_COUNT;
         character->lastFrameTime = currentTime;
-    } else if (!isMoving) character->frame = 0; // stå still i mittenrutan (mitten av 3 frames)
+    } else if (!isMoving) {
+        character->frame = 0;
+    }
 }
 
 void setPosition(Character* character, float x, float y) {
@@ -109,65 +111,70 @@ void setPosition(Character* character, float x, float y) {
     character->y = y;
 }
 
-void setDirection(Character* character) {   character->state = IDLE; }
+void setDirection(Character* character) { character->state = IDLE; }
 
 void renderCharacter(Character* character, SDL_Renderer* renderer) {
+    if (!character || !renderer || !character->fullSheet) return;
+
     SDL_Rect srcRect = { character->frame * CHARACTER_WIDTH, 0, CHARACTER_WIDTH, CHARACTER_HEIGHT };
-    SDL_Rect destRect = { character->x, character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    SDL_Rect destRect = { (int)character->x, (int)character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
 
     switch (character->state) {
-        case WALKING_DOWN: SDL_RenderCopy(renderer, character->walkDown, &srcRect, &destRect); break;
-        case WALKING_UP: SDL_RenderCopy(renderer, character->walkUp, &srcRect, &destRect); break;
-        case WALKING_LEFT: SDL_RenderCopy(renderer, character->walkLeft, &srcRect, &destRect); break;
+        case WALKING_DOWN:  SDL_RenderCopy(renderer, character->walkDown, &srcRect, &destRect); break;
+        case WALKING_UP:    SDL_RenderCopy(renderer, character->walkUp, &srcRect, &destRect); break;
+        case WALKING_LEFT:  SDL_RenderCopy(renderer, character->walkLeft, &srcRect, &destRect); break;
         case WALKING_RIGHT: SDL_RenderCopy(renderer, character->walkRight, &srcRect, &destRect); break;
         case IDLE:
-        default: SDL_RenderCopy(renderer, character->idleFront, NULL, &destRect); break;
+        default:            SDL_RenderCopy(renderer, character->idleFront, &srcRect, &destRect); break;
     }
-
-    SDL_RenderCopy(renderer, character->fullSheet, &srcRect, &destRect);
 }
 
 void healthBar(Character* character, SDL_Renderer* renderer) {
-    SDL_Rect healthRect = { character->x, character->y - 10, (CHARACTER_WIDTH * character->health) / MAX_HEALTH, 5 };
+    if (!character || !renderer) return;
+    SDL_Rect healthRect = { (int)character->x, (int)character->y - 10,
+                            (CHARACTER_WIDTH * character->health) / MAX_HEALTH, 5 };
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &healthRect);
 }
 
 int howManyPlayersAlive(Character* players[], int num_players) {
     int aliveCount = 0;
-    for (int i = 0; i < num_players; i++) if (isCharacterAlive(players[i])) aliveCount++;
+    for (int i = 0; i < num_players; i++) {
+        if (players[i] && isCharacterAlive(players[i])) aliveCount++;
+    }
     return aliveCount;
 }
 
 bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
-    SDL_Rect characterRect = { character->x, character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    if (!character || !bullet) return false;
+    SDL_Rect characterRect = { (int)character->x, (int)character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
     SDL_Rect bulletRect = getBulletRect(bullet);
-
     return SDL_HasIntersection(&characterRect, &bulletRect);
 }
 
 void setBulletStartPosition(Character* character, float* startX, float* startY) {
+    if (!character || !startX || !startY) return;
     *startX = character->x + CHARACTER_WIDTH / 2;
     *startY = character->y + CHARACTER_HEIGHT / 2;
 }
 
 void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount) {
+    if (!character || (!walls && wallCount > 0)) return;
+
     float prevX = character->x;
     float prevY = character->y;
 
     character->x += moveX;
     character->y += moveY;
 
-    bool collision = false;
     for (int i = 0; i < wallCount; i++) {
         if (character->x + CHARACTER_WIDTH > walls[i].x_min &&
             character->x < walls[i].x_max &&
             character->y + CHARACTER_HEIGHT > walls[i].y_min &&
             character->y < walls[i].y_max) {
-            collision = true;
+            character->x = prevX;
+            character->y = prevY;
             break;
         }
     }
-
-    if (collision) { character->x = prevX; character->y = prevY; }
 }
