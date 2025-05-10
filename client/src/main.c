@@ -478,10 +478,10 @@ char* connectionScreen(SDL_Renderer* renderer) {
     static char ip[64] = "";
     bool typingActive = false;
 
-    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/images/objects/ui/ip.png");
+    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/images/ui/ip.png");
     SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/images/objects/nature/grass.png");
 
-    TTF_Font* font = TTF_OpenFont("lib/assets/fonts/PressStart2P.ttf", 16);
+    TTF_Font* font = TTF_OpenFont("lib/assets/fonts/PressStart2P-Regular.ttf", 16);
     if (!font) { SDL_Log("Failed to load font: %s", TTF_GetError()); return NULL; }
 
     SDL_Rect menuRect = {
@@ -636,8 +636,8 @@ char* connectionScreen(SDL_Renderer* renderer) {
 }
 
 void waitingRoom(SDL_Renderer* renderer) {
-    SDL_Texture* bgTexture = loadTexture(renderer, "lib/assets/startPage/waitingRoom.png");
-    SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/grass.png");
+    SDL_Texture* bgTexture = loadTexture(renderer, "lib/assets/images/ui/waitingRoom.png");
+    SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/images/objects/nature/grass.png");
 
     SDL_Event event;
 
@@ -706,8 +706,8 @@ void waitingRoom(SDL_Renderer* renderer) {
 }
 
 int mainMenu(SDL_Renderer* renderer) {
-    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/startPage/startMenyn.png");
-    SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/grass.png");
+    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/images/ui/startMenyn.png");
+    SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/images/objects/nature/grass.png");
 
     SDL_Event event;
     int selection = -1;
@@ -786,8 +786,8 @@ int mainMenu(SDL_Renderer* renderer) {
 
 
 int selectCharacter(SDL_Renderer* renderer) {
-    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/startPage/selChar.png");
-    SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/grass.png");
+    SDL_Texture* menuTexture = loadTexture(renderer, "lib/assets/images/ui/selChar.png");
+    SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/images/objects/nature/grass.png");
 
     SDL_Event event;
     int selected = -1;
