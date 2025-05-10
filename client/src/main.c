@@ -171,7 +171,7 @@ void initSDL() {
 }
 
 bool initNetwork() {
-    if (SDLNet_Init() != 0) { SDL_Log("SDLNet_Init error: %s", SDLNet_GetError()); return false; }  }
+    if (SDLNet_Init() != 0) { SDL_Log("SDLNet_Init error: %s", SDLNet_GetError()); return false; }
 
     clientSocket = SDLNet_UDP_Open(0);
     if (!clientSocket) { SDL_Log("SDLNet_UDP_Open error: %s", SDLNet_GetError()); return false; }
