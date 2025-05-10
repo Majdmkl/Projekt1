@@ -29,12 +29,12 @@ void cleanup(SDL_Window* window, SDL_Renderer* renderer);
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath);
 Character* createSelectedCharacter(SDL_Renderer* renderer, int selected);
 
-UDPsocket clientSocket;
-UDPpacket *sendPacket;
-UDPpacket *receivePacket;
-IPaddress serverIP;
+UDPsocket clientSocket = NULL;
+UDPpacket *sendPacket = NULL;
+UDPpacket *receivePacket = NULL;
+IPaddress serverIP = {};
 int playerID = -1;
-ServerData serverData;
+ServerData serverData = {};
 bool connected = false;
 
 int main(int argc, char* argv[]) {
@@ -126,6 +126,7 @@ int main(int argc, char* argv[]) {
     SDLNet_UDP_Send(clientSocket, -1, sendPacket);
 
     Uint32 startTime = SDL_GetTicks();
+    Uint32 lastTimeSent = startTime;
     while (SDL_GetTicks() - startTime < 10000) {
         if (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
             memcpy(&serverData, receivePacket->data, sizeof(ServerData));
@@ -140,7 +141,11 @@ int main(int argc, char* argv[]) {
             }
 
             if (connected) break;
-        } else SDLNet_UDP_Send(clientSocket, -1, sendPacket);  // resend connect request
+        }
+
+        Uint32 now = SDL_GetTicks();
+        if (now - lastTimeSent > 500)
+            if (sendPacket) { SDLNet_UDP_Send(clientSocket, -1, sendPacket); lastTimeSent = now; }
 
         SDL_Delay(100);
     }
@@ -184,9 +189,9 @@ bool initNetwork() {
 }
 
 void cleanupNetwork() {
-    if (sendPacket) SDLNet_FreePacket(sendPacket);
-    if (receivePacket) SDLNet_FreePacket(receivePacket);
-    if (clientSocket) SDLNet_UDP_Close(clientSocket);
+    if (sendPacket) { SDLNet_FreePacket(sendPacket); sendPacket = NULL; }
+    if (receivePacket) { SDLNet_FreePacket(receivePacket); receivePacket = NULL; }
+    if (clientSocket) { SDLNet_UDP_Close(clientSocket); clientSocket = NULL; }
     SDLNet_Quit();
 }
 
@@ -262,7 +267,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     MAP* gameMap = createMap(renderer);
     if (!gameMap) { SDL_Log("Failed to create map"); return; }
 
-    Bullet* bullets[MAX_BULLETS];
+    Bullet* bullets[MAX_BULLETS] = {NULL};
     int bulletCount = 0;
 
     Character* otherPlayers[MAX_ANIMALS] = {NULL};
