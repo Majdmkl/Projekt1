@@ -19,26 +19,26 @@ This tutorial assumes that you have installed and are familiar with running a C 
 To summarize, the tutorial assumes that:
 
 1. you are using either Windows (10 or 11), Ubuntu Linux, or Macos.
-2. You have installed GNU C compiler (GCC) using the method described in the tutorial for your operating system. 
+2. You have installed GNU C compiler (GCC) using the method described in the tutorial for your operating system.
 3. You are able able to successfully compile the a program using make.
 
 A program with SDL libraries will not only require you to include and call the functions in the SDL library but also to provide the runtime libraries during the _linking_ process. The following sections describe how to install a SDL library (2 or 3) and to tell the compiler to use it and link your program against it, to create the executable that can be run on your machine.
 
 ## Installing SDL2 Libraries
-SDL contains various libraries based on what type of functions are called. For example, the _SDL2\_mixer_ library contains functions to manage sound when creating games, while _SDL2\_ttf_ library helps in creating fonts. The libraries are separated based on their functions but also to ensure that only the required parts of the libraries are used for building the executable. The size of the library will have a influence on the size of the executable cerated.
+
+SDL contains various libraries based on what type of functions are called. For example, the _SDL2_mixer_ library contains functions to manage sound when creating games, while _SDL2_ttf_ library helps in creating fonts. The libraries are separated based on their functions but also to ensure that only the required parts of the libraries are used for building the executable. The size of the library will have a influence on the size of the executable cerated.
 
 ### SDL2 on Ubuntu Linux
 
 On Ubuntu linux, use the following command in the terminal to install the required libraries:
 
     $ sudo apt install -y libsdl2-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0 libsdl2-ttf-2.0-0 libsdl2-net-2.0-0 libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-net-dev libsdl2-mixer-dev
-  
+
 ### SDL2 on Macos
 
 On mac with _homebrew_ installed please use the following command in terminal to install the libraries:
 
     $ brew install sdl2 sdl2_mixer sdl2_image sdl2_ttf sdl2_net
-
 
 ### SDL2 on Windows
 
@@ -48,38 +48,40 @@ On widows with Msys2, please open the msys2 console and issue the following comm
 
 Answer _Y_ to proceed with the installation.
 
-
 ## Installing SDL3 Libraries
-SDL contains various libraries based on what type of functions are called. For example, the _SDL2\_mixer_ library contains functions to manage sound when creating games, while _SDL2\_ttf_ library helps in creating fonts. The libraries are separated based on their functions but also to ensure that only the required parts of the libraries are used for building the executable. The size of the library will have a influence on the size of the executable cerated.
 
-IMPORTANT  
+SDL contains various libraries based on what type of functions are called. For example, the _SDL2_mixer_ library contains functions to manage sound when creating games, while _SDL2_ttf_ library helps in creating fonts. The libraries are separated based on their functions but also to ensure that only the required parts of the libraries are used for building the executable. The size of the library will have a influence on the size of the executable cerated.
+
+IMPORTANT
 SDL3 is a very new release. As a result, for Ubuntu Linux all will be built from source, and for Windows and Mac libraries like SDL_mixer and SDL_net need to be built from source.
 
 ### SDL3 on Ubuntu Linux
 
-SDL3 is a very new release and has still not entered into package management in Ubuntu Linux. It will be installed by compiling the same. 
+SDL3 is a very new release and has still not entered into package management in Ubuntu Linux. It will be installed by compiling the same.
 
 On Ubuntu linux, use the following command in the terminal to install the required libraries:
 
 #### 1. Install CMake
+
     $ sudo apt-get update
     $ sudo apt-get install build-essential
     $ sudo apt-get install cmake
-    
 
 #### 2. Download SDL3 from here: [SDL3-3.2.8.tar.gz](https://github.com/libsdl-org/SDL/releases/download/release-3.2.8/SDL3-3.2.8.tar.gz)
 
 #### 3. Extract the archive and compile
+
 Open a terminal and go to Downloads folder
-    $ cd ~/Downloads
+$ cd ~/Downloads
 
 Extract the downloaded file.
-    $ tar -xf SDL3-3.2.4.tar.gz
+$ tar -xf SDL3-3.2.4.tar.gz
 
- Go to the extracted archive : for example I have the archive in the downloads directory : 
-    $ cd ~/Downloads/SDL3-3.2.4 
+Go to the extracted archive : for example I have the archive in the downloads directory :
+$ cd ~/Downloads/SDL3-3.2.4
 
 #### 4. Compile SDL3 and install
+
 Issue the following commands:
 
 ```bash
@@ -92,6 +94,7 @@ type g for generate
 make
 sudo make install
 ```
+
 This will install _sdl3_ into the standard library on your distribution.
 
 ### SDL3 on Macos
@@ -156,11 +159,11 @@ Now, you should hopefully be able to include and link the new library in the sam
 
 ## Running the sdl hello program
 
-In order to run the hello program using Makefile, rename the right makefile for you system. For example, on a Windows computer, rename _Makefile\_win_ to _Makefile_. 
+In order to run the hello program using Makefile, rename the right makefile for you system. For example, on a Windows computer, rename _Makefile_win_ to _Makefile_.
 
-Ensure the Makefile have the correct active lines of code for your version of SDL (2 or 3). 
+Ensure the Makefile have the correct active lines of code for your version of SDL (2 or 3).
 
-Open a terminal and point the working directory to the project folder. Refer to the [_c\_programming\_intro_](https://github.com/Makerspace-KTH/c_programing_intro#4-launch-and-run-a-c-program) for details for your operating system.
+Open a terminal and point the working directory to the project folder. Refer to the [_c_programming_intro_](https://github.com/Makerspace-KTH/c_programing_intro#4-launch-and-run-a-c-program) for details for your operating system.
 
 Run the makefile based on your OS to build the _hello_ executable
 
@@ -174,7 +177,7 @@ Linux / macos:
 
 Execute the binary _hello_
 
-    $ ./hello 
+    $ ./hello
 
 or
 
@@ -182,7 +185,7 @@ or
 
 Expected output:
 
-![Expected Output](contents/expected-output.png?raw=true "Expected output")
+![Expected Output](contents/expected-output.png?raw=true 'Expected output')
 
 Run
 
