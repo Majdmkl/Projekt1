@@ -87,10 +87,10 @@ int initiate(Game *game) {
     game->socket = SDLNet_UDP_Open(SERVER_PORT);
     if (!game->socket) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_UDP_Open Error: %s", SDLNet_GetError()); return 0; }
 
-    game->packet = SDLNet_AllocPacket(512);
+    game->packet = SDLNet_AllocPacket(sizeof(ServerData));
     if (!game->packet) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_AllocPacket Error: %s", SDLNet_GetError()); return 0; }
 
-    game->packet = SDLNet_AllocPacket(512);
+    game->packet = SDLNet_AllocPacket(sizeof(ServerData));
     if (!game->packet) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_AllocPacket Error: %s", SDLNet_GetError()); return 0;}
 
     for (int i = 0; i < MAX_ANIMALS; i++) {

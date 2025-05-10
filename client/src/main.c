@@ -786,5 +786,4 @@ void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
     SDL_Quit();
     IMG_Quit();
     TTF_Quit();
-    SDLNet_Quit();
 }
