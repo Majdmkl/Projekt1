@@ -171,24 +171,14 @@ void initSDL() {
 }
 
 bool initNetwork() {
-    if (SDLNet_Init() != 0) {
-        SDL_Log("SDLNet_Init error: %s", SDLNet_GetError());
-        return false;
-    }
+    if (SDLNet_Init() != 0) { SDL_Log("SDLNet_Init error: %s", SDLNet_GetError()); return false; }  }
 
-    clientSocket = SDLNet_UDP_Open(0); // 0 means any available port
-    if (!clientSocket) {
-        SDL_Log("SDLNet_UDP_Open error: %s", SDLNet_GetError());
-        return false;
-    }
+    clientSocket = SDLNet_UDP_Open(0);
+    if (!clientSocket) { SDL_Log("SDLNet_UDP_Open error: %s", SDLNet_GetError()); return false; }
 
     sendPacket = SDLNet_AllocPacket(512);
     receivePacket = SDLNet_AllocPacket(512);
-
-    if (!sendPacket || !receivePacket) {
-        SDL_Log("SDLNet_AllocPacket error: %s", SDLNet_GetError());
-        return false;
-    }
+    if (!sendPacket || !receivePacket) { SDL_Log("SDLNet_AllocPacket error: %s", SDLNet_GetError()); return false; }
 
     return true;
 }
@@ -205,9 +195,7 @@ bool connectToServer(const char* serverIP_str) {
         SDL_Log("SDLNet_ResolveHost error: %s", SDLNet_GetError());
         return false;
     }
-
     sendPacket->address = serverIP;
-
     return true;
 }
 
@@ -236,8 +224,8 @@ void sendPlayerData(Character* player, int action) {
             float ddy = mouseY - clientData.bulletStartY;
             float mag = sqrtf(ddx * ddx + ddy * ddy);
             if (mag > 0.0f) {
-                clientData.bulletDx = ddx / mag * 10.0f; // normalized to speed 10
-                clientData.bulletDy = ddy / mag * 10.0f;
+                clientData.bulletDx = ddx / mag * MOVE_SPEED;
+                clientData.bulletDy = ddy / mag * MOVE_SPEED;
             } else {
                 clientData.bulletDx = 0;
                 clientData.bulletDy = 0;
@@ -250,13 +238,9 @@ void sendPlayerData(Character* player, int action) {
     SDLNet_UDP_Send(clientSocket, -1, sendPacket);
 }
 
-SDL_Window* createWindow() {
-    return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
-}
+SDL_Window* createWindow() {return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); }
 
-SDL_Renderer* createRenderer(SDL_Window* window) {
-    return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-}
+SDL_Renderer* createRenderer(SDL_Window* window) { return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); }
 
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
@@ -287,7 +271,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     SDL_Event event;
     bool running = true;
     bool spectating = false;
-    float deathX = 0, deathY = 0;  // record death position
+    float deathX = 0, deathY = 0;
     Uint32 lastNetworkUpdate = 0;
 
     for (int i = 0; i < MAX_ANIMALS; i++) {
@@ -316,28 +300,28 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         const Uint8* keys = SDL_GetKeyboardState(NULL);
         float moveX = 0, moveY = 0;
-        int actionSent = 0;
+        bool actionSent = 0;
 
         if (!spectating) {
             if (keys[SDL_SCANCODE_W]) {
                 moveY -= MOVE_SPEED;
                 turnUp(player);
-                if (!actionSent) { sendPlayerData(player, 1); actionSent = 1; } // UP
+                if (!actionSent) { sendPlayerData(player, 1); actionSent = true; } // UP
             }
             if (keys[SDL_SCANCODE_S]) {
                 moveY += MOVE_SPEED;
                 turnDown(player);
-                if (!actionSent) { sendPlayerData(player, 2); actionSent = 1; } // DOWN
+                if (!actionSent) { sendPlayerData(player, 2); actionSent = true; } // DOWN
             }
             if (keys[SDL_SCANCODE_A]) {
                 moveX -= MOVE_SPEED;
                 turnLeft(player);
-                if (!actionSent) { sendPlayerData(player, 3); actionSent = 1; } // LEFT
+                if (!actionSent) { sendPlayerData(player, 3); actionSent = true; } // LEFT
             }
             if (keys[SDL_SCANCODE_D]) {
                 moveX += MOVE_SPEED;
                 turnRight(player);
-                if (!actionSent) { sendPlayerData(player, 4); actionSent = 1; } // RIGHT
+                if (!actionSent) { sendPlayerData(player, 4); actionSent = true; } // RIGHT
             }
         }
 
@@ -350,24 +334,22 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         float prevPlayerX = getX(player);
         float prevPlayerY = getY(player);
         moveCharacter(player, moveX, moveY, walls, MAX_WALLS);
+
         for (int i = 0; i < MAX_ANIMALS; i++) {
             if (i != playerID && playerActive[i] && otherPlayers[i]) {
                 SDL_Rect pRect = { getX(player), getY(player), CHARACTER_WIDTH, CHARACTER_HEIGHT };
                 SDL_Rect oRect = { getX(otherPlayers[i]), getY(otherPlayers[i]), CHARACTER_WIDTH, CHARACTER_HEIGHT };
-                if (SDL_HasIntersection(&pRect, &oRect)) {
-                    setPosition(player, prevPlayerX, prevPlayerY);
-                    break;
-                }
+                if (SDL_HasIntersection(&pRect, &oRect)) { setPosition(player, prevPlayerX, prevPlayerY); break; }
             }
         }
         updateCharacterAnimation(player, SDL_GetTicks());
 
         Uint32 now = SDL_GetTicks();
         if (now - lastNetworkUpdate > 16) { // ~60fps network tick
-            int gotData = 0;
+            bool gotData = false;
             while (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
                 memcpy(&serverData, receivePacket->data, sizeof(ServerData));
-                gotData = 1;
+                gotData = true;
             }
             if (gotData) {
                 for (int i = 0; i < MAX_ANIMALS; i++) {
@@ -382,13 +364,10 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                             float newX = serverData.animals[i].x;
                             float newY = serverData.animals[i].y;
                             float dx = newX - oldX, dy = newY - oldY;
-                            if (fabsf(dx) < 0.1f && fabsf(dy) < 0.1f) {
-                                setDirection(otherPlayers[i]);
-                            } else if (fabsf(dx) > fabsf(dy)) {
-                                (dx > 0 ? turnRight : turnLeft)(otherPlayers[i]);
-                            } else {
-                                (dy > 0 ? turnDown : turnUp)(otherPlayers[i]);
-                            }
+                            if (fabsf(dx) < 0.1f && fabsf(dy) < 0.1f) setDirection(otherPlayers[i]);
+                            else if (fabsf(dx) > fabsf(dy))(dx > 0 ? turnRight : turnLeft)(otherPlayers[i]);
+                            else (dy > 0 ? turnDown : turnUp)(otherPlayers[i]);
+
                             setPosition(otherPlayers[i], newX, newY);
                             updateCharacterAnimation(otherPlayers[i], SDL_GetTicks());
                             int targetHP = serverData.animals[i].health;
@@ -423,14 +402,10 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
             if (!spectating) sendPlayerData(player, 0);
 
-
             lastNetworkUpdate = now;
         }
-        for (int i = 0; i < MAX_ANIMALS; ++i) {
-            if (i != playerID && playerActive[i] && otherPlayers[i]) {
-                updateCharacterAnimation(otherPlayers[i], now);
-            }
-        }
+        for (int i = 0; i < MAX_ANIMALS; ++i)
+            if (i != playerID && playerActive[i] && otherPlayers[i]) updateCharacterAnimation(otherPlayers[i], now);
 
         for (int i = 0; i < bulletCount; ) {
             Bullet* b = bullets[i];
@@ -438,10 +413,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 checkCollisionBulletWall(b, walls, MAX_WALLS)) {
                 destroyBullet(b);
                 bullets[i] = bullets[--bulletCount];
-            } else {
-                moveBullet(b);
-                ++i;
-            }
+            } else { moveBullet(b); ++i; }
         }
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -484,23 +456,9 @@ char* connectionScreen(SDL_Renderer* renderer) {
     TTF_Font* font = TTF_OpenFont("lib/assets/fonts/PressStart2P-Regular.ttf", 16);
     if (!font) { SDL_Log("Failed to load font: %s", TTF_GetError()); return NULL; }
 
-    SDL_Rect menuRect = {
-        (SCREEN_WIDTH - 800) / 2,
-        (SCREEN_HEIGHT - 900) / 2,
-        800, 900
-    };
-
-    SDL_Rect inputBox = {
-        menuRect.x + 240,
-        menuRect.y + 450,
-        340, 70
-    };
-
-    SDL_Rect closeBtn = {
-        inputBox.x + inputBox.w - 45,
-        inputBox.y + 15,
-        40, 40
-    };
+    SDL_Rect menuRect = { (SCREEN_WIDTH - 800) / 2, (SCREEN_HEIGHT - 900) / 2, 800, 900 };
+    SDL_Rect inputBox = { menuRect.x + 240, menuRect.y + 450, 340, 70 };
+    SDL_Rect closeBtn = { inputBox.x + inputBox.w - 45, inputBox.y + 15, 40, 40 };
 
     SDL_Event event;
     bool running = true;
@@ -513,13 +471,8 @@ char* connectionScreen(SDL_Renderer* renderer) {
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
 
-                if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &inputBox)) {
-                    typingActive = true;
-                    SDL_StartTextInput();
-                } else {
-                    typingActive = false;
-                    SDL_StopTextInput();
-                }
+                if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &inputBox)) { typingActive = true; SDL_StartTextInput(); }
+                else { typingActive = false; SDL_StopTextInput(); }
 
                 if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &closeBtn)) {
                     ip[0] = '\0';
@@ -527,15 +480,9 @@ char* connectionScreen(SDL_Renderer* renderer) {
                     SDL_StopTextInput();
                 }
             }
-
-            else if (typingActive && event.type == SDL_TEXTINPUT) {
-                strncat(ip, event.text.text, sizeof(ip) - strlen(ip) - 1);
-            }
-
+            else if (typingActive && event.type == SDL_TEXTINPUT) strncat(ip, event.text.text, sizeof(ip) - strlen(ip) - 1);
             else if (typingActive && event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_BACKSPACE && strlen(ip) > 0) {
-                    ip[strlen(ip) - 1] = '\0';
-                }
+                if (event.key.keysym.sym == SDLK_BACKSPACE && strlen(ip) > 0) ip[strlen(ip) - 1] = '\0';
                 if (event.key.keysym.sym == SDLK_RETURN) {
                     SDL_StopTextInput();
                     SDL_DestroyTexture(menuTexture);
@@ -574,12 +521,7 @@ char* connectionScreen(SDL_Renderer* renderer) {
         // 4. Tjock outline runt meny
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         for (int i = 0; i < 4; i++) {
-            SDL_Rect outline = {
-                menuRect.x - i,
-                menuRect.y - i,
-                menuRect.w + 2 * i,
-                menuRect.h + 2 * i
-            };
+            SDL_Rect outline = { menuRect.x - i, menuRect.y - i, menuRect.w + 2 * i, menuRect.h + 2 * i };
             SDL_RenderDrawRect(renderer, &outline);
         }
 
@@ -613,12 +555,7 @@ char* connectionScreen(SDL_Renderer* renderer) {
             SDL_Surface* textSurface = TTF_RenderText_Blended(font, ip, textColor);
             SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
 
-            SDL_Rect textRect = {
-                inputBox.x + 10,
-                inputBox.y + (inputBox.h - textSurface->h) / 2,
-                textSurface->w,
-                textSurface->h
-            };
+            SDL_Rect textRect = { inputBox.x + 10, inputBox.y + (inputBox.h - textSurface->h) / 2, textSurface->w, textSurface->h };
 
             SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
             SDL_FreeSurface(textSurface);
@@ -641,22 +578,12 @@ void waitingRoom(SDL_Renderer* renderer) {
 
     SDL_Event event;
 
-    SDL_Rect menuRect = {
-        (SCREEN_WIDTH - 700) / 2,
-        (SCREEN_HEIGHT - 900) / 2,
-        690, 910
-    };
-
-    SDL_Rect continueBtn = {
-        menuRect.x + 170,
-        menuRect.y + 765,
-        390, 85
-    };
+    SDL_Rect menuRect = {(SCREEN_WIDTH - 700) / 2, (SCREEN_HEIGHT - 900) / 2, 690, 910};
+    SDL_Rect continueBtn = { menuRect.x + 170, menuRect.y + 765, 390, 85 };
 
     while (1) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) return;
-
             if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                 int x = event.button.x;
                 int y = event.button.y;
@@ -688,12 +615,7 @@ void waitingRoom(SDL_Renderer* renderer) {
         // Svart tjock outline
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         for (int i = 0; i < 4; i++) {
-            SDL_Rect outline = {
-                menuRect.x - i,
-                menuRect.y - i,
-                menuRect.w + 2 * i,
-                menuRect.h + 2 * i
-            };
+            SDL_Rect outline = { menuRect.x - i, menuRect.y - i, menuRect.w + 2 * i, menuRect.h + 2 * i };
             SDL_RenderDrawRect(renderer, &outline);
         }
 
@@ -712,11 +634,7 @@ int mainMenu(SDL_Renderer* renderer) {
     SDL_Event event;
     int selection = -1;
 
-    SDL_Rect menuRect = {
-        (SCREEN_WIDTH - 700) / 2,
-        (SCREEN_HEIGHT - 900) / 2,
-        700, 900
-    };
+    SDL_Rect menuRect = { (SCREEN_WIDTH - 700) / 2, (SCREEN_HEIGHT - 900) / 2, 700, 900 };
 
     int menuX = menuRect.x;
     int menuY = menuRect.y;
@@ -735,7 +653,6 @@ int mainMenu(SDL_Renderer* renderer) {
                 if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &startBtn)) selection = 0;
                 else if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &connectBtn)) selection = 1;
                 else if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &quitBtn)) selection = 2;
-
             }
         }
 
@@ -760,15 +677,9 @@ int mainMenu(SDL_Renderer* renderer) {
         int thickness = 4;
 
         for (int i = 0; i < thickness; i++) {
-            SDL_Rect outline = {
-                menuRect.x - i,
-                menuRect.y - i,
-                menuRect.w + 2 * i,
-                menuRect.h + 2 * i
-            };
+            SDL_Rect outline = { menuRect.x - i, menuRect.y - i, menuRect.w + 2 * i, menuRect.h + 2 * i };
             SDL_RenderDrawRect(renderer, &outline);
         }
-
 
         //Rita outlines
         // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);  // Vit färg
@@ -792,11 +703,7 @@ int selectCharacter(SDL_Renderer* renderer) {
     SDL_Event event;
     int selected = -1;
 
-    SDL_Rect menuRect = {
-        (SCREEN_WIDTH - 700) / 2,
-        (SCREEN_HEIGHT - 900) / 2,
-        700, 900
-    };
+    SDL_Rect menuRect = {(SCREEN_WIDTH - 700) / 2, (SCREEN_HEIGHT - 900) / 2, 700, 900};
 
     int menuX = menuRect.x;
     int menuY = menuRect.y;
@@ -860,12 +767,7 @@ int selectCharacter(SDL_Renderer* renderer) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         int thickness = 4;
         for (int i = 0; i < thickness; i++) {
-            SDL_Rect outline = {
-                menuRect.x - i,
-                menuRect.y - i,
-                menuRect.w + 2 * i,
-                menuRect.h + 2 * i
-            };
+            SDL_Rect outline = { menuRect.x - i, menuRect.y - i, menuRect.w + 2 * i, menuRect.h + 2 * i };
             SDL_RenderDrawRect(renderer, &outline);
         }
 
