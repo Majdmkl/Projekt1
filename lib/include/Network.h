@@ -3,7 +3,7 @@
 
 #include "Bullet.h"
 
-#define MIN_PLAYERS 2
+#define MIN_PLAYERS 4
 #define MAX_ANIMALS 6
 #define SERVER_PORT 2000
 
