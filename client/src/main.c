@@ -178,14 +178,8 @@ bool initNetwork() {
 
     sendPacket = SDLNet_AllocPacket(512);
     receivePacket = SDLNet_AllocPacket(512);
-    if (!sendPacket || !receivePacket) {
-        SDL_Log("SDLNet_AllocPacket error: %s", SDLNet_GetError());
-        if (sendPacket) SDLNet_FreePacket(sendPacket);
-        if (receivePacket) SDLNet_FreePacket(receivePacket);
-        SDLNet_UDP_Close(clientSocket);
-        return false;
-    }
-    SDL_Log("Network initialized successfully. sendPacket: %p, receivePacket: %p", (void*)sendPacket, (void*)receivePacket);
+    if (!sendPacket || !receivePacket) { SDL_Log("SDLNet_AllocPacket error: %s", SDLNet_GetError()); return false; }
+
     return true;
 }
 
@@ -197,8 +191,10 @@ void cleanupNetwork() {
 }
 
 bool connectToServer(const char* serverIP_str) {
-    if (!sendPacket) { SDL_Log("sendPacket is NULL"); return false; }
-    if (SDLNet_ResolveHost(&serverIP, serverIP_str, SERVER_PORT) != 0) { SDL_Log("SDLNet_ResolveHost error: %s", SDLNet_GetError()); return false; }
+    if (SDLNet_ResolveHost(&serverIP, serverIP_str, SERVER_PORT) != 0) {
+        SDL_Log("SDLNet_ResolveHost error: %s", SDLNet_GetError());
+        return false;
+    }
     sendPacket->address = serverIP;
     return true;
 }
