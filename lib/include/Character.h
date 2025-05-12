@@ -9,7 +9,7 @@
 #include "Bullet.h"
 #include "Network.h"
 
-#define MOVE_SPEED 5
+#define MOVE_SPEED 3
 #define MAX_HEALTH 100
 #define CHARACTER_WIDTH 64
 #define CHARACTER_HEIGHT 64
