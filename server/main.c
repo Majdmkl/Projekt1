@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <string.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_timer.h>
@@ -15,28 +14,18 @@
 #include "Text.h"
 #include "Map.h"
 
-#define NR_OF_MENUTEXTURES 2
-
-typedef enum { MAIN, SETTINGS, CONFIGURE, INGAME } MenuState;
-
-typedef struct {
-    char textureFiles[NR_OF_MENUTEXTURES][60];
-    SDL_Texture *textures[NR_OF_MENUTEXTURES];
-} MenuTextures;
+typedef enum { MAIN, INGAME } MenuState;
 
 typedef struct {
     TTF_Font *font;
     GameState state;
     ServerData server_data;
     UDPsocket socket;
-    SDL_Rect menuRect;
     UDPpacket *packet;
     SDL_Window *window;
     MenuState menuState;
     SDL_Renderer *renderer;
-    SDL_Rect backgroundRect;
     SDL_Texture *background;
-    MenuTextures *menuTextures;
     Bullet *bullets[MAX_BULLETS];
     Text *waitingText, *joinedText;
     Character *players[MAX_ANIMALS];
@@ -89,9 +78,6 @@ int initiate(Game *game) {
 
     game->packet = SDLNet_AllocPacket(sizeof(ServerData));
     if (!game->packet) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_AllocPacket Error: %s", SDLNet_GetError()); return 0; }
-
-    game->packet = SDLNet_AllocPacket(sizeof(ServerData));
-    if (!game->packet) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_AllocPacket Error: %s", SDLNet_GetError()); return 0;}
 
     for (int i = 0; i < MAX_ANIMALS; i++) {
         game->players[i] = createCharacter(game->renderer, i);
