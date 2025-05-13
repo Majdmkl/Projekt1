@@ -41,7 +41,7 @@ SDL_Texture* mapTexture = NULL;
 int main(int argc, char* argv[]) {
     initSDL();
 
-    if (!initNetwork()) {  SDL_Log("Network initialization failed!"); return 1; }
+    if (!initNetwork()) { SDL_Log("Network initialization failed!"); return 1; }
 
     SDL_Window* window = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
