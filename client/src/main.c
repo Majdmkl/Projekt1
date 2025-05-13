@@ -48,21 +48,18 @@ int main(int argc, char* argv[]) {
 
     mapTexture = loadTexture(renderer, "lib/assets/images/ui/MapNew.png");
 
-    if (argc > 1) {
-        if (!connectToServer(argv[1])) {
-            SDL_Log("Failed to connect to server at %s", argv[1]);
+    int selected = -1;
+    int menuSelection = mainMenu(renderer);
+    // start
+    if (menuSelection == 0) {
+        selected = selectCharacter(renderer);
+        const char* ip = (argc > 1) ? argv[1] : "127.0.0.1";
+        if (!connectToServer(ip)) {
+            SDL_Log("Failed to connect to server %s", ip);
             cleanup(window, renderer);
             cleanupNetwork();
             return 1;
         }
-    }
-
-    int selected = -1;
-    int menuSelection = mainMenu(renderer);
-    // start
-    if(menuSelection == 0) {
-        selected = selectCharacter(renderer);
-        connectToServer("127.0.0.1");
     }
     // connection
     if (menuSelection == 1) {
