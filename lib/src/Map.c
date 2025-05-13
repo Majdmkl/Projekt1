@@ -11,8 +11,7 @@ MAP walls[] = {
     {SCREEN_WIDTH, SCREEN_WIDTH, 0, SCREEN_HEIGHT},
     {0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_HEIGHT},
 
-    {300, 428, 300, 428}, // Tree obstacle
-    {600, 745, 600, 730}  // Cottage obstacle
+
 };
 
 void convertWallsToRects(MAP* walls, SDL_Rect* rects, int count) {

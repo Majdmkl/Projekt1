@@ -17,11 +17,11 @@ void initSDL();
 bool initNetwork();
 void cleanupNetwork();
 SDL_Window* createWindow();
-int mainMenu(SDL_Renderer* renderer); //!
-void waitingRoom(SDL_Renderer* renderer); //!
+int mainMenu(SDL_Renderer* renderer);
+void waitingRoom(SDL_Renderer* renderer);
 bool connectToServer(const char* serverIP);
 int selectCharacter(SDL_Renderer* renderer);
-char* connectionScreen(SDL_Renderer* renderer); //!
+char* connectionScreen(SDL_Renderer* renderer);
 SDL_Renderer* createRenderer(SDL_Window* window);
 void sendPlayerData(Character* player, int action);
 void gameLoop(SDL_Renderer* renderer, Character* player);
