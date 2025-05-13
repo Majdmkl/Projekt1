@@ -94,14 +94,12 @@ int main(int argc, char* argv[]) {
             memcpy(&serverData, receivePacket->data, sizeof(ServerData));
 
             for (int i = 0; i < MAX_ANIMALS; i++) {
-                if (serverData.slotsTaken[i] &&
-                    serverData.animals[i].type == selected) {
+                if (serverData.slotsTaken[i] &&  serverData.animals[i].type == selected) {
                     playerID = i;
                     connected = true;
                     break;
                 }
             }
-
             if (connected) break;
         }
 
@@ -378,7 +376,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
-        // render map background
         SDL_RenderCopy(renderer, mapTexture, NULL, NULL);
 
         if (player && getPlayerHP(player) > 0) {
