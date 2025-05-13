@@ -52,14 +52,8 @@ int main(int argc, char* argv[]) {
     int menuSelection = mainMenu(renderer);
     // start
     if (menuSelection == 0) {
-        selected = selectCharacter(renderer);
-        const char* ip = (argc > 1) ? argv[1] : "127.0.0.1";
-        if (!connectToServer(ip)) {
-            SDL_Log("Failed to connect to server %s", ip);
-            cleanup(window, renderer);
-            cleanupNetwork();
-            return 1;
-        }
+        char* ip = (argc > 1) ? argv[1] : "127.0.0.1";
+        if (connectToServer(ip)) selected = selectCharacter(renderer);
     }
     // connection
     if (menuSelection == 1) {
