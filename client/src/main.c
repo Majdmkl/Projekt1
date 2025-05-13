@@ -53,11 +53,11 @@ int main(int argc, char* argv[]) {
     int menuSelection = mainMenu(renderer);
 
     switch (menuSelection) {
-    //start game = 0
+    //start button = 0
     case 0: ip = (argc > 1) ? argv[1] : "127.0.0.1"; break;
-    //connect to server = 1
+    //connect button = 1
     case 1: ip = connectionScreen(renderer); break;
-    //exit = 2
+    //exit button = 2
     case 2: cleanup(window, renderer); cleanupNetwork(); return 0;
     default: break;
     }
