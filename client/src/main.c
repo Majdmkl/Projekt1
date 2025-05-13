@@ -87,7 +87,6 @@ int main(int argc, char* argv[]) {
 
             gameLoop(renderer, player);
             destroyCharacter(player);
-            if (mapTexture) SDL_DestroyTexture(mapTexture);
             cleanup(window, renderer);
             cleanupNetwork();
             return 0;
@@ -166,7 +165,6 @@ int main(int argc, char* argv[]) {
     gameLoop(renderer, player);
 
     destroyCharacter(player);
-    if (mapTexture) SDL_DestroyTexture(mapTexture);
     cleanup(window, renderer);
     cleanupNetwork();
 
@@ -784,7 +782,6 @@ int selectCharacter(SDL_Renderer* renderer) {
 }
 
 void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
-    // destroy map texture
     if (mapTexture) SDL_DestroyTexture(mapTexture);
     if (renderer) SDL_DestroyRenderer(renderer);
     if (window) SDL_DestroyWindow(window);
