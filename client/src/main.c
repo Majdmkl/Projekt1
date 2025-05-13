@@ -49,24 +49,20 @@ int main(int argc, char* argv[]) {
     mapTexture = loadTexture(renderer, "lib/assets/images/ui/MapNew.png");
 
     int selected = -1;
+    char *ip = NULL;
     int menuSelection = mainMenu(renderer);
-    // start
-    if (menuSelection == 0) {
-        char* ip = (argc > 1) ? argv[1] : "127.0.0.1";
-        if (connectToServer(ip)) selected = selectCharacter(renderer);
+
+    switch (menuSelection) {
+    //start game = 0
+    case 0: ip = (argc > 1) ? argv[1] : "127.0.0.1"; break;
+    //connect to server = 1
+    case 1: ip = connectionScreen(renderer); break;
+    //exit = 2
+    case 2: cleanup(window, renderer); cleanupNetwork(); return 0;
+    default: break;
     }
-    // connection
-    if (menuSelection == 1) {
-        char* ip = connectionScreen(renderer);
-        if (connectToServer(ip)) selected = selectCharacter(renderer);
-        printf("connected to server %s\n", ip);
-    }
-    // quit
-    if (menuSelection == 2) {
-        cleanup(window, renderer);
-        cleanupNetwork();
-        return 0;
-    }
+
+    if (ip && connectToServer(ip)) selected = selectCharacter(renderer);
 
     Character* player = createSelectedCharacter(renderer, selected);
     if (!player) {
