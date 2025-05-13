@@ -36,6 +36,7 @@ IPaddress serverIP = {};
 int playerID = -1;
 ServerData serverData = {};
 bool connected = false;
+SDL_Texture* mapTexture = NULL;
 
 int main(int argc, char* argv[]) {
     initSDL();
@@ -44,6 +45,8 @@ int main(int argc, char* argv[]) {
 
     SDL_Window* window = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
+    // load map background
+    mapTexture = loadTexture(renderer, "lib/assets/images/ui/MapNew.png");
 
     if (argc > 1) {
         if (!connectToServer(argv[1])) {
@@ -84,6 +87,7 @@ int main(int argc, char* argv[]) {
 
             gameLoop(renderer, player);
             destroyCharacter(player);
+            if (mapTexture) SDL_DestroyTexture(mapTexture);
             cleanup(window, renderer);
             cleanupNetwork();
             return 0;
@@ -162,6 +166,7 @@ int main(int argc, char* argv[]) {
     gameLoop(renderer, player);
 
     destroyCharacter(player);
+    if (mapTexture) SDL_DestroyTexture(mapTexture);
     cleanup(window, renderer);
     cleanupNetwork();
 
@@ -259,9 +264,6 @@ Character* createSelectedCharacter(SDL_Renderer* renderer, int selected) {
 
 void gameLoop(SDL_Renderer* renderer, Character* player) {
     if (!player) { SDL_Log("Invalid player character"); return; }
-
-    MAP* gameMap = createMap(renderer);
-    if (!gameMap) { SDL_Log("Failed to create map"); return; }
 
     Bullet* bullets[MAX_BULLETS] = {NULL};
     int bulletCount = 0;
@@ -419,8 +421,9 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+        // render map background
+        SDL_RenderCopy(renderer, mapTexture, NULL, NULL);
 
-        renderMap(gameMap, renderer);
         if (player && getPlayerHP(player) > 0) {
             renderCharacter(player, renderer);
             healthBar(player, renderer);
@@ -445,8 +448,8 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     for (int i = 0; i < bulletCount; i++) destroyBullet(bullets[i]);
     for (int i = 0; i < MAX_ANIMALS; i++) if (i != playerID && playerActive[i]) destroyCharacter(otherPlayers[i]);
 
-    destroyMap(gameMap);
 }
+
 char* connectionScreen(SDL_Renderer* renderer) {
     static char ip[64] = "";
     bool typingActive = false;
@@ -781,6 +784,8 @@ int selectCharacter(SDL_Renderer* renderer) {
 }
 
 void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
+    // destroy map texture
+    if (mapTexture) SDL_DestroyTexture(mapTexture);
     if (renderer) SDL_DestroyRenderer(renderer);
     if (window) SDL_DestroyWindow(window);
     cleanupNetwork();

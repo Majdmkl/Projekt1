@@ -111,6 +111,7 @@ void run(Game *game) {
             case INGAME:
                 SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
                 SDL_RenderClear(game->renderer);
+                // render same map background
                 SDL_RenderCopy(game->renderer, game->background, NULL, NULL);
                 renderCharacters(game);
 
