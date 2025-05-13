@@ -68,7 +68,7 @@ int initiate(Game *game) {
     game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!game->renderer) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_CreateRenderer Error: %s", SDL_GetError()); return 0; }
 
-    game->background = IMG_LoadTexture(game->renderer, "lib/assets/images/objects/buildings/Apartment.png");
+    game->background = IMG_LoadTexture(game->renderer, "lib/assets/images/ui/MapNew.png");
     if (!game->background) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "IMG_LoadTexture Error: %s", IMG_GetError()); return 0; }
 
     if (SDLNet_Init() == -1) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_Init Error: %s", SDLNet_GetError()); return 0;}
