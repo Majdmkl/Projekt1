@@ -63,6 +63,12 @@ int main(int argc, char* argv[]) {
     }
 
     if (ip && connectToServer(ip)) selected = selectCharacter(renderer);
+    else {
+        SDL_Log("Invalid IP address.");
+        cleanup(window, renderer);
+        cleanupNetwork();
+        return 1;
+    }
 
     Character* player = createSelectedCharacter(renderer, selected);
     if (!player) {
