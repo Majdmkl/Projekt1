@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 
     SDL_Window* window = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
-    // load map background
+
     mapTexture = loadTexture(renderer, "lib/assets/images/ui/MapNew.png");
 
     if (argc > 1) {
@@ -55,60 +55,26 @@ int main(int argc, char* argv[]) {
             cleanupNetwork();
             return 1;
         }
-    } else {
-        if (!connectToServer("127.0.0.1")) {
-            SDL_Log("Failed to connect to local server");
-            cleanup(window, renderer);
-            cleanupNetwork();
-            return 1;
-        }
     }
 
+    int selected = -1;
     int menuSelection = mainMenu(renderer);
+    // start
+    if(menuSelection == 0) {
+        selected = selectCharacter(renderer);
+        connectToServer("127.0.0.1");
+    }
+    // connection
     if (menuSelection == 1) {
         char* ip = connectionScreen(renderer);
-        if(ip) {
-            int selected = selectCharacter(renderer);
-            if(selected == -1) {
-                cleanup(window, renderer);
-                cleanupNetwork();
-                return 1;
-            }
-
-            waitingRoom(renderer);
-
-            Character * player = createSelectedCharacter(renderer, selected);
-            if (!player) {
-                SDL_Log("Failed to create character");
-                cleanup(window, renderer);
-                cleanupNetwork();
-                return 1;
-            }
-
-            gameLoop(renderer, player);
-            destroyCharacter(player);
-            cleanup(window, renderer);
-            cleanupNetwork();
-            return 0;
-        }
-
-        cleanup(window, renderer);
-        cleanupNetwork();
-        return 0;
+        if (connectToServer(ip)) selected = selectCharacter(renderer);
+        printf("connected to server %s\n", ip);
     }
-
+    // quit
     if (menuSelection == 2) {
         cleanup(window, renderer);
         cleanupNetwork();
         return 0;
-    }
-
-    // Start menu - Start game
-    int selected = selectCharacter(renderer);
-    if (selected == -1) {
-        cleanup(window, renderer);
-        cleanupNetwork();
-        return 1;
     }
 
     Character* player = createSelectedCharacter(renderer, selected);
@@ -161,7 +127,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // 👉 Starta spelet
+    waitingRoom(renderer);
     gameLoop(renderer, player);
 
     destroyCharacter(player);
