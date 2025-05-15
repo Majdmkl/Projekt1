@@ -10,7 +10,7 @@
 
 struct Character {
     float x, y, speed;
-    int health, frame, characterID;
+    int health, frame, characterID, packages;
     Uint32 lastFrameTime;
     SDL_Texture *walkRight;
     SDL_Texture *walkLeft;
@@ -26,6 +26,8 @@ float getX(Character* character) { return character->x; }
 float getY(Character* character) { return character->y; }
 int getcharacterID(Character* character) { return character->characterID; }
 float getSpeed(Character* character) { return character->speed; }
+int getPackageCount(Character* character) { return character->packages; }
+void setPackageCount(Character* character, int count) { character->packages = count; }
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
@@ -44,7 +46,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     character->frame = 0;
     character->lastFrameTime = SDL_GetTicks();
     character->state = IDLE;
-    character->packageIcon = NULL; // NEW
+    character->packageIcon = NULL;
 
     const char* characterType = NULL;
     switch (characterNumber) {

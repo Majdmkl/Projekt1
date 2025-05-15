@@ -39,8 +39,8 @@ Character *createCharacter(SDL_Renderer *renderer, int characterNumber);
 bool checkCollisionCharacterBullet(Character *character, Bullet *bullet);
 void setBulletStartPosition(Character *pCharacter, float *startX, float *startY);
 void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount);
-
-// NEW
+int getPackageCount(Character* character);
+void setPackageCount(Character* character, int count);
 void setCharacterPackageIcon(Character* character, SDL_Texture* icon);
 
 #endif

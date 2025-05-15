@@ -255,6 +255,7 @@ void characterSendData(Character *character, Animal *animal) {
     animal->type = getcharacterID(character);
     animal->speed_x = MOVE_SPEED;
     animal->speed_y = MOVE_SPEED;
+    animal->packages = getPackageCount(character);
 }
 
 void sendGameData(Game *game, ClientData clientData) {

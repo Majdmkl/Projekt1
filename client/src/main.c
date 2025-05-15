@@ -265,6 +265,12 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     MAP* gameMap = createMap(renderer);
     if (!gameMap) { SDL_Log("Failed to create map"); return; }
 
+    SDL_Texture* packageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/package1.png");
+    if (!packageIcon) {
+        SDL_Log("Failed to load package icon: %s", IMG_GetError());
+        return;
+    }
+
     Bullet* bullets[MAX_BULLETS];
     int bulletCount = 0;
 
@@ -278,15 +284,17 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     Uint32 lastNetworkUpdate = 0;
 
     for (int i = 0; i < MAX_ANIMALS; i++) {
-        if (i != playerID && serverData.slotsTaken[i]) {
+        if (i != playerID && serverData.slotsTaken[i]) { 
             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
             if (otherPlayers[i]) {
                 setPosition(otherPlayers[i], serverData.animals[i].x, serverData.animals[i].y);
+                setPackageCount(otherPlayers[i], serverData.animals[i].packages);
+                setCharacterPackageIcon(otherPlayers[i], packageIcon);
                 playerActive[i] = true;
             }
         }
     }
-
+    
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) running = false;
@@ -359,8 +367,11 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                     if (i != playerID && serverData.slotsTaken[i]) {
                         if (!playerActive[i] || !otherPlayers[i]) {
                             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
+                            if (otherPlayers[i]) {
+                                setCharacterPackageIcon(otherPlayers[i], packageIcon); // ✅ LÄGG TILL DETTA!
+                            }
                             playerActive[i] = otherPlayers[i] != NULL;
-                        }
+                        }                        
                         if (playerActive[i]) {
                             float oldX = getX(otherPlayers[i]);
                             float oldY = getY(otherPlayers[i]);
@@ -372,6 +383,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                             else (dy > 0 ? turnDown : turnUp)(otherPlayers[i]);
 
                             setPosition(otherPlayers[i], newX, newY);
+                            setPackageCount(otherPlayers[i], serverData.animals[i].packages);
                             updateCharacterAnimation(otherPlayers[i], SDL_GetTicks());
                             int targetHP = serverData.animals[i].health;
                             while (getPlayerHP(otherPlayers[i]) > targetHP) decreaseHealth(otherPlayers[i]);
@@ -424,6 +436,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         renderMap(gameMap, renderer);
         if (player && getPlayerHP(player) > 0) {
+            setCharacterPackageIcon(player, packageIcon);  
             renderCharacter(player, renderer);
             healthBar(player, renderer);
         } else if (spectating) {
@@ -449,6 +462,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
     destroyMap(gameMap);
 }
+
 char* connectionScreen(SDL_Renderer* renderer) {
     static char ip[64] = "";
     bool typingActive = false;
