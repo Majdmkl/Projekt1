@@ -115,6 +115,9 @@ int main(int argc, char* argv[]) {
         cleanupNetwork();
         return 1;
     }
+    
+    setCharacterPackageIcon(player, loadTexture(renderer, "lib/assets/images/character/weapons/package1.png"));
+    
 
     ClientData initialData = {0};
     initialData.playerNumber = selected;

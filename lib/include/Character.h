@@ -40,4 +40,7 @@ bool checkCollisionCharacterBullet(Character *character, Bullet *bullet);
 void setBulletStartPosition(Character *pCharacter, float *startX, float *startY);
 void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount);
 
+// NEW
+void setCharacterPackageIcon(Character* character, SDL_Texture* icon);
+
 #endif
