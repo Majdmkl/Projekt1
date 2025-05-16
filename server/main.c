@@ -154,7 +154,7 @@ void run(Game *game) {
                 if (SDL_PollEvent(&event) && event.type == SDL_QUIT) running = 0;
 
                 SDL_RenderPresent(game->renderer);
-                SDL_Delay(16);
+                SDL_Delay(FRAME_DELAY_MS);
                 break;
 
             case MAIN:

@@ -419,6 +419,14 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
 }
 
+static void tileGrass(SDL_Renderer* renderer, SDL_Texture* grass) {
+    for (int y = 0; y < SCREEN_HEIGHT; y += 64)
+        for (int x = 0; x < SCREEN_WIDTH; x += 64) {
+            SDL_Rect dst = { x, y, 64, 64 };
+            SDL_RenderCopy(renderer, grass, NULL, &dst);
+        }
+}
+
 char* connectionScreen(SDL_Renderer* renderer) {
     static char ip[64] = "";
     bool typingActive = false;
@@ -475,12 +483,7 @@ char* connectionScreen(SDL_Renderer* renderer) {
 
         // === RENDERING ===
         // 1. Bakgrundsgräs
-        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
-            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
-                SDL_Rect dst = { x, y, 64, 64 };
-                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
-            }
-        }
+        tileGrass(renderer, grassTexture);
 
         // 2. Mörk overlay
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -569,12 +572,7 @@ void waitingRoom(SDL_Renderer* renderer) {
         }
 
         // Bakgrundsgräs
-        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
-            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
-                SDL_Rect dst = { x, y, 64, 64 };
-                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
-            }
-        }
+        tileGrass(renderer, grassTexture);
 
         // Mörk overlay
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -629,12 +627,7 @@ int mainMenu(SDL_Renderer* renderer) {
             }
         }
 
-        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
-            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
-                SDL_Rect dst = { x, y, 64, 64 };
-                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
-            }
-        }
+        tileGrass(renderer, grassTexture);
 
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
@@ -708,12 +701,7 @@ int selectCharacter(SDL_Renderer* renderer) {
 
         // RENDERING
         // Bakgrundsgräs
-        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
-            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
-                SDL_Rect dst = { x, y, 64, 64 };
-                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
-            }
-        }
+        tileGrass(renderer, grassTexture);
 
         // Mörk overlay ovanpå bakgrunden
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
