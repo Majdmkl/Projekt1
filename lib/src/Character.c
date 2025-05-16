@@ -127,6 +127,7 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
     float hitboxX = character->x + (CHARACTER_WIDTH - CHARACTER_HITBOX_WIDTH) / 2;
     float hitboxY = character->y + (CHARACTER_HEIGHT - CHARACTER_HITBOX_HEIGHT) / 2;
 
+    bool collision = false;
     for (int i = 0; i < wallCount; i++) {
         if (hitboxX + CHARACTER_HITBOX_WIDTH > walls[i].x_min &&
             hitboxX < walls[i].x_max &&
@@ -135,6 +136,11 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
             collision = true;
             break;
         }
+    }
+
+    if (collision) {
+        character->x = prevX;
+        character->y = prevY;
     }
 
 }

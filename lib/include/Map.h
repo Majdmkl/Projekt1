@@ -6,7 +6,7 @@
 
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1024
-#define MAX_WALLS 6
+#define MAX_WALLS 67
 
 typedef struct MAP{
     int x_min, x_max;
