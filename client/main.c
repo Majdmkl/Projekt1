@@ -50,12 +50,15 @@ int main(int argc, char* argv[]) {
     if (!initNetwork()) { SDL_Log("Network initialization failed!"); return 1; }
 
     shootSound = Mix_LoadWAV("lib/assets/sounds/shoot.wav");
+    if (!shootSound) SDL_Log("Failed to load shoot.wav: %s", Mix_GetError());
     hitSound = Mix_LoadWAV("lib/assets/sounds/hit.wav");
+    if (!hitSound) SDL_Log("Failed to load hit.wav: %s", Mix_GetError());
 
     SDL_Window* window = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
 
     mapTexture = loadTexture(renderer, "lib/assets/images/ui/MapNew.png");
+    if (!mapTexture) SDL_Log("Failed to load map texture\n");
 
     int selected = -1;
     char *ip = NULL;

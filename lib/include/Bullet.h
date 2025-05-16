@@ -3,15 +3,7 @@
 
 #include <SDL2/SDL.h>
 #include "Map.h"
-
-#define MAX_BULLETS 3
-#define BULLET_WIDTH 6
-
-#define BULLET_HEIGHT 6
-#define BULLET_DAMAGE 50
-
-#define BULLET_SPEED 10.0f
-#define BULLET_LIFETIME 1500
+#include "config.h"
 
 typedef struct Bullet {
   int whoShot;
