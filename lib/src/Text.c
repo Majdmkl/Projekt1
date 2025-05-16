@@ -21,7 +21,9 @@ Text *createText(SDL_Renderer *renderer, int r, int g, int b, TTF_Font *font, ch
     text->renderer = renderer;
 
     SDL_Color color = {r, g, b, 255};
-    SDL_Surface *surface = TTF_RenderText_Solid(font, string, color);
+    TTF_SetFontOutline(font, 1);
+    SDL_Surface *surface = TTF_RenderText_Blended(font, string, color);
+    TTF_SetFontOutline(font, 0);
     if (!surface) {
         free(text);
         return NULL;
@@ -52,5 +54,13 @@ void destroyText(Text *text) {
     if (text) {
         SDL_DestroyTexture(text->texture);
         free(text);
+    }
+}
+
+void drawTextCentered(Text *text, int centerX, int centerY) {
+    if (text && text->texture) {
+        text->rect.x = centerX - text->rect.w / 2;
+        text->rect.y = centerY - text->rect.h / 2;
+        SDL_RenderCopy(text->renderer, text->texture, NULL, &text->rect);
     }
 }
