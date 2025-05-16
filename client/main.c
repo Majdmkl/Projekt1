@@ -285,22 +285,22 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             if (keys[SDL_SCANCODE_W]) {
                 moveY -= MOVE_SPEED;
                 turnUp(player);
-                if (!actionSent) { sendPlayerData(player, 1); actionSent = true; } // UP
+                if (!actionSent) { sendPlayerData(player, 1); actionSent = true; }
             }
             if (keys[SDL_SCANCODE_S]) {
                 moveY += MOVE_SPEED;
                 turnDown(player);
-                if (!actionSent) { sendPlayerData(player, 2); actionSent = true; } // DOWN
+                if (!actionSent) { sendPlayerData(player, 2); actionSent = true; }
             }
             if (keys[SDL_SCANCODE_A]) {
                 moveX -= MOVE_SPEED;
                 turnLeft(player);
-                if (!actionSent) { sendPlayerData(player, 3); actionSent = true; } // LEFT
+                if (!actionSent) { sendPlayerData(player, 3); actionSent = true; }
             }
             if (keys[SDL_SCANCODE_D]) {
                 moveX += MOVE_SPEED;
                 turnRight(player);
-                if (!actionSent) { sendPlayerData(player, 4); actionSent = true; } // RIGHT
+                if (!actionSent) { sendPlayerData(player, 4); actionSent = true; }
             }
         }
 
@@ -324,7 +324,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         updateCharacterAnimation(player, SDL_GetTicks());
 
         Uint32 now = SDL_GetTicks();
-        if (now - lastNetworkUpdate > NETWORK_TICK_MS) { // ~60fps network tick
+        if (now - lastNetworkUpdate > NETWORK_TICK_MS) {
             bool gotData = false;
             while (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
                 memcpy(&serverData, receivePacket->data, sizeof(ServerData));
@@ -541,11 +541,8 @@ char* connectionScreen(SDL_Renderer* renderer) {
 
         // 7. Visa IP-texten
         if (strlen(ip) > 0) {
-            Text *ipText = createText(renderer, 20, 120, 20, font, ip,
-                                       inputBox.x + inputBox.w / 2,
-                                       inputBox.y + inputBox.h / 2);
-            drawTextCentered(ipText, inputBox.x + inputBox.w / 2,
-                             inputBox.y + inputBox.h / 2);
+            Text *ipText = createText(renderer, 20, 120, 20, font, ip, inputBox.x + inputBox.w / 2, inputBox.y + inputBox.h / 2);
+            drawTextCentered(ipText, inputBox.x + inputBox.w / 2, inputBox.y + inputBox.h / 2);
             destroyText(ipText);
         }
 
@@ -596,7 +593,6 @@ void waitingRoom(SDL_Renderer* renderer) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         for (int i = 0; i < 4; i++) SDL_RenderDrawRect(renderer, &(SDL_Rect){ menuRect.x - i, menuRect.y - i, menuRect.w + 2*i, menuRect.h + 2*i });
         char buf[32]; sprintf(buf, "Ready: %d/%d", serverData.readyCount, serverData.numberOfPlayers);
-        // Replace manual SDL surface text rendering with Text functions
         Text *readyText = createText(renderer, 255, 255, 255, font, buf, 20, 20);
         drawText(readyText);
         destroyText(readyText);
