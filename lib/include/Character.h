@@ -13,6 +13,9 @@
 #define MAX_HEALTH 100
 #define CHARACTER_WIDTH 64
 #define CHARACTER_HEIGHT 64
+#define CHARACTER_HITBOX_WIDTH 30
+#define CHARACTER_HITBOX_HEIGHT 30
+
 
 typedef struct Character Character;
 

@@ -11,8 +11,15 @@ MAP walls[] = {
     {SCREEN_WIDTH, SCREEN_WIDTH, 0, SCREEN_HEIGHT},
     {0, SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_HEIGHT},
 
+<<<<<<< Updated upstream
     {300, 428, 300, 428},
     {600, 745, 600, 730}
+=======
+    /* {x, x + B, y , y + H} */
+
+    {65, 129, 76, 164} //Träd 1
+
+>>>>>>> Stashed changes
 };
 
 static int mapData[NR_X][NR_Y] = {

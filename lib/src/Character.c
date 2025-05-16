@@ -158,6 +158,7 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
     character->x += moveX;
     character->y += moveY;
 
+<<<<<<< Updated upstream
     bool collision = false;
     for (int i = 0; i < wallCount; i++) {
         if (character->x + CHARACTER_WIDTH > walls[i].x_min &&
@@ -165,6 +166,19 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
             character->y + CHARACTER_HEIGHT > walls[i].y_min &&
             character->y < walls[i].y_max) {
             collision = true;
+=======
+    float hitboxX = character->x + (CHARACTER_WIDTH - CHARACTER_HITBOX_WIDTH) / 2;
+    float hitboxY = character->y + (CHARACTER_HEIGHT - CHARACTER_HITBOX_HEIGHT) / 2;
+
+
+    for (int i = 0; i < wallCount; i++) {
+        if (hitboxX + CHARACTER_HITBOX_WIDTH > walls[i].x_min &&
+            hitboxX < walls[i].x_max &&
+            hitboxY + CHARACTER_HITBOX_HEIGHT > walls[i].y_min &&
+            hitboxY < walls[i].y_max) {
+            character->x = prevX;
+            character->y = prevY;
+>>>>>>> Stashed changes
             break;
         }
     }
