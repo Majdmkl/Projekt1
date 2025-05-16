@@ -238,6 +238,11 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     Character* otherPlayers[MAX_ANIMALS] = {NULL};
     bool playerActive[MAX_ANIMALS] = {false};
 
+    SDL_Texture* packageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/package1.png");
+    if (!packageIcon) {
+        SDL_Log("Failed to load package icon: %s", IMG_GetError());
+        return;
+    }
     SDL_Event event;
     bool running = true;
     bool spectating = false;
