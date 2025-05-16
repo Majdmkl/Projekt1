@@ -338,7 +338,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                         if (!playerActive[i] || !otherPlayers[i]) {
                             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
                             if (otherPlayers[i]) {
-                                setCharacterPackageIcon(otherPlayers[i], packageIcon); // ✅ LÄGG TILL DETTA!
+                                setCharacterPackageIcon(otherPlayers[i], packageIcon);
                             }
                             playerActive[i] = otherPlayers[i] != NULL;
                         }
