@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 
 #include "Map.h"
-#include "Character.h"
 
 MAP walls[] = {
     {0, SCREEN_WIDTH, 0, 0},

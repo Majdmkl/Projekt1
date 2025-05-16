@@ -45,13 +45,12 @@ Text *createText(SDL_Renderer *renderer, int r, int g, int b, TTF_Font *font, ch
 }
 
 void drawText(Text *text) {
-    if (!text || !text->texture || !text->renderer) return;
-    SDL_RenderCopy(text->renderer, text->texture, NULL, &text->rect);
+    if (text && text->texture) SDL_RenderCopy(text->renderer, text->texture, NULL, &text->rect);
 }
 
 void destroyText(Text *text) {
     if (text) {
-        if (text->texture) SDL_DestroyTexture(text->texture);
+        SDL_DestroyTexture(text->texture);
         free(text);
     }
 }

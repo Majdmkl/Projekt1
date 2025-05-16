@@ -1,0 +1,9 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define FRAME_DELAY_MS 16
+#define NETWORK_TICK_MS 16
+#define NETWORK_SEND_INTERVAL_MS 500
+#define CONNECTION_TIMEOUT_MS 10000
+
+#endif
