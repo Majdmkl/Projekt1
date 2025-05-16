@@ -7,6 +7,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_net.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "Map.h"
 #include "Bullet.h"
@@ -37,6 +38,10 @@ int playerID = -1;
 ServerData serverData = {};
 bool connected = false;
 SDL_Texture* mapTexture = NULL;
+
+Mix_Chunk *shootSound = NULL;
+Mix_Chunk *hitSound = NULL;
+Mix_Chunk *wallHitSound = NULL;
 
 int main(int argc, char* argv[]) {
     initSDL();
@@ -133,6 +138,10 @@ void initSDL() {
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
     SDLNet_Init();
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { SDL_Log("Mix_OpenAudio error: %s", Mix_GetError()); }
+    shootSound = Mix_LoadWAV("lib/assets/sounds/shoot.wav");
+    hitSound = Mix_LoadWAV("lib/assets/sounds/hit.wav");
+    wallHitSound = Mix_LoadWAV("lib/assets/sounds/wall_hit.wav");
 }
 
 bool initNetwork() {
@@ -146,7 +155,7 @@ bool initNetwork() {
     return true;
 }
 
-void cleanupNetwork() {
+void cleanupNetwdwork() {
     if (sendPacket) { SDLNet_FreePacket(sendPacket); sendPacket = NULL; }
     if (receivePacket) { SDLNet_FreePacket(receivePacket); receivePacket = NULL; }
     if (clientSocket) { SDLNet_UDP_Close(clientSocket); clientSocket = NULL; }
@@ -253,6 +262,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 float startY = getY(player) + CHARACTER_HEIGHT / 2.0f;
 
                 sendPlayerData(player, 5);
+                Mix_PlayChannel(-1, shootSound, 0);
             }
         }
 
@@ -328,8 +338,10 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
                             setPosition(otherPlayers[i], newX, newY);
                             updateCharacterAnimation(otherPlayers[i], SDL_GetTicks());
-                            int targetHP = serverData.animals[i].health;
-                            while (getPlayerHP(otherPlayers[i]) > targetHP) decreaseHealth(otherPlayers[i]);
+                            int oldHP = getPlayerHP(otherPlayers[i]);
+                            int srvHP = serverData.animals[i].health;
+                            if (srvHP < oldHP) Mix_PlayChannel(-1, hitSound, 0);
+                            while (getPlayerHP(otherPlayers[i]) > srvHP) decreaseHealth(otherPlayers[i]);
                         }
                     } else if (i != playerID && !serverData.slotsTaken[i] && playerActive[i]) {
                         if (otherPlayers[i]) destroyCharacter(otherPlayers[i]);
@@ -339,7 +351,9 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 }
 
                 if (serverData.slotsTaken[playerID]) {
+                    int oldHP = getPlayerHP(player);
                     int srvHP = serverData.animals[playerID].health;
+                    if (srvHP < oldHP) Mix_PlayChannel(-1, hitSound, 0);
                     while (getPlayerHP(player) > srvHP) decreaseHealth(player);
                 }
 
@@ -369,6 +383,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             Bullet* b = bullets[i];
             if ((now - getBulletBornTime(b) > BULLET_LIFETIME) ||
                 checkCollisionBulletWall(b, walls, MAX_WALLS)) {
+                if (checkCollisionBulletWall(b, walls, MAX_WALLS)) Mix_PlayChannel(-1, wallHitSound, 0);
                 destroyBullet(b);
                 bullets[i] = bullets[--bulletCount];
             } else { moveBullet(b); ++i; }
@@ -742,6 +757,11 @@ void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
     if (renderer) SDL_DestroyRenderer(renderer);
     if (window) SDL_DestroyWindow(window);
     cleanupNetwork();
+    Mix_FreeChunk(shootSound);
+    Mix_FreeChunk(hitSound);
+    Mix_FreeChunk(wallHitSound);
+    Mix_CloseAudio();
+    Mix_Quit();
     SDL_Quit();
     IMG_Quit();
     TTF_Quit();
