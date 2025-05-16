@@ -8,7 +8,7 @@
 
 typedef enum { MENU, ONGOING  } GameState;
 typedef struct { float x, y, dx, dy; int whoShot; } BulletData;
-typedef enum { READY, UP, DOWN, LEFT, RIGHT, FIRE, BLOCKED, CONNECTING } ClientCommand;
+typedef enum { UP, DOWN, LEFT, RIGHT, FIRE, BLOCKED, CONNECTING, CONTINUE } ClientCommand;
 
 typedef struct {
     int health, type;
@@ -18,7 +18,7 @@ typedef struct {
 
 typedef struct {
     Animal animals;
-    ClientCommand command[7];
+    ClientCommand command[8];
     int playerNumber, slotsTaken[MAX_PLAYERS], numberOfBullets;
     float bulletDx, bulletDy, bulletStartX, bulletStartY;
 } ClientData;
@@ -29,6 +29,7 @@ typedef struct {
     int slotsTaken[MAX_PLAYERS];
     BulletData bullets[MAX_BULLETS];
     int numberOfPlayers, numberOfBullets;
+    int readyCount;
 } ServerData;
 
 #endif

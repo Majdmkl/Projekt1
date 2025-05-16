@@ -564,51 +564,52 @@ char* connectionScreen(SDL_Renderer* renderer) {
 void waitingRoom(SDL_Renderer* renderer) {
     SDL_Texture* bgTexture = loadTexture(renderer, "lib/assets/images/ui/waitingRoom.png");
     SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/images/objects/nature/grass.png");
-
+    TTF_Font* font = TTF_OpenFont("lib/assets/fonts/PressStart2P-Regular.ttf", 24);
     SDL_Event event;
-
     SDL_Rect menuRect = {(SCREEN_WIDTH - 700) / 2, (SCREEN_HEIGHT - 900) / 2, 690, 910};
     SDL_Rect continueBtn = { menuRect.x + 170, menuRect.y + 765, 390, 85 };
-
+    bool pressed = false;
+    Uint32 lastSent = SDL_GetTicks();
     while (1) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) return;
             if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
-                int x = event.button.x;
-                int y = event.button.y;
-                if (SDL_PointInRect(&(SDL_Point){x, y}, &continueBtn)) {
-                    SDL_DestroyTexture(bgTexture);
-                    SDL_DestroyTexture(grassTexture);
-                    return;
-                }
+                int x = event.button.x, y = event.button.y;
+                if (SDL_PointInRect(&(SDL_Point){x, y}, &continueBtn)) pressed = true;
             }
         }
-
-        // Bakgrundsgräs
+        if (pressed && SDL_GetTicks() - lastSent > 200) {
+            ClientData cd = {0};
+            cd.playerNumber = playerID;
+            cd.command[7] = CONTINUE;
+            memcpy(sendPacket->data, &cd, sizeof(ClientData));
+            sendPacket->len = sizeof(ClientData);
+            SDLNet_UDP_Send(clientSocket, -1, sendPacket);
+            lastSent = SDL_GetTicks();
+        }
+        while (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
+            memcpy(&serverData, receivePacket->data, sizeof(ServerData));
+        }
         tileGrass(renderer, grassTexture);
-
-        // Mörk overlay
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
-        SDL_Rect overlay = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-        SDL_RenderFillRect(renderer, &overlay);
-
-        // Visa waitingRoom-bilden i mitten med rätt storlek
+        SDL_Rect overlay = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}; SDL_RenderFillRect(renderer, &overlay);
         SDL_RenderCopy(renderer, bgTexture, NULL, &menuRect);
-
-        // Svart tjock outline
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        for (int i = 0; i < 4; i++) {
-            SDL_Rect outline = { menuRect.x - i, menuRect.y - i, menuRect.w + 2 * i, menuRect.h + 2 * i };
-            SDL_RenderDrawRect(renderer, &outline);
-        }
-
-        // Vit ruta runt continue-knapp (för debug)
-        // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        // SDL_RenderDrawRect(renderer, &continueBtn);
-
+        for (int i = 0; i < 4; i++) SDL_RenderDrawRect(renderer, &(SDL_Rect){ menuRect.x - i, menuRect.y - i, menuRect.w + 2*i, menuRect.h + 2*i });
+        char buf[32]; sprintf(buf, "Ready: %d/%d", serverData.readyCount, serverData.numberOfPlayers);
+        SDL_Color clr = {255,255,255};
+        SDL_Surface* surf = TTF_RenderText_Blended(font, buf, clr);
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+        SDL_Rect dst = {20, 20, surf->w, surf->h};
+        SDL_RenderCopy(renderer, tex, NULL, &dst);
+        SDL_FreeSurface(surf); SDL_DestroyTexture(tex);
         SDL_RenderPresent(renderer);
+        if (serverData.gameState == ONGOING) break;
+        SDL_Delay(FRAME_DELAY_MS);
     }
+    SDL_DestroyTexture(bgTexture); SDL_DestroyTexture(grassTexture); TTF_CloseFont(font);
+    return;
 }
 
 int mainMenu(SDL_Renderer* renderer) {

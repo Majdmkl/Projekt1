@@ -18,7 +18,7 @@ struct Character {
     SDL_Texture *walkUp;
     SDL_Texture *idleFront;
     SDL_Texture *fullSheet;
-    SDL_Texture *packageIcon; // NEW
+    SDL_Texture *packageIcon;
     enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;
 };
 
@@ -88,7 +88,6 @@ bool isCharacterAlive(Character* character) { return character->health > 0; }
 void destroyCharacter(Character* character) {
     if (character) {
         if (character->fullSheet) SDL_DestroyTexture(character->fullSheet);
-        // do not destroy shared packageIcon
         free(character);
     }
 }
@@ -142,8 +141,6 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
     }
 }
 
-#include <SDL2/SDL_rect.h> // om det inte redan finns
-
 bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
     if (!character || !bullet) return false;
 
@@ -154,7 +151,7 @@ bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
         CHARACTER_HEIGHT
     };
 
-    SDL_Rect bulletRect = getBulletRect(bullet); // se till att denna funktion finns i Bullet.c
+    SDL_Rect bulletRect = getBulletRect(bullet);
 
     return SDL_HasIntersection(&characterRect, &bulletRect);
 }

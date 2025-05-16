@@ -15,6 +15,8 @@
 #include "Map.h"
 #include "config.h"
 
+#define CONTINUE_CMD CONTINUE
+
 typedef enum { MAIN, INGAME } MenuState;
 
 typedef struct {
@@ -32,7 +34,7 @@ typedef struct {
     Character *players[MAX_PLAYERS];
     IPaddress serverAddress[MAX_PLAYERS];
     int numBullets, numPlayers, slotsTaken[MAX_PLAYERS], fire;
-    bool ready[MAX_PLAYERS]; // track continue presses
+    bool ready[MAX_PLAYERS];
 } Game;
 
 void run(Game *game);
@@ -114,7 +116,6 @@ void run(Game *game) {
             case INGAME:
                 SDL_SetRenderDrawColor(game->renderer, 0, 0, 0, 255);
                 SDL_RenderClear(game->renderer);
-                // render same map background
                 SDL_RenderCopy(game->renderer, game->background, NULL, NULL);
                 renderCharacters(game);
 
@@ -176,20 +177,16 @@ void run(Game *game) {
                             game->ready[id] = false;
                         }
                     }
-                    // handle continue presses
                     if (clientData.command[7] == CONTINUE_CMD && clientData.playerNumber >= 0 && clientData.playerNumber < MAX_PLAYERS) {
                         game->ready[clientData.playerNumber] = true;
                     }
                 }
 
-                // count ready
                 int readyCount = 0;
                 for (int i = 0; i < MAX_PLAYERS; i++) if (game->ready[i]) readyCount++;
 
-                // send data including readyCount
                 sendGameData(game, clientData);
 
-                // transition when all ready and enough players
                 if (game->numPlayers >= MAX_PLAYERS && readyCount == game->numPlayers) {
                     game->state = INGAME;
                     destroyText(game->waitingText);
@@ -197,11 +194,10 @@ void run(Game *game) {
                 }
 
                 drawText(game->waitingText);
-                // Draw ready counter
                 {
                     char buf[32];
                     sprintf(buf, "Ready: %d/%d", readyCount, game->numPlayers);
-                    Text* counterText = createText(game->renderer, 255,255,255, game->font, buf, SCREEN_WIDTH-200, 20);
+                    Text* counterText = createText(game->renderer, 255,255,255, game->font, buf, 20, 20);
                     drawText(counterText);
                     destroyText(counterText);
                 }
@@ -290,7 +286,6 @@ void sendGameData(Game *game, ClientData clientData) {
         server_data.bullets[i].whoShot = b->whoShot;
     }
 
-    // expose readyCount in network data
     int readyCount = 0;
     for (int i = 0; i < MAX_PLAYERS; i++) if (game->ready[i]) readyCount++;
     server_data.readyCount = readyCount;
