@@ -164,8 +164,8 @@ static void applyPlayerAction(ClientData* clientData, Character* player, int act
             float ddy = mouseY - clientData->bulletStartY;
             float mag = sqrtf(ddx*ddx + ddy*ddy);
             if (mag > 0.0f) {
-                clientData->bulletDx = ddx/mag * MOVE_SPEED;
-                clientData->bulletDy = ddy/mag * MOVE_SPEED;
+                clientData->bulletDx = ddx/mag * BULLET_SPEED;
+                clientData->bulletDy = ddy/mag * BULLET_SPEED;
             } else {
                 clientData->bulletDx = 0;
                 clientData->bulletDy = 0;
@@ -242,6 +242,12 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
                 float startX = getX(player) + CHARACTER_WIDTH / 2.0f;
                 float startY = getY(player) + CHARACTER_HEIGHT / 2.0f;
+                float dx = mouseX - startX, dy = mouseY - startY;;
+                float mag = sqrtf(dx * dx + dy * dy);
+                if (mag>0) { dx = dx/mag * BULLET_SPEED; dy = dy/mag * BULLET_SPEED; }
+                else { dx = BULLET_SPEED; dy = 0; }
+
+                if (bulletCount < MAX_BULLETS) bullets[bulletCount++] = createBullet(renderer, startX, startY, dx, dy, playerID);
 
                 sendPlayerData(player, 5);
                 Mix_PlayChannel(-1, shootSound, 0);

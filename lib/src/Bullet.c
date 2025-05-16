@@ -6,20 +6,14 @@ Bullet* createBullet(SDL_Renderer* renderer, float startX, float startY, float d
     Bullet* bullet = (Bullet*)malloc(sizeof(Bullet));
     if (!bullet) return NULL;
 
-    float length = sqrtf(dirX * dirX + dirY * dirY);
-    if (length > 0.0f) {
-        bullet->dx = (dirX / length) * BULLET_SPEED;
-        bullet->dy = (dirY / length) * BULLET_SPEED;
-    } else {
-        bullet->dx = BULLET_SPEED;
-        bullet->dy = 0;
-    }
-
     bullet->x = startX;
     bullet->y = startY;
+    bullet->dx = dirX;
+    bullet->dy = dirY;
     bullet->whoShot = whoShot;
     bullet->bornTime = SDL_GetTicks();
 
+    // bullet->texture = IMG_LoadTexture(renderer, "lib/assets/images/bullet.png");
     return bullet;
 }
 
