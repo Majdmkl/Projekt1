@@ -49,6 +49,9 @@ int main(int argc, char* argv[]) {
 
     if (!initNetwork()) { SDL_Log("Network initialization failed!"); return 1; }
 
+    shootSound = Mix_LoadWAV("lib/assets/sounds/shoot.wav");
+    hitSound = Mix_LoadWAV("lib/assets/sounds/hit.wav");
+
     SDL_Window* window = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
 
@@ -69,20 +72,8 @@ int main(int argc, char* argv[]) {
     }
 
     if (ip && connectToServer(ip)) selected = selectCharacter(renderer);
-    else {
-        SDL_Log("Invalid IP address.");
-        cleanup(window, renderer);
-        cleanupNetwork();
-        return 1;
-    }
 
     Character* player = createSelectedCharacter(renderer, selected);
-    if (!player) {
-        SDL_Log("Could not create character.");
-        cleanup(window, renderer);
-        cleanupNetwork();
-        return 1;
-    }
 
     ClientData initialData = {0};
     initialData.playerNumber = selected;
@@ -116,14 +107,6 @@ int main(int argc, char* argv[]) {
         SDL_Delay(100);
     }
 
-    if (!connected) {
-        SDL_Log("Failed to connect with selected character.");
-        destroyCharacter(player);
-        cleanup(window, renderer);
-        cleanupNetwork();
-        return 1;
-    }
-
     waitingRoom(renderer);
     gameLoop(renderer, player);
 
@@ -139,26 +122,20 @@ void initSDL() {
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
     SDLNet_Init();
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { SDL_Log("Mix_OpenAudio error: %s", Mix_GetError()); }
-    shootSound = Mix_LoadWAV("lib/assets/sounds/shoot.wav");
-    hitSound = Mix_LoadWAV("lib/assets/sounds/hit.wav");
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 }
 
 bool initNetwork() {
     clientSocket = SDLNet_UDP_Open(0);
-    if (!clientSocket) { SDL_Log("SDLNet_UDP_Open error: %s", SDLNet_GetError()); return false; }
-
-    sendPacket = SDLNet_AllocPacket(512);
-    receivePacket = SDLNet_AllocPacket(512);
-    if (!sendPacket || !receivePacket) { SDL_Log("SDLNet_AllocPacket error: %s", SDLNet_GetError()); return false; }
-
+    sendPacket = SDLNet_AllocPacket(sizeof(ClientData));
+    receivePacket = SDLNet_AllocPacket(sizeof(ServerData));
     return true;
 }
 
 void cleanupNetwork() {
-    if (sendPacket) SDLNet_FreePacket(sendPacket);
-    if (receivePacket) SDLNet_FreePacket(receivePacket);
-    if (clientSocket) SDLNet_UDP_Close(clientSocket);
+    SDLNet_FreePacket(sendPacket);
+    SDLNet_FreePacket(receivePacket);
+    SDLNet_UDP_Close(clientSocket);
     SDLNet_Quit();
 }
 
@@ -212,13 +189,12 @@ void sendPlayerData(Character* player, int action) {
     SDLNet_UDP_Send(clientSocket, -1, sendPacket);
 }
 
-SDL_Window* createWindow() {return SDL_CreateWindow("COZY DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); }
+SDL_Window* createWindow() {return SDL_CreateWindow("Safari DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); }
 
 SDL_Renderer* createRenderer(SDL_Window* window) { return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); }
 
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
-    if (!surface) { SDL_Log("Failed to load image: %s\n", IMG_GetError()); return NULL; }
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
     return texture;
@@ -231,8 +207,6 @@ Character* createSelectedCharacter(SDL_Renderer* renderer, int selected) {
 }
 
 void gameLoop(SDL_Renderer* renderer, Character* player) {
-    if (!player) { SDL_Log("Invalid player character"); return; }
-
     Bullet* bullets[MAX_BULLETS] = {NULL};
     int bulletCount = 0;
 
@@ -240,10 +214,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     bool playerActive[MAX_PLAYERS] = {false};
 
     SDL_Texture* packageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/package1.png");
-    if (!packageIcon) {
-        SDL_Log("Failed to load package icon: %s", IMG_GetError());
-        return;
-    }
+
     SDL_Event event;
     bool running = true;
     bool spectating = false;
@@ -427,7 +398,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         for (int i = 0; i < bulletCount; i++) drawBullet(bullets[i], renderer);
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(FRAME_DELAY_MS); // ~60 fps
+        SDL_Delay(FRAME_DELAY_MS);
     }
 
     for (int i = 0; i < bulletCount; i++) destroyBullet(bullets[i]);
