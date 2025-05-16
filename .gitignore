@@ -21,3 +21,4 @@ lib/src/Character.d
 lib/src/Map.d
 lib/src/Text.d
 server/main.d
+client/src/main.d

@@ -31,12 +31,12 @@ void cleanup(SDL_Window* window, SDL_Renderer* renderer);
 SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath);
 Character* createSelectedCharacter(SDL_Renderer* renderer, int selected);
 
-UDPsocket clientSocket = NULL;
-UDPpacket *sendPacket = NULL;
-UDPpacket *receivePacket = NULL;
-IPaddress serverIP = {};
+UDPsocket clientSocket;
+UDPpacket *sendPacket;
+UDPpacket *receivePacket;
+IPaddress serverIP;
 int playerID = -1;
-ServerData serverData = {};
+ServerData serverData;
 bool connected = false;
 SDL_Texture* mapTexture = NULL;
 
@@ -147,23 +147,25 @@ bool initNetwork() {
     clientSocket = SDLNet_UDP_Open(0);
     if (!clientSocket) { SDL_Log("SDLNet_UDP_Open error: %s", SDLNet_GetError()); return false; }
 
-    sendPacket = SDLNet_AllocPacket(sizeof(ClientData));
-    receivePacket = SDLNet_AllocPacket(sizeof(ServerData));
+    sendPacket = SDLNet_AllocPacket(512);
+    receivePacket = SDLNet_AllocPacket(512);
     if (!sendPacket || !receivePacket) { SDL_Log("SDLNet_AllocPacket error: %s", SDLNet_GetError()); return false; }
 
     return true;
 }
 
 void cleanupNetwork() {
-    if (sendPacket) { SDLNet_FreePacket(sendPacket); sendPacket = NULL; }
-    if (receivePacket) { SDLNet_FreePacket(receivePacket); receivePacket = NULL; }
-    if (clientSocket) { SDLNet_UDP_Close(clientSocket); clientSocket = NULL; }
+    if (sendPacket) SDLNet_FreePacket(sendPacket);
+    if (receivePacket) SDLNet_FreePacket(receivePacket);
+    if (clientSocket) SDLNet_UDP_Close(clientSocket);
     SDLNet_Quit();
 }
 
 bool connectToServer(const char* serverIP_str) {
-    if (!sendPacket) { SDL_Log("sendPacket is NULL"); return false; }
-    if (SDLNet_ResolveHost(&serverIP, serverIP_str, SERVER_PORT) != 0) { SDL_Log("SDLNet_ResolveHost error: %s", SDLNet_GetError()); return false; }
+    if (SDLNet_ResolveHost(&serverIP, serverIP_str, SERVER_PORT) != 0) {
+        SDL_Log("SDLNet_ResolveHost error: %s", SDLNet_GetError());
+        return false;
+    }
     sendPacket->address = serverIP;
     return true;
 }
@@ -247,6 +249,8 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
             if (otherPlayers[i]) {
                 setPosition(otherPlayers[i], serverData.animals[i].x, serverData.animals[i].y);
+                setPackageCount(otherPlayers[i], serverData.animals[i].packages);
+                setCharacterPackageIcon(otherPlayers[i], packageIcon);
                 playerActive[i] = true;
             }
         }
@@ -325,6 +329,9 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                     if (i != playerID && serverData.slotsTaken[i]) {
                         if (!playerActive[i] || !otherPlayers[i]) {
                             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
+                            if (otherPlayers[i]) {
+                                setCharacterPackageIcon(otherPlayers[i], packageIcon); // ✅ LÄGG TILL DETTA!
+                            }
                             playerActive[i] = otherPlayers[i] != NULL;
                         }
                         if (playerActive[i]) {
@@ -338,6 +345,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                             else (dy > 0 ? turnDown : turnUp)(otherPlayers[i]);
 
                             setPosition(otherPlayers[i], newX, newY);
+                            setPackageCount(otherPlayers[i], serverData.animals[i].packages);
                             updateCharacterAnimation(otherPlayers[i], SDL_GetTicks());
                             int oldHP = getPlayerHP(otherPlayers[i]);
                             int srvHP = serverData.animals[i].health;
@@ -752,4 +760,5 @@ void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
     SDL_Quit();
     IMG_Quit();
     TTF_Quit();
+    SDLNet_Quit();
 }

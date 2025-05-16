@@ -14,6 +14,7 @@ typedef enum { READY, UP, DOWN, LEFT, RIGHT, FIRE, BLOCKED, CONNECTING } ClientC
 typedef struct {
     int health, type;
     float x, y, speed_x, speed_y;
+    int packages;
 } Animal;
 
 typedef struct {
