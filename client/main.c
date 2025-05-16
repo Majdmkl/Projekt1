@@ -41,7 +41,6 @@ SDL_Texture* mapTexture = NULL;
 
 Mix_Chunk *shootSound = NULL;
 Mix_Chunk *hitSound = NULL;
-Mix_Chunk *wallHitSound = NULL;
 
 int main(int argc, char* argv[]) {
     initSDL();
@@ -140,8 +139,7 @@ void initSDL() {
     SDLNet_Init();
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { SDL_Log("Mix_OpenAudio error: %s", Mix_GetError()); }
     shootSound = Mix_LoadWAV("lib/assets/sounds/shoot.wav");
-    hitSound = Mix_LoadWAV("lib/assets/sounds/hit.wav");
-    wallHitSound = Mix_LoadWAV("lib/assets/sounds/wall_hit.wav");
+    hitSound = Mix_LoadWAV("lib/assets/sounds/wall_hit.wav");
 }
 
 bool initNetwork() {
@@ -383,7 +381,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             Bullet* b = bullets[i];
             if ((now - getBulletBornTime(b) > BULLET_LIFETIME) ||
                 checkCollisionBulletWall(b, walls, MAX_WALLS)) {
-                if (checkCollisionBulletWall(b, walls, MAX_WALLS)) Mix_PlayChannel(-1, wallHitSound, 0);
                 destroyBullet(b);
                 bullets[i] = bullets[--bulletCount];
             } else { moveBullet(b); ++i; }
@@ -759,7 +756,6 @@ void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
     cleanupNetwork();
     Mix_FreeChunk(shootSound);
     Mix_FreeChunk(hitSound);
-    Mix_FreeChunk(wallHitSound);
     Mix_CloseAudio();
     Mix_Quit();
     SDL_Quit();
