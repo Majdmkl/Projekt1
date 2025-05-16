@@ -3,8 +3,7 @@
 
 #include "Bullet.h"
 
-#define MIN_PLAYERS 2
-#define MAX_ANIMALS 2
+#define MAX_PLAYERS 2
 #define SERVER_PORT 2000
 
 typedef enum { MENU, ONGOING  } GameState;
@@ -20,14 +19,14 @@ typedef struct {
 typedef struct {
     Animal animals;
     ClientCommand command[7];
-    int playerNumber, slotsTaken[MAX_ANIMALS], numberOfBullets;
+    int playerNumber, slotsTaken[MAX_PLAYERS], numberOfBullets;
     float bulletDx, bulletDy, bulletStartX, bulletStartY;
 } ClientData;
 
 typedef struct {
     GameState gameState;
-    Animal animals[MAX_ANIMALS];
-    int slotsTaken[MAX_ANIMALS];
+    Animal animals[MAX_PLAYERS];
+    int slotsTaken[MAX_PLAYERS];
     BulletData bullets[MAX_BULLETS];
     int numberOfPlayers, numberOfBullets;
 } ServerData;

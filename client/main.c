@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
         if (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
             memcpy(&serverData, receivePacket->data, sizeof(ServerData));
 
-            for (int i = 0; i < MAX_ANIMALS; i++) {
+            for (int i = 0; i < MAX_PLAYERS; i++) {
                 if (serverData.slotsTaken[i] &&  serverData.animals[i].type == selected) {
                     playerID = i;
                     connected = true;
@@ -235,8 +235,8 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     Bullet* bullets[MAX_BULLETS] = {NULL};
     int bulletCount = 0;
 
-    Character* otherPlayers[MAX_ANIMALS] = {NULL};
-    bool playerActive[MAX_ANIMALS] = {false};
+    Character* otherPlayers[MAX_PLAYERS] = {NULL};
+    bool playerActive[MAX_PLAYERS] = {false};
 
     SDL_Texture* packageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/package1.png");
     if (!packageIcon) {
@@ -249,7 +249,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     float deathX = 0, deathY = 0;
     Uint32 lastNetworkUpdate = 0;
 
-    for (int i = 0; i < MAX_ANIMALS; i++) {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
         if (i != playerID && serverData.slotsTaken[i]) {
             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
             if (otherPlayers[i]) {
@@ -313,7 +313,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         float prevPlayerY = getY(player);
         moveCharacter(player, moveX, moveY, walls, MAX_WALLS);
 
-        for (int i = 0; i < MAX_ANIMALS; i++) {
+        for (int i = 0; i < MAX_PLAYERS; i++) {
             if (i != playerID && playerActive[i] && otherPlayers[i]) {
                 SDL_Rect pRect = { getX(player), getY(player), CHARACTER_WIDTH, CHARACTER_HEIGHT };
                 SDL_Rect oRect = { getX(otherPlayers[i]), getY(otherPlayers[i]), CHARACTER_WIDTH, CHARACTER_HEIGHT };
@@ -330,7 +330,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 gotData = true;
             }
             if (gotData) {
-                for (int i = 0; i < MAX_ANIMALS; i++) {
+                for (int i = 0; i < MAX_PLAYERS; i++) {
                     if (i != playerID && serverData.slotsTaken[i]) {
                         if (!playerActive[i] || !otherPlayers[i]) {
                             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
@@ -390,7 +390,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
             lastNetworkUpdate = now;
         }
-        for (int i = 0; i < MAX_ANIMALS; ++i)
+        for (int i = 0; i < MAX_PLAYERS; ++i)
             if (i != playerID && playerActive[i] && otherPlayers[i]) updateCharacterAnimation(otherPlayers[i], now);
 
         for (int i = 0; i < bulletCount; ) {
@@ -415,7 +415,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             SDL_RenderFillRect(renderer, &deathRect);
         }
 
-        for (int i = 0; i < MAX_ANIMALS; i++) {
+        for (int i = 0; i < MAX_PLAYERS; i++) {
             if (i != playerID && playerActive[i] && otherPlayers[i]) {
                 if (getPlayerHP(otherPlayers[i]) > 0) renderCharacter(otherPlayers[i], renderer);
                 healthBar(otherPlayers[i], renderer);
@@ -428,7 +428,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     }
 
     for (int i = 0; i < bulletCount; i++) destroyBullet(bullets[i]);
-    for (int i = 0; i < MAX_ANIMALS; i++) if (i != playerID && playerActive[i]) destroyCharacter(otherPlayers[i]);
+    for (int i = 0; i < MAX_PLAYERS; i++) if (i != playerID && playerActive[i]) destroyCharacter(otherPlayers[i]);
 
 }
 
