@@ -155,7 +155,7 @@ bool initNetwork() {
     return true;
 }
 
-void cleanupNetwdwork() {
+void cleanupNetwork() {
     if (sendPacket) { SDLNet_FreePacket(sendPacket); sendPacket = NULL; }
     if (receivePacket) { SDLNet_FreePacket(receivePacket); receivePacket = NULL; }
     if (clientSocket) { SDLNet_UDP_Close(clientSocket); clientSocket = NULL; }
