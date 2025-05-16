@@ -138,11 +138,6 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
             break;
         }
     }
-
-    if (collision) {
-        character->x = prevX;
-        character->y = prevY;
-    }
 }
 
 bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
