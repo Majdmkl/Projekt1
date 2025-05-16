@@ -310,18 +310,20 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             moveY = (moveY > 0) ? diagSpeed : -diagSpeed;
         }
 
-        float prevPlayerX = getX(player);
-        float prevPlayerY = getY(player);
-        moveCharacter(player, moveX, moveY, walls, MAX_WALLS);
+        if (!spectating) {
+            float prevPlayerX = getX(player);
+            float prevPlayerY = getY(player);
+            moveCharacter(player, moveX, moveY, walls, MAX_WALLS);
 
-        for (int i = 0; i < MAX_PLAYERS; i++) {
-            if (i != playerID && playerActive[i] && otherPlayers[i]) {
-                SDL_Rect pRect = { getX(player), getY(player), CHARACTER_WIDTH, CHARACTER_HEIGHT };
-                SDL_Rect oRect = { getX(otherPlayers[i]), getY(otherPlayers[i]), CHARACTER_WIDTH, CHARACTER_HEIGHT };
-                if (SDL_HasIntersection(&pRect, &oRect)) { setPosition(player, prevPlayerX, prevPlayerY); break; }
+            for (int i = 0; i < MAX_PLAYERS; i++) {
+                if (i != playerID && playerActive[i] && otherPlayers[i]) {
+                    SDL_Rect pRect = { getX(player), getY(player), CHARACTER_WIDTH, CHARACTER_HEIGHT };
+                    SDL_Rect oRect = { getX(otherPlayers[i]), getY(otherPlayers[i]), CHARACTER_WIDTH, CHARACTER_HEIGHT };
+                    if (SDL_HasIntersection(&pRect, &oRect)) { setPosition(player, prevPlayerX, prevPlayerY); break; }
+                }
             }
+            updateCharacterAnimation(player, SDL_GetTicks());
         }
-        updateCharacterAnimation(player, SDL_GetTicks());
 
         Uint32 now = SDL_GetTicks();
         if (now - lastNetworkUpdate > NETWORK_TICK_MS) {
