@@ -13,6 +13,7 @@
 #include "Bullet.h"
 #include "Text.h"
 #include "Map.h"
+#include "config.h"
 
 typedef enum { MAIN, INGAME } MenuState;
 
