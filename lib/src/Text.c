@@ -21,7 +21,9 @@ Text *createText(SDL_Renderer *renderer, int r, int g, int b, TTF_Font *font, ch
     text->renderer = renderer;
 
     SDL_Color color = {r, g, b, 255};
-    SDL_Surface *surface = TTF_RenderText_Solid(font, string, color);
+    TTF_SetFontOutline(font, 1);
+    SDL_Surface *surface = TTF_RenderText_Blended(font, string, color);
+    TTF_SetFontOutline(font, 0);
     if (!surface) {
         free(text);
         return NULL;
