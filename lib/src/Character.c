@@ -124,12 +124,15 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
     character->x += moveX;
     character->y += moveY;
 
+    float hitboxX = character->x + (CHARACTER_WIDTH - CHARACTER_HITBOX_WIDTH) / 2;
+    float hitboxY = character->y + (CHARACTER_HEIGHT - CHARACTER_HITBOX_HEIGHT) / 2;
+
     bool collision = false;
     for (int i = 0; i < wallCount; i++) {
-        if (character->x + CHARACTER_WIDTH > walls[i].x_min &&
-            character->x < walls[i].x_max &&
-            character->y + CHARACTER_HEIGHT > walls[i].y_min &&
-            character->y < walls[i].y_max) {
+        if (hitboxX + CHARACTER_HITBOX_WIDTH > walls[i].x_min &&
+            hitboxX < walls[i].x_max &&
+            hitboxY + CHARACTER_HITBOX_HEIGHT > walls[i].y_min &&
+            hitboxY < walls[i].y_max) {
             collision = true;
             break;
         }
@@ -139,6 +142,7 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
         character->x = prevX;
         character->y = prevY;
     }
+
 }
 
 bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {

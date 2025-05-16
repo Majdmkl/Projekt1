@@ -141,7 +141,7 @@ void initSDL() {
     SDLNet_Init();
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { SDL_Log("Mix_OpenAudio error: %s", Mix_GetError()); }
     shootSound = Mix_LoadWAV("lib/assets/sounds/shoot.wav");
-    hitSound = Mix_LoadWAV("lib/assets/sounds/wall_hit.wav");
+    hitSound = Mix_LoadWAV("lib/assets/sounds/hit.wav");
 }
 
 bool initNetwork() {
