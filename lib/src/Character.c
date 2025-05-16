@@ -12,11 +12,6 @@ struct Character {
     float x, y, speed;
     int health, frame, characterID, packages;
     Uint32 lastFrameTime;
-    SDL_Texture *walkRight;
-    SDL_Texture *walkLeft;
-    SDL_Texture *walkDown;
-    SDL_Texture *walkUp;
-    SDL_Texture *idleFront;
     SDL_Texture *fullSheet;
     SDL_Texture *packageIcon;
     enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;

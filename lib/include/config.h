@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+// Character
 #define MOVE_SPEED 3
 #define MAX_HEALTH 100
 #define CHARACTER_WIDTH 64
@@ -8,6 +9,7 @@
 #define CHARACTER_HITBOX_WIDTH 20
 #define CHARACTER_HITBOX_HEIGHT 20
 
+// Bullet
 #define MAX_BULLETS 3
 #define BULLET_WIDTH 6
 #define BULLET_HEIGHT 6
@@ -15,6 +17,7 @@
 #define BULLET_SPEED 10.0f
 #define BULLET_LIFETIME 1200
 
+// Timing
 #define FRAME_DELAY_MS 16
 #define NETWORK_TICK_MS 16
 #define CONNECTION_TIMEOUT_MS 10000

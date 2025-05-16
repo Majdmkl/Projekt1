@@ -2,13 +2,10 @@
 #define CHARACTER_H
 
 #include <stdbool.h>
+#include "config.h"
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-
 #include "Map.h"
 #include "Bullet.h"
-#include "Network.h"
-#include "config.h"
 
 typedef struct Character Character;
 
