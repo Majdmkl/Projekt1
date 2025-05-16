@@ -53,8 +53,37 @@ MAP walls[] = {
     {1786, 1856, 756, 833},
     {1773, 1837, 884, 948},
 
-    //Builidings
+    //Water
+    {740, 810, 442, 512},
+    {740, 810, 564, 807},
+    {740, 810, 857, 1008},
+    {875, 916, 442, 619},
 
+    //Builidings
+    {153, 319, 42, 214}, //Bakery
+    {25, 265, 170, 214}, //Bakery door
+
+    {74, 227, 480, 623}, //Blue house (School)
+    {129, 180, 583, 623}, //Blue house door
+
+    {327, 483, 755, 910}, //Yellow house (Cafe)
+    {392, 422, 887, 910}, //Yellow house door
+
+    {1082, 1251, 768, 908}, //Red house (Garden)
+    {1143, 1191, 768, 791}, //Red house door upp
+
+    {1165, 1334, 445, 589}, //Blue house
+    {1225, 1270, 566, 589}, //Blue house door
+
+    {1400, 1578, 116, 274}, //White house (Gym)
+    {1469, 1515, 237, 274}, //White house door
+
+    {1524, 1683, 512, 651}, //Green house (normal house)
+    {1584, 1624, 602, 651}, //Green house door
+
+    {1584, 1728, 765, 887}, //Black house (Blacksmith)
+    {1638, 1728, 719, 765}, //Black house (Skorsten)
+    {1607, 1670, 838, 887}, //Black house door
 
 };
 

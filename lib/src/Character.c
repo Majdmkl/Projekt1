@@ -50,12 +50,12 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
 
     const char* characterType = NULL;
     switch (characterNumber) {
-        case 0: setPosition(character, 0, 0); characterType = "panda"; character->characterID = 0; break;
-        case 1: setPosition(character, 0, SCREEN_HEIGHT - CHARACTER_HEIGHT); characterType = "giraffe"; character->characterID = 1; break;
-        case 2: setPosition(character, SCREEN_WIDTH - CHARACTER_WIDTH, 0); characterType = "fox"; character->characterID = 2; break;
-        case 3: setPosition(character, SCREEN_WIDTH - CHARACTER_WIDTH, SCREEN_HEIGHT - CHARACTER_HEIGHT); characterType = "bear"; character->characterID = 3; break;
-        case 4: setPosition(character, (SCREEN_WIDTH - CHARACTER_WIDTH) / 2 , (SCREEN_HEIGHT - CHARACTER_HEIGHT) / 2); characterType = "bunny"; character->characterID = 4; break;
-        case 5: setPosition(character, SCREEN_WIDTH / 2 - 200, SCREEN_HEIGHT / 2 - 200); characterType = "lion"; character->characterID = 5; break;
+        case 0: setPosition(character, 65, 283); characterType = "panda"; character->characterID = 0; break;
+        case 1: setPosition(character, 238, 914); characterType = "giraffe"; character->characterID = 1; break;
+        case 2: setPosition(character, 1504, 934); characterType = "fox"; character->characterID = 2; break;
+        case 3: setPosition(character, 1840, 324); characterType = "bear"; character->characterID = 3; break;
+        case 4: setPosition(character, 1419, 74); characterType = "bunny"; character->characterID = 4; break;
+        case 5: setPosition(character, 844, 72); characterType = "lion"; character->characterID = 5; break;
         default: free(character); return NULL;
     }
 
