@@ -14,6 +14,7 @@
 #include "Character.h"
 #include "Network.h"
 #include "config.h"
+#include "Text.h"
 
 void initSDL();
 bool initNetwork();
@@ -540,15 +541,12 @@ char* connectionScreen(SDL_Renderer* renderer) {
 
         // 7. Visa IP-texten
         if (strlen(ip) > 0) {
-            SDL_Color textColor = {20, 120, 20};
-            SDL_Surface* textSurface = TTF_RenderText_Blended(font, ip, textColor);
-            SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-
-            SDL_Rect textRect = { inputBox.x + 10, inputBox.y + (inputBox.h - textSurface->h) / 2, textSurface->w, textSurface->h };
-
-            SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
-            SDL_FreeSurface(textSurface);
-            SDL_DestroyTexture(textTexture);
+            Text *ipText = createText(renderer, 20, 120, 20, font, ip,
+                                       inputBox.x + inputBox.w / 2,
+                                       inputBox.y + inputBox.h / 2);
+            drawTextCentered(ipText, inputBox.x + inputBox.w / 2,
+                             inputBox.y + inputBox.h / 2);
+            destroyText(ipText);
         }
 
         SDL_RenderPresent(renderer);
@@ -598,12 +596,10 @@ void waitingRoom(SDL_Renderer* renderer) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         for (int i = 0; i < 4; i++) SDL_RenderDrawRect(renderer, &(SDL_Rect){ menuRect.x - i, menuRect.y - i, menuRect.w + 2*i, menuRect.h + 2*i });
         char buf[32]; sprintf(buf, "Ready: %d/%d", serverData.readyCount, serverData.numberOfPlayers);
-        SDL_Color clr = {255,255,255};
-        SDL_Surface* surf = TTF_RenderText_Blended(font, buf, clr);
-        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
-        SDL_Rect dst = {20, 20, surf->w, surf->h};
-        SDL_RenderCopy(renderer, tex, NULL, &dst);
-        SDL_FreeSurface(surf); SDL_DestroyTexture(tex);
+        // Replace manual SDL surface text rendering with Text functions
+        Text *readyText = createText(renderer, 255, 255, 255, font, buf, 20, 20);
+        drawText(readyText);
+        destroyText(readyText);
         SDL_RenderPresent(renderer);
         if (serverData.gameState == ONGOING) break;
         SDL_Delay(FRAME_DELAY_MS);

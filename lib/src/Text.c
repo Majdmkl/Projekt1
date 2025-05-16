@@ -56,3 +56,11 @@ void destroyText(Text *text) {
         free(text);
     }
 }
+
+void drawTextCentered(Text *text, int centerX, int centerY) {
+    if (text && text->texture) {
+        text->rect.x = centerX - text->rect.w / 2;
+        text->rect.y = centerY - text->rect.h / 2;
+        SDL_RenderCopy(text->renderer, text->texture, NULL, &text->rect);
+    }
+}
