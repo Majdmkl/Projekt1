@@ -7,21 +7,23 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_net.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 
 #include "Map.h"
 #include "Bullet.h"
 #include "Character.h"
 #include "Network.h"
+#include "config.h"
 
 void initSDL();
 bool initNetwork();
 void cleanupNetwork();
 SDL_Window* createWindow();
-int mainMenu(SDL_Renderer* renderer); //!
-void waitingRoom(SDL_Renderer* renderer); //!
+int mainMenu(SDL_Renderer* renderer);
+void waitingRoom(SDL_Renderer* renderer);
 bool connectToServer(const char* serverIP);
 int selectCharacter(SDL_Renderer* renderer);
-char* connectionScreen(SDL_Renderer* renderer); //!
+char* connectionScreen(SDL_Renderer* renderer);
 SDL_Renderer* createRenderer(SDL_Window* window);
 void sendPlayerData(Character* player, int action);
 void gameLoop(SDL_Renderer* renderer, Character* player);
@@ -36,73 +38,38 @@ IPaddress serverIP;
 int playerID = -1;
 ServerData serverData;
 bool connected = false;
+SDL_Texture* mapTexture = NULL;
+
+Mix_Chunk *shootSound = NULL;
+Mix_Chunk *hitSound = NULL;
 
 int main(int argc, char* argv[]) {
     initSDL();
 
-    if (!initNetwork()) {  SDL_Log("Network initialization failed!"); return 1; }
+    if (!initNetwork()) { SDL_Log("Network initialization failed!"); return 1; }
 
     SDL_Window* window = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
 
-    if (argc > 1) {
-        if (!connectToServer(argv[1])) {
-            SDL_Log("Failed to connect to server at %s", argv[1]);
-            cleanup(window, renderer);
-            cleanupNetwork();
-            return 1;
-        }
-    } else {
-        if (!connectToServer("127.0.0.1")) {
-            SDL_Log("Failed to connect to local server");
-            cleanup(window, renderer);
-            cleanupNetwork();
-            return 1;
-        }
-    }
+    mapTexture = loadTexture(renderer, "lib/assets/images/ui/MapNew.png");
 
+    int selected = -1;
+    char *ip = NULL;
     int menuSelection = mainMenu(renderer);
-    if (menuSelection == 1) {
-        char* ip = connectionScreen(renderer);
-        if(ip) {
-            int selected = selectCharacter(renderer);
-            if(selected == -1) {
-                cleanup(window, renderer);
-                cleanupNetwork();
-                return 1;
-            }
 
-            waitingRoom(renderer);
-
-            Character * player = createSelectedCharacter(renderer, selected);
-            if (!player) {
-                SDL_Log("Failed to create character");
-                cleanup(window, renderer);
-                cleanupNetwork();
-                return 1;
-            }
-
-            gameLoop(renderer, player);
-            destroyCharacter(player);
-            cleanup(window, renderer);
-            cleanupNetwork();
-            return 0;
-        }
-
-        cleanup(window, renderer);
-        cleanupNetwork();
-        return 0;
+    switch (menuSelection) {
+    //start button = 0
+    case 0: ip = (argc > 1) ? argv[1] : "127.0.0.1"; break;
+    //connect button = 1
+    case 1: ip = connectionScreen(renderer); break;
+    //exit button = 2
+    case 2: cleanup(window, renderer); cleanupNetwork(); return 0;
+    default: break;
     }
 
-    if (menuSelection == 2) {
-        cleanup(window, renderer);
-        cleanupNetwork();
-        return 0;
-    }
-
-    // Start menu - Start game
-    int selected = selectCharacter(renderer);
-    if (selected == -1) {
+    if (ip && connectToServer(ip)) selected = selectCharacter(renderer);
+    else {
+        SDL_Log("Invalid IP address.");
         cleanup(window, renderer);
         cleanupNetwork();
         return 1;
@@ -126,21 +93,24 @@ int main(int argc, char* argv[]) {
     SDLNet_UDP_Send(clientSocket, -1, sendPacket);
 
     Uint32 startTime = SDL_GetTicks();
-    while (SDL_GetTicks() - startTime < 10000) {
+    Uint32 lastTimeSent = startTime;
+    while (SDL_GetTicks() - startTime < CONNECTION_TIMEOUT_MS) {
         if (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
             memcpy(&serverData, receivePacket->data, sizeof(ServerData));
 
-            for (int i = 0; i < MAX_ANIMALS; i++) {
-                if (serverData.slotsTaken[i] &&
-                    serverData.animals[i].type == selected) {
+            for (int i = 0; i < MAX_PLAYERS; i++) {
+                if (serverData.slotsTaken[i] &&  serverData.animals[i].type == selected) {
                     playerID = i;
                     connected = true;
                     break;
                 }
             }
-
             if (connected) break;
-        } else SDLNet_UDP_Send(clientSocket, -1, sendPacket);  // resend connect request
+        }
+
+        Uint32 now = SDL_GetTicks();
+        if (now - lastTimeSent > NETWORK_SEND_INTERVAL_MS)
+            if (sendPacket) { SDLNet_UDP_Send(clientSocket, -1, sendPacket); lastTimeSent = now; }
 
         SDL_Delay(100);
     }
@@ -153,7 +123,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // 👉 Starta spelet
+    waitingRoom(renderer);
     gameLoop(renderer, player);
 
     destroyCharacter(player);
@@ -168,11 +138,12 @@ void initSDL() {
     IMG_Init(IMG_INIT_PNG);
     TTF_Init();
     SDLNet_Init();
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { SDL_Log("Mix_OpenAudio error: %s", Mix_GetError()); }
+    shootSound = Mix_LoadWAV("lib/assets/sounds/shoot.wav");
+    hitSound = Mix_LoadWAV("lib/assets/sounds/wall_hit.wav");
 }
 
 bool initNetwork() {
-    if (SDLNet_Init() != 0) { SDL_Log("SDLNet_Init error: %s", SDLNet_GetError()); return false; }
-
     clientSocket = SDLNet_UDP_Open(0);
     if (!clientSocket) { SDL_Log("SDLNet_UDP_Open error: %s", SDLNet_GetError()); return false; }
 
@@ -199,6 +170,31 @@ bool connectToServer(const char* serverIP_str) {
     return true;
 }
 
+static void applyPlayerAction(ClientData* clientData, Character* player, int action) {
+    switch (action) {
+        case 1: clientData->command[1] = UP; break;
+        case 2: clientData->command[2] = DOWN; break;
+        case 3: clientData->command[3] = LEFT; break;
+        case 4: clientData->command[4] = RIGHT; break;
+        case 5:
+            clientData->command[5] = FIRE;
+            clientData->bulletStartX = getX(player) + CHARACTER_WIDTH/2.0f;
+            clientData->bulletStartY = getY(player) + CHARACTER_HEIGHT/2.0f;
+            int mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
+            float ddx = mouseX - clientData->bulletStartX;
+            float ddy = mouseY - clientData->bulletStartY;
+            float mag = sqrtf(ddx*ddx + ddy*ddy);
+            if (mag > 0.0f) {
+                clientData->bulletDx = ddx/mag * MOVE_SPEED;
+                clientData->bulletDy = ddy/mag * MOVE_SPEED;
+            } else {
+                clientData->bulletDx = 0;
+                clientData->bulletDy = 0;
+            }
+            break;
+    }
+}
 
 void sendPlayerData(Character* player, int action) {
     if (!connected) return;
@@ -208,30 +204,7 @@ void sendPlayerData(Character* player, int action) {
     clientData.animals.x = getX(player);
     clientData.animals.y = getY(player);
 
-    switch (action) {
-        case 1: clientData.command[1] = UP; break;
-        case 2: clientData.command[2] = DOWN; break;
-        case 3: clientData.command[3] = LEFT; break;
-        case 4: clientData.command[4] = RIGHT; break;
-        case 5:
-            clientData.command[5] = FIRE;
-            clientData.bulletStartX = getX(player) + CHARACTER_WIDTH / 2.0f;
-            clientData.bulletStartY = getY(player) + CHARACTER_HEIGHT / 2.0f;
-
-            int mouseX, mouseY;
-            SDL_GetMouseState(&mouseX, &mouseY);
-            float ddx = mouseX - clientData.bulletStartX;
-            float ddy = mouseY - clientData.bulletStartY;
-            float mag = sqrtf(ddx * ddx + ddy * ddy);
-            if (mag > 0.0f) {
-                clientData.bulletDx = ddx / mag * MOVE_SPEED;
-                clientData.bulletDy = ddy / mag * MOVE_SPEED;
-            } else {
-                clientData.bulletDx = 0;
-                clientData.bulletDy = 0;
-            }
-            break;
-    }
+    applyPlayerAction(&clientData, player, action);
 
     memcpy(sendPacket->data, &clientData, sizeof(ClientData));
     sendPacket->len = sizeof(ClientData);
@@ -259,26 +232,30 @@ Character* createSelectedCharacter(SDL_Renderer* renderer, int selected) {
 void gameLoop(SDL_Renderer* renderer, Character* player) {
     if (!player) { SDL_Log("Invalid player character"); return; }
 
-    MAP* gameMap = createMap(renderer);
-    if (!gameMap) { SDL_Log("Failed to create map"); return; }
-
-    Bullet* bullets[MAX_BULLETS];
+    Bullet* bullets[MAX_BULLETS] = {NULL};
     int bulletCount = 0;
 
-    Character* otherPlayers[MAX_ANIMALS] = {NULL};
-    bool playerActive[MAX_ANIMALS] = {false};
+    Character* otherPlayers[MAX_PLAYERS] = {NULL};
+    bool playerActive[MAX_PLAYERS] = {false};
 
+    SDL_Texture* packageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/package1.png");
+    if (!packageIcon) {
+        SDL_Log("Failed to load package icon: %s", IMG_GetError());
+        return;
+    }
     SDL_Event event;
     bool running = true;
     bool spectating = false;
     float deathX = 0, deathY = 0;
     Uint32 lastNetworkUpdate = 0;
 
-    for (int i = 0; i < MAX_ANIMALS; i++) {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
         if (i != playerID && serverData.slotsTaken[i]) {
             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
             if (otherPlayers[i]) {
                 setPosition(otherPlayers[i], serverData.animals[i].x, serverData.animals[i].y);
+                setPackageCount(otherPlayers[i], serverData.animals[i].packages);
+                setCharacterPackageIcon(otherPlayers[i], packageIcon);
                 playerActive[i] = true;
             }
         }
@@ -295,6 +272,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 float startY = getY(player) + CHARACTER_HEIGHT / 2.0f;
 
                 sendPlayerData(player, 5);
+                Mix_PlayChannel(-1, shootSound, 0);
             }
         }
 
@@ -335,7 +313,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         float prevPlayerY = getY(player);
         moveCharacter(player, moveX, moveY, walls, MAX_WALLS);
 
-        for (int i = 0; i < MAX_ANIMALS; i++) {
+        for (int i = 0; i < MAX_PLAYERS; i++) {
             if (i != playerID && playerActive[i] && otherPlayers[i]) {
                 SDL_Rect pRect = { getX(player), getY(player), CHARACTER_WIDTH, CHARACTER_HEIGHT };
                 SDL_Rect oRect = { getX(otherPlayers[i]), getY(otherPlayers[i]), CHARACTER_WIDTH, CHARACTER_HEIGHT };
@@ -345,17 +323,20 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         updateCharacterAnimation(player, SDL_GetTicks());
 
         Uint32 now = SDL_GetTicks();
-        if (now - lastNetworkUpdate > 16) { // ~60fps network tick
+        if (now - lastNetworkUpdate > NETWORK_TICK_MS) { // ~60fps network tick
             bool gotData = false;
             while (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
                 memcpy(&serverData, receivePacket->data, sizeof(ServerData));
                 gotData = true;
             }
             if (gotData) {
-                for (int i = 0; i < MAX_ANIMALS; i++) {
+                for (int i = 0; i < MAX_PLAYERS; i++) {
                     if (i != playerID && serverData.slotsTaken[i]) {
                         if (!playerActive[i] || !otherPlayers[i]) {
                             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
+                            if (otherPlayers[i]) {
+                                setCharacterPackageIcon(otherPlayers[i], packageIcon); // ✅ LÄGG TILL DETTA!
+                            }
                             playerActive[i] = otherPlayers[i] != NULL;
                         }
                         if (playerActive[i]) {
@@ -369,9 +350,12 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                             else (dy > 0 ? turnDown : turnUp)(otherPlayers[i]);
 
                             setPosition(otherPlayers[i], newX, newY);
+                            setPackageCount(otherPlayers[i], serverData.animals[i].packages);
                             updateCharacterAnimation(otherPlayers[i], SDL_GetTicks());
-                            int targetHP = serverData.animals[i].health;
-                            while (getPlayerHP(otherPlayers[i]) > targetHP) decreaseHealth(otherPlayers[i]);
+                            int oldHP = getPlayerHP(otherPlayers[i]);
+                            int srvHP = serverData.animals[i].health;
+                            if (srvHP < oldHP) Mix_PlayChannel(-1, hitSound, 0);
+                            while (getPlayerHP(otherPlayers[i]) > srvHP) decreaseHealth(otherPlayers[i]);
                         }
                     } else if (i != playerID && !serverData.slotsTaken[i] && playerActive[i]) {
                         if (otherPlayers[i]) destroyCharacter(otherPlayers[i]);
@@ -381,7 +365,9 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 }
 
                 if (serverData.slotsTaken[playerID]) {
+                    int oldHP = getPlayerHP(player);
                     int srvHP = serverData.animals[playerID].health;
+                    if (srvHP < oldHP) Mix_PlayChannel(-1, hitSound, 0);
                     while (getPlayerHP(player) > srvHP) decreaseHealth(player);
                 }
 
@@ -404,7 +390,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
             lastNetworkUpdate = now;
         }
-        for (int i = 0; i < MAX_ANIMALS; ++i)
+        for (int i = 0; i < MAX_PLAYERS; ++i)
             if (i != playerID && playerActive[i] && otherPlayers[i]) updateCharacterAnimation(otherPlayers[i], now);
 
         for (int i = 0; i < bulletCount; ) {
@@ -418,8 +404,8 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, mapTexture, NULL, NULL);
 
-        renderMap(gameMap, renderer);
         if (player && getPlayerHP(player) > 0) {
             renderCharacter(player, renderer);
             healthBar(player, renderer);
@@ -429,7 +415,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             SDL_RenderFillRect(renderer, &deathRect);
         }
 
-        for (int i = 0; i < MAX_ANIMALS; i++) {
+        for (int i = 0; i < MAX_PLAYERS; i++) {
             if (i != playerID && playerActive[i] && otherPlayers[i]) {
                 if (getPlayerHP(otherPlayers[i]) > 0) renderCharacter(otherPlayers[i], renderer);
                 healthBar(otherPlayers[i], renderer);
@@ -438,14 +424,22 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         for (int i = 0; i < bulletCount; i++) drawBullet(bullets[i], renderer);
 
         SDL_RenderPresent(renderer);
-        SDL_Delay(16); // ~60 fps
+        SDL_Delay(FRAME_DELAY_MS); // ~60 fps
     }
 
     for (int i = 0; i < bulletCount; i++) destroyBullet(bullets[i]);
-    for (int i = 0; i < MAX_ANIMALS; i++) if (i != playerID && playerActive[i]) destroyCharacter(otherPlayers[i]);
+    for (int i = 0; i < MAX_PLAYERS; i++) if (i != playerID && playerActive[i]) destroyCharacter(otherPlayers[i]);
 
-    destroyMap(gameMap);
 }
+
+static void tileGrass(SDL_Renderer* renderer, SDL_Texture* grass) {
+    for (int y = 0; y < SCREEN_HEIGHT; y += 64)
+        for (int x = 0; x < SCREEN_WIDTH; x += 64) {
+            SDL_Rect dst = { x, y, 64, 64 };
+            SDL_RenderCopy(renderer, grass, NULL, &dst);
+        }
+}
+
 char* connectionScreen(SDL_Renderer* renderer) {
     static char ip[64] = "";
     bool typingActive = false;
@@ -502,12 +496,7 @@ char* connectionScreen(SDL_Renderer* renderer) {
 
         // === RENDERING ===
         // 1. Bakgrundsgräs
-        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
-            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
-                SDL_Rect dst = { x, y, 64, 64 };
-                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
-            }
-        }
+        tileGrass(renderer, grassTexture);
 
         // 2. Mörk overlay
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -575,56 +564,52 @@ char* connectionScreen(SDL_Renderer* renderer) {
 void waitingRoom(SDL_Renderer* renderer) {
     SDL_Texture* bgTexture = loadTexture(renderer, "lib/assets/images/ui/waitingRoom.png");
     SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/images/objects/nature/grass.png");
-
+    TTF_Font* font = TTF_OpenFont("lib/assets/fonts/PressStart2P-Regular.ttf", 24);
     SDL_Event event;
-
     SDL_Rect menuRect = {(SCREEN_WIDTH - 700) / 2, (SCREEN_HEIGHT - 900) / 2, 690, 910};
     SDL_Rect continueBtn = { menuRect.x + 170, menuRect.y + 765, 390, 85 };
-
+    bool pressed = false;
+    Uint32 lastSent = SDL_GetTicks();
     while (1) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) return;
             if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
-                int x = event.button.x;
-                int y = event.button.y;
-                if (SDL_PointInRect(&(SDL_Point){x, y}, &continueBtn)) {
-                    SDL_DestroyTexture(bgTexture);
-                    SDL_DestroyTexture(grassTexture);
-                    return;
-                }
+                int x = event.button.x, y = event.button.y;
+                if (SDL_PointInRect(&(SDL_Point){x, y}, &continueBtn)) pressed = true;
             }
         }
-
-        // Bakgrundsgräs
-        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
-            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
-                SDL_Rect dst = { x, y, 64, 64 };
-                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
-            }
+        if (pressed && SDL_GetTicks() - lastSent > 200) {
+            ClientData cd = {0};
+            cd.playerNumber = playerID;
+            cd.command[7] = CONTINUE;
+            memcpy(sendPacket->data, &cd, sizeof(ClientData));
+            sendPacket->len = sizeof(ClientData);
+            SDLNet_UDP_Send(clientSocket, -1, sendPacket);
+            lastSent = SDL_GetTicks();
         }
-
-        // Mörk overlay
+        while (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
+            memcpy(&serverData, receivePacket->data, sizeof(ServerData));
+        }
+        tileGrass(renderer, grassTexture);
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
-        SDL_Rect overlay = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-        SDL_RenderFillRect(renderer, &overlay);
-
-        // Visa waitingRoom-bilden i mitten med rätt storlek
+        SDL_Rect overlay = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}; SDL_RenderFillRect(renderer, &overlay);
         SDL_RenderCopy(renderer, bgTexture, NULL, &menuRect);
-
-        // Svart tjock outline
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        for (int i = 0; i < 4; i++) {
-            SDL_Rect outline = { menuRect.x - i, menuRect.y - i, menuRect.w + 2 * i, menuRect.h + 2 * i };
-            SDL_RenderDrawRect(renderer, &outline);
-        }
-
-        // Vit ruta runt continue-knapp (för debug)
-        // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        // SDL_RenderDrawRect(renderer, &continueBtn);
-
+        for (int i = 0; i < 4; i++) SDL_RenderDrawRect(renderer, &(SDL_Rect){ menuRect.x - i, menuRect.y - i, menuRect.w + 2*i, menuRect.h + 2*i });
+        char buf[32]; sprintf(buf, "Ready: %d/%d", serverData.readyCount, serverData.numberOfPlayers);
+        SDL_Color clr = {255,255,255};
+        SDL_Surface* surf = TTF_RenderText_Blended(font, buf, clr);
+        SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+        SDL_Rect dst = {20, 20, surf->w, surf->h};
+        SDL_RenderCopy(renderer, tex, NULL, &dst);
+        SDL_FreeSurface(surf); SDL_DestroyTexture(tex);
         SDL_RenderPresent(renderer);
+        if (serverData.gameState == ONGOING) break;
+        SDL_Delay(FRAME_DELAY_MS);
     }
+    SDL_DestroyTexture(bgTexture); SDL_DestroyTexture(grassTexture); TTF_CloseFont(font);
+    return;
 }
 
 int mainMenu(SDL_Renderer* renderer) {
@@ -656,12 +641,7 @@ int mainMenu(SDL_Renderer* renderer) {
             }
         }
 
-        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
-            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
-                SDL_Rect dst = { x, y, 64, 64 };
-                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
-            }
-        }
+        tileGrass(renderer, grassTexture);
 
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
@@ -735,12 +715,7 @@ int selectCharacter(SDL_Renderer* renderer) {
 
         // RENDERING
         // Bakgrundsgräs
-        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
-            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
-                SDL_Rect dst = { x, y, 64, 64 };
-                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
-            }
-        }
+        tileGrass(renderer, grassTexture);
 
         // Mörk overlay ovanpå bakgrunden
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -780,9 +755,14 @@ int selectCharacter(SDL_Renderer* renderer) {
 }
 
 void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
+    if (mapTexture) SDL_DestroyTexture(mapTexture);
     if (renderer) SDL_DestroyRenderer(renderer);
     if (window) SDL_DestroyWindow(window);
     cleanupNetwork();
+    Mix_FreeChunk(shootSound);
+    Mix_FreeChunk(hitSound);
+    Mix_CloseAudio();
+    Mix_Quit();
     SDL_Quit();
     IMG_Quit();
     TTF_Quit();

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <string.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_timer.h>
@@ -14,34 +13,28 @@
 #include "Bullet.h"
 #include "Text.h"
 #include "Map.h"
+#include "config.h"
 
-#define NR_OF_MENUTEXTURES 2
+#define CONTINUE_CMD CONTINUE
 
-typedef enum { MAIN, SETTINGS, CONFIGURE, INGAME } MenuState;
-
-typedef struct {
-    char textureFiles[NR_OF_MENUTEXTURES][60];
-    SDL_Texture *textures[NR_OF_MENUTEXTURES];
-} MenuTextures;
+typedef enum { MAIN, INGAME } MenuState;
 
 typedef struct {
     TTF_Font *font;
     GameState state;
     ServerData server_data;
     UDPsocket socket;
-    SDL_Rect menuRect;
     UDPpacket *packet;
     SDL_Window *window;
     MenuState menuState;
     SDL_Renderer *renderer;
-    SDL_Rect backgroundRect;
     SDL_Texture *background;
-    MenuTextures *menuTextures;
     Bullet *bullets[MAX_BULLETS];
     Text *waitingText, *joinedText;
-    Character *players[MAX_ANIMALS];
-    IPaddress serverAddress[MAX_ANIMALS];
-    int numBullets, numPlayers, slotsTaken[MAX_ANIMALS], fire;
+    Character *players[MAX_PLAYERS];
+    IPaddress serverAddress[MAX_PLAYERS];
+    int numBullets, numPlayers, slotsTaken[MAX_PLAYERS], fire;
+    bool ready[MAX_PLAYERS];
 } Game;
 
 void run(Game *game);
@@ -79,7 +72,7 @@ int initiate(Game *game) {
     game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!game->renderer) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_CreateRenderer Error: %s", SDL_GetError()); return 0; }
 
-    game->background = IMG_LoadTexture(game->renderer, "lib/assets/images/objects/buildings/Apartment.png");
+    game->background = IMG_LoadTexture(game->renderer, "lib/assets/images/ui/MapNew.png");
     if (!game->background) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "IMG_LoadTexture Error: %s", IMG_GetError()); return 0; }
 
     if (SDLNet_Init() == -1) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_Init Error: %s", SDLNet_GetError()); return 0;}
@@ -90,10 +83,7 @@ int initiate(Game *game) {
     game->packet = SDLNet_AllocPacket(512);
     if (!game->packet) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_AllocPacket Error: %s", SDLNet_GetError()); return 0; }
 
-    game->packet = SDLNet_AllocPacket(512);
-    if (!game->packet) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_AllocPacket Error: %s", SDLNet_GetError()); return 0;}
-
-    for (int i = 0; i < MAX_ANIMALS; i++) {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
         game->players[i] = createCharacter(game->renderer, i);
         if (!game->players[i]) {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "createCharacter(%d) failed", i + 1);
@@ -106,6 +96,7 @@ int initiate(Game *game) {
 
     game->state = MAIN;
     game->numPlayers = 0;
+    memset(game->ready, 0, sizeof(game->ready));
 
     return 1;
 }
@@ -143,10 +134,10 @@ void run(Game *game) {
 
                 for (int b = 0; b < game->numBullets; ) {
                     Bullet* bullet = game->bullets[b];
-                    if (!bullet || bullet->whoShot < 0 || bullet->whoShot >= MAX_ANIMALS) { b++; continue;}
+                    if (!bullet || bullet->whoShot < 0 || bullet->whoShot >= MAX_PLAYERS) { b++; continue;}
 
                     bool hit = false;
-                    for (int p = 0; p < MAX_ANIMALS; p++) {
+                    for (int p = 0; p < MAX_PLAYERS; p++) {
                         Character* target = game->players[p];
                         if (p != bullet->whoShot && target && getPlayerHP(target) > 0 && checkCollisionCharacterBullet(target, bullet)) {
                             decreaseHealth(target);
@@ -167,7 +158,7 @@ void run(Game *game) {
                 if (SDL_PollEvent(&event) && event.type == SDL_QUIT) running = 0;
 
                 SDL_RenderPresent(game->renderer);
-                SDL_Delay(16);
+                SDL_Delay(FRAME_DELAY_MS);
                 break;
 
             case MAIN:
@@ -177,23 +168,39 @@ void run(Game *game) {
                 if (SDLNet_UDP_Recv(game->socket, game->packet) == 1) {
                     memcpy(&clientData, game->packet->data, sizeof(ClientData));
 
-                    if (clientData.command[0] == CONNECTING && clientData.playerNumber >= 0 && clientData.playerNumber < MAX_ANIMALS) {
+                    if (clientData.command[0] == CONNECTING && clientData.playerNumber >= 0 && clientData.playerNumber < MAX_PLAYERS) {
                         int id = clientData.playerNumber;
                         if (!game->slotsTaken[id]) {
                             game->slotsTaken[id] = 1;
                             game->serverAddress[id] = game->packet->address;
                             game->numPlayers++;
-                            sendGameData(game, clientData);
-                            if (game->numPlayers >= MIN_PLAYERS) {
-                                game->state = INGAME;
-                                destroyText(game->waitingText);
-                                drawText(game->joinedText);
-                            }
+                            game->ready[id] = false;
                         }
+                    }
+                    if (clientData.command[7] == CONTINUE_CMD && clientData.playerNumber >= 0 && clientData.playerNumber < MAX_PLAYERS) {
+                        game->ready[clientData.playerNumber] = true;
                     }
                 }
 
+                int readyCount = 0;
+                for (int i = 0; i < MAX_PLAYERS; i++) if (game->ready[i]) readyCount++;
+
+                sendGameData(game, clientData);
+
+                if (game->numPlayers >= MAX_PLAYERS && readyCount == game->numPlayers) {
+                    game->state = INGAME;
+                    destroyText(game->waitingText);
+                    drawText(game->joinedText);
+                }
+
                 drawText(game->waitingText);
+                {
+                    char buf[32];
+                    sprintf(buf, "Ready: %d/%d", readyCount, game->numPlayers);
+                    Text* counterText = createText(game->renderer, 255,255,255, game->font, buf, 20, 20);
+                    drawText(counterText);
+                    destroyText(counterText);
+                }
                 SDL_RenderPresent(game->renderer);
 
                 if (SDL_PollEvent(&event) && event.type == SDL_QUIT) running = 0;
@@ -203,7 +210,7 @@ void run(Game *game) {
 }
 
 void executeCommand(Game *game, ClientData *clientData) {
-    if (!clientData || clientData->playerNumber < 0 || clientData->playerNumber >= MAX_ANIMALS) return;
+    if (!clientData || clientData->playerNumber < 0 || clientData->playerNumber >= MAX_PLAYERS) return;
 
     game->slotsTaken[clientData->playerNumber] = 1;
     Character *player = game->players[clientData->playerNumber];
@@ -234,7 +241,7 @@ void executeCommand(Game *game, ClientData *clientData) {
 }
 
 void renderCharacters(Game *game) {
-    for (int i = 0; i < MAX_ANIMALS; i++) {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
         if (game->slotsTaken[i] && game->players[i]) {
             renderCharacter(game->players[i], game->renderer);
             healthBar(game->players[i], game->renderer);
@@ -255,6 +262,7 @@ void characterSendData(Character *character, Animal *animal) {
     animal->type = getcharacterID(character);
     animal->speed_x = MOVE_SPEED;
     animal->speed_y = MOVE_SPEED;
+    animal->packages = getPackageCount(character);
 }
 
 void sendGameData(Game *game, ClientData clientData) {
@@ -262,7 +270,7 @@ void sendGameData(Game *game, ClientData clientData) {
     server_data.gameState = game->state;
     server_data.numberOfPlayers = game->numPlayers;
 
-    for (int i = 0; i < MAX_ANIMALS; i++) {
+    for (int i = 0; i < MAX_PLAYERS; i++) {
         if (getPlayerHP(game->players[i]) <= 0) game->slotsTaken[i] = 0;
         server_data.slotsTaken[i] = game->slotsTaken[i];
         characterSendData(game->players[i], &server_data.animals[i]);
@@ -278,6 +286,10 @@ void sendGameData(Game *game, ClientData clientData) {
         server_data.bullets[i].whoShot = b->whoShot;
     }
 
+    int readyCount = 0;
+    for (int i = 0; i < MAX_PLAYERS; i++) if (game->ready[i]) readyCount++;
+    server_data.readyCount = readyCount;
+
     memcpy(game->packet->data, &server_data, sizeof(ServerData));
     game->packet->len = sizeof(ServerData);
 
@@ -288,7 +300,7 @@ void sendGameData(Game *game, ClientData clientData) {
 }
 
 void close(Game *game) {
-    for (int i = 0; i < MAX_ANIMALS; i++) if (game->players[i]) destroyCharacter(game->players[i]);
+    for (int i = 0; i < MAX_PLAYERS; i++) if (game->players[i]) destroyCharacter(game->players[i]);
     for (int i = 0; i < game->numBullets; i++) if (game->bullets[i]) destroyBullet(game->bullets[i]);
 
     destroyText(game->waitingText);

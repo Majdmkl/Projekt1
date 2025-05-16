@@ -10,7 +10,7 @@
 
 struct Character {
     float x, y, speed;
-    int health, frame, characterID;
+    int health, frame, characterID, packages;
     Uint32 lastFrameTime;
     SDL_Texture *walkRight;
     SDL_Texture *walkLeft;
@@ -18,16 +18,16 @@ struct Character {
     SDL_Texture *walkUp;
     SDL_Texture *idleFront;
     SDL_Texture *fullSheet;
+    SDL_Texture *packageIcon;
     enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;
 };
 
 float getX(Character* character) { return character->x; }
-
 float getY(Character* character) { return character->y; }
-
 int getcharacterID(Character* character) { return character->characterID; }
-
 float getSpeed(Character* character) { return character->speed; }
+int getPackageCount(Character* character) { return character->packages; }
+void setPackageCount(Character* character, int count) { character->packages = count; }
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
@@ -46,6 +46,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     character->frame = 0;
     character->lastFrameTime = SDL_GetTicks();
     character->state = IDLE;
+    character->packageIcon = NULL;
 
     const char* characterType = NULL;
     switch (characterNumber) {
@@ -67,14 +68,14 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     return character;
 }
 
+void setCharacterPackageIcon(Character* character, SDL_Texture* icon) {
+    if (character) character->packageIcon = icon;
+}
+
 void turnUp(Character* character) { character->state = WALKING_UP; }
-
 void turnDown(Character* character) { character->state = WALKING_DOWN; }
-
 void turnLeft(Character* character) { character->state = WALKING_LEFT; }
-
 void turnRight(Character* character) { character->state = WALKING_RIGHT; }
-
 int getPlayerHP(Character* character) { return character->health; }
 
 void decreaseHealth(Character* character) {
@@ -101,7 +102,7 @@ void updateCharacterAnimation(Character* character, Uint32 deltaTime) {
     if (isMoving && currentTime - character->lastFrameTime >= FRAME_DELAY) {
         character->frame = (character->frame + 1) % FRAME_COUNT;
         character->lastFrameTime = currentTime;
-    } else if (!isMoving) character->frame = 0; // stå still i mittenrutan (mitten av 3 frames)
+    } else if (!isMoving) character->frame = 0;
 }
 
 void setPosition(Character* character, float x, float y) {
@@ -109,48 +110,13 @@ void setPosition(Character* character, float x, float y) {
     character->y = y;
 }
 
-void setDirection(Character* character) {   character->state = IDLE; }
+void setDirection(Character* character) { character->state = IDLE; }
 
 void renderCharacter(Character* character, SDL_Renderer* renderer) {
     SDL_Rect srcRect = { character->frame * CHARACTER_WIDTH, 0, CHARACTER_WIDTH, CHARACTER_HEIGHT };
     SDL_Rect destRect = { character->x, character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
-
-    switch (character->state) {
-        case WALKING_DOWN: SDL_RenderCopy(renderer, character->walkDown, &srcRect, &destRect); break;
-        case WALKING_UP: SDL_RenderCopy(renderer, character->walkUp, &srcRect, &destRect); break;
-        case WALKING_LEFT: SDL_RenderCopy(renderer, character->walkLeft, &srcRect, &destRect); break;
-        case WALKING_RIGHT: SDL_RenderCopy(renderer, character->walkRight, &srcRect, &destRect); break;
-        case IDLE:
-        default: SDL_RenderCopy(renderer, character->idleFront, NULL, &destRect); break;
-    }
-
     SDL_RenderCopy(renderer, character->fullSheet, &srcRect, &destRect);
 }
-
-void healthBar(Character* character, SDL_Renderer* renderer) {
-    SDL_Rect healthRect = { character->x, character->y - 10, (CHARACTER_WIDTH * character->health) / MAX_HEALTH, 5 };
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &healthRect);
-}
-
-int howManyPlayersAlive(Character* players[], int num_players) {
-    int aliveCount = 0;
-    for (int i = 0; i < num_players; i++) if (isCharacterAlive(players[i])) aliveCount++;
-    return aliveCount;
-}
-
-bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
-    SDL_Rect characterRect = { character->x, character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
-    SDL_Rect bulletRect = getBulletRect(bullet);
-
-    return SDL_HasIntersection(&characterRect, &bulletRect);
-}
-
-void setBulletStartPosition(Character* character, float* startX, float* startY) {
-    *startX = character->x + CHARACTER_WIDTH / 2;
-    *startY = character->y + CHARACTER_HEIGHT / 2;
-}
-
 void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount) {
     float prevX = character->x;
     float prevY = character->y;
@@ -183,5 +149,49 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
         }
     }
 
-    if (collision) { character->x = prevX; character->y = prevY; }
+    if (collision) {
+        character->x = prevX;
+        character->y = prevY;
+    }
+}
+
+bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
+    if (!character || !bullet) return false;
+
+    SDL_Rect characterRect = {
+        (int)character->x,
+        (int)character->y,
+        CHARACTER_WIDTH,
+        CHARACTER_HEIGHT
+    };
+
+    SDL_Rect bulletRect = getBulletRect(bullet);
+
+    return SDL_HasIntersection(&characterRect, &bulletRect);
+}
+
+
+void healthBar(Character* character, SDL_Renderer* renderer) {
+    SDL_Rect healthRect = { character->x, character->y - 10, (CHARACTER_WIDTH * character->health) / MAX_HEALTH, 5 };
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    SDL_RenderFillRect(renderer, &healthRect);
+
+    if (character->packageIcon) {
+        int iconSize = 20;
+        int spacing = 3;
+        int totalWidth = 3 * iconSize + 2 * spacing;
+
+        int startX = character->x + (CHARACTER_WIDTH - totalWidth) / 2;
+        int startY = character->y - 30;
+
+        for (int i = 0; i < 3; i++) {
+            SDL_Rect iconRect = {
+                startX + i * (iconSize + spacing),
+                startY,
+                iconSize,
+                iconSize
+            };
+            SDL_RenderCopy(renderer, character->packageIcon, NULL, &iconRect);
+        }
+    }
 }
