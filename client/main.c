@@ -46,6 +46,7 @@ Mix_Chunk *hitSound = NULL;
 Mix_Music *bgMusic = NULL;
 Mix_Chunk *buttonSound = NULL;
 Mix_Chunk *selectSound = NULL;
+Mix_Chunk *deliverSound = NULL;
 
 int main(int argc, char* argv[]) {
     initSDL();
@@ -58,6 +59,7 @@ int main(int argc, char* argv[]) {
     bgMusic = Mix_LoadMUS("lib/assets/sounds/bg_music.mp3");
     buttonSound = Mix_LoadWAV("lib/assets/sounds/Button_press.wav");
     selectSound = Mix_LoadWAV("lib/assets/sounds/character_select.wav");
+    deliverSound = Mix_LoadWAV("lib/assets/sounds/deliver.wav");
     Mix_PlayMusic(bgMusic, -1);
 
     SDL_Window* window = createWindow();
@@ -74,8 +76,7 @@ int main(int argc, char* argv[]) {
     case 0: ip = (argc > 1) ? argv[1] : "127.0.0.1"; break;
     //connect button = 1
     case 1: ip = connectionScreen(renderer); break;
-    //exit button = 2
-    case 2: cleanup(window, renderer); cleanupNetwork(); return 0;
+    //exit button = 2: cleanup(window, renderer); cleanupNetwork(); return 0;
     default: break;
     }
 
@@ -278,6 +279,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 SDL_Rect pRect={ (int)getX(player), (int)getY(player), CHARACTER_WIDTH, CHARACTER_HEIGHT };
                 for(int i=0;i<3;i++) if(!delivered[i] && SDL_HasIntersection(&pRect, &targets[i])) {
                     delivered[i]=true; deliveriesRemaining--; setPackageCount(player, deliveriesRemaining);
+                    Mix_PlayChannel(-1, deliverSound, 0);
                 }
             }
         }
@@ -610,7 +612,10 @@ void waitingRoom(SDL_Renderer* renderer) {
             if (event.type == SDL_QUIT) return;
             if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                 int x = event.button.x, y = event.button.y;
-                if (SDL_PointInRect(&(SDL_Point){x, y}, &continueBtn)) pressed = true;
+                if (SDL_PointInRect(&(SDL_Point){x, y}, &continueBtn)) {
+                    Mix_PlayChannel(-1, buttonSound, 0);
+                    pressed = true;
+                }
             }
         }
         if (pressed && SDL_GetTicks() - lastSent > 200) {
@@ -796,6 +801,7 @@ void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
     Mix_FreeChunk(hitSound);
     Mix_FreeChunk(buttonSound);
     Mix_FreeChunk(selectSound);
+    Mix_FreeChunk(deliverSound);
     Mix_FreeMusic(bgMusic);
     Mix_CloseAudio();
     Mix_Quit();
