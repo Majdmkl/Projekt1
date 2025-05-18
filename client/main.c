@@ -198,7 +198,7 @@ void sendPlayerData(Character* player, int action) {
     SDLNet_UDP_Send(clientSocket, -1, sendPacket);
 }
 
-SDL_Window* createWindow() {return SDL_CreateWindow("Safari DELIVERY", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); }
+SDL_Window* createWindow() {return SDL_CreateWindow("Safari Delivery", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0); }
 
 SDL_Renderer* createRenderer(SDL_Window* window) { return SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); }
 
@@ -446,7 +446,11 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             bool won = (deliveriesRemaining==0) || (aliveCount==1 && getPlayerHP(player)>0);
             extern void endScreen(SDL_Renderer*, bool);
             endScreen(renderer, won);
-            return;
+            SDL_Event event;
+            while (SDL_WaitEvent(&event)) if (event.type == SDL_QUIT) break;
+
+            running = false;
+            continue;
         }
 
         SDL_RenderPresent(renderer);
