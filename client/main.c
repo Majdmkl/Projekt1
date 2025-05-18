@@ -26,6 +26,7 @@ bool connectToServer(const char* serverIP);
 int selectCharacter(SDL_Renderer* renderer);
 char* connectionScreen(SDL_Renderer* renderer);
 SDL_Renderer* createRenderer(SDL_Window* window);
+void endScreen(SDL_Renderer* renderer, bool won);
 void sendPlayerData(Character* player, int action);
 void gameLoop(SDL_Renderer* renderer, Character* player);
 void cleanup(SDL_Window* window, SDL_Renderer* renderer);
@@ -41,12 +42,8 @@ ServerData serverData;
 bool connected = false;
 SDL_Texture* mapTexture = NULL;
 
-Mix_Chunk *shootSound = NULL;
-Mix_Chunk *hitSound = NULL;
 Mix_Music *bgMusic = NULL;
-Mix_Chunk *buttonSound = NULL;
-Mix_Chunk *selectSound = NULL;
-Mix_Chunk *deliverSound = NULL;
+Mix_Chunk *shootSound = NULL, *hitSound = NULL, *buttonSound = NULL, *selectSound = NULL, *deliverSound = NULL;
 
 int main(int argc, char* argv[]) {
     initSDL();
@@ -237,6 +234,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     bool playerActive[MAX_PLAYERS] = {false};
 
     SDL_Texture* packageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/package1.png");
+    SDL_Texture* housePackageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/Zone.png");
     setCharacterPackageIcon(player, packageIcon);
     setPackageCount(player, deliveriesRemaining);
     SDL_Event event;
@@ -435,12 +433,12 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             }
         }
         for (int i = 0; i < bulletCount; i++) drawBullet(bullets[i], renderer);
-
+        // house packages
         for(int i=0;i<3;i++) {
             if(!delivered[i]) {
                 SDL_Rect h = targets[i];
-                SDL_Rect iconDest = { h.x + (h.w - 32)/2, h.y - 32, 32, 32 };
-                SDL_RenderCopy(renderer, packageIcon, NULL, &iconDest);
+                SDL_Rect iconDest = { h.x + (h.w - 64)/2, h.y - 64, 64, 64 };
+                SDL_RenderCopy(renderer, housePackageIcon, NULL, &iconDest);
             }
         }
 
@@ -448,7 +446,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         if(deliveriesRemaining==0 || aliveCount<=1) {
             gameOver = true;
             bool won = (deliveriesRemaining==0) || (aliveCount==1 && getPlayerHP(player)>0);
-            extern void endScreen(SDL_Renderer*, bool);
             endScreen(renderer, won);
             SDL_Event event;
             while (SDL_WaitEvent(&event)) if (event.type == SDL_QUIT) break;
