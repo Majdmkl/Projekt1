@@ -2,9 +2,7 @@
 #define NETWORK_H
 
 #include "Bullet.h"
-
-#define MAX_PLAYERS 3
-#define SERVER_PORT 2000
+#include "config.h"
 
 typedef enum { MENU, ONGOING  } GameState;
 typedef struct { float x, y, dx, dy; int whoShot; } BulletData;

@@ -1,8 +1,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#define SERVER_PORT 2000
+
 // Character
 #define MOVE_SPEED 3
+#define MAX_PLAYERS 3
 #define MAX_HEALTH 100
 #define CHARACTER_WIDTH 64
 #define CHARACTER_HEIGHT 64
