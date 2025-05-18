@@ -215,6 +215,20 @@ Character* createSelectedCharacter(SDL_Renderer* renderer, int selected) {
 }
 
 void gameLoop(SDL_Renderer* renderer, Character* player) {
+    SDL_Rect possibleHouses[] = {
+        {153, 42, 166, 172},    // Bakery
+        {74, 480, 153, 143},    // School (Blue house)
+        {327, 755, 156, 155},   // Cafe (Yellow house)
+        {1082, 768, 169, 140},  // Garden (Red house)
+        {1165, 445, 169, 144},  // Blue house
+        {1400, 116, 178, 158},  // Gym (White house)
+        {1524, 512, 159, 139},  // Green house
+        {1584, 765, 144, 122},  // Black house
+    };
+    SDL_Rect targets[3]; bool delivered[3] = {false,false,false}; int deliveriesRemaining = 3;
+    srand(SDL_GetTicks());
+    for(int i=0;i<3;i++) { int idx=rand()% (sizeof(possibleHouses)/sizeof(SDL_Rect)); targets[i]=possibleHouses[idx]; }
+
     Bullet* bullets[MAX_BULLETS] = {NULL};
     int bulletCount = 0;
 
@@ -259,6 +273,12 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
                 sendPlayerData(player, 5);
                 Mix_PlayChannel(-1, shootSound, 0);
+            }
+            if (event.type==SDL_KEYDOWN && event.key.keysym.sym==SDLK_e && player) {
+                SDL_Rect pRect={ (int)getX(player), (int)getY(player), CHARACTER_WIDTH, CHARACTER_HEIGHT };
+                for(int i=0;i<3;i++) if(!delivered[i] && SDL_HasIntersection(&pRect, &targets[i])) {
+                    delivered[i]=true; deliveriesRemaining--; setPackageCount(player, deliveriesRemaining);
+                }
             }
         }
 
@@ -410,6 +430,23 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         }
         for (int i = 0; i < bulletCount; i++) drawBullet(bullets[i], renderer);
 
+        for(int i=0;i<3;i++) {
+            if(!delivered[i]) {
+                SDL_Rect h = targets[i];
+                SDL_Rect iconDest = { h.x + (h.w - 32)/2, h.y + (h.h - 32)/2, 32, 32 };
+                SDL_RenderCopy(renderer, packageIcon, NULL, &iconDest);
+            }
+        }
+
+        // check end conditions
+        int aliveCount=0; for(int i=0;i<MAX_PLAYERS;i++) if(i==playerID? getPlayerHP(player)>0 : playerActive[i]) aliveCount++;
+        if(deliveriesRemaining==0 || aliveCount<=1) {
+            bool won = (deliveriesRemaining==0) || (aliveCount==1 && getPlayerHP(player)>0);
+            extern void endScreen(SDL_Renderer*, bool);
+            endScreen(renderer, won);
+            return;
+        }
+
         SDL_RenderPresent(renderer);
         SDL_Delay(FRAME_DELAY_MS);
     }
@@ -417,6 +454,17 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     for (int i = 0; i < bulletCount; i++) destroyBullet(bullets[i]);
     for (int i = 0; i < MAX_PLAYERS; i++) if (i != playerID && playerActive[i]) destroyCharacter(otherPlayers[i]);
 
+}
+
+void endScreen(SDL_Renderer* renderer, bool won) {
+    TTF_Font* font = TTF_OpenFont("lib/assets/fonts/PressStart2P-Regular.ttf", 48);
+    SDL_Color white={255,255,255,255}, red={255,0,0,255};
+    SDL_Color green={0,255,0,255};
+    const char* msg = won? "You Won" : "You Lost";
+    Text* text = createText(renderer, won?green.r:red.r, won?green.g:red.g, won?green.b:red.b, font, msg, SCREEN_WIDTH/2, won?SCREEN_HEIGHT/2:50);
+    drawTextCentered(text, SCREEN_WIDTH/2, won?SCREEN_HEIGHT/2:50);
+    destroyText(text);
+    SDL_RenderPresent(renderer);
 }
 
 static void tileGrass(SDL_Renderer* renderer, SDL_Texture* grass) {
