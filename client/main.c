@@ -433,12 +433,11 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         for(int i=0;i<3;i++) {
             if(!delivered[i]) {
                 SDL_Rect h = targets[i];
-                SDL_Rect iconDest = { h.x + (h.w - 32)/2, h.y + (h.h - 32)/2, 32, 32 };
+                SDL_Rect iconDest = { h.x + (h.w - 32)/2, h.y - 32, 32, 32 };
                 SDL_RenderCopy(renderer, packageIcon, NULL, &iconDest);
             }
         }
 
-        // check end conditions
         int aliveCount=0; for(int i=0;i<MAX_PLAYERS;i++) if(i==playerID? getPlayerHP(player)>0 : playerActive[i]) aliveCount++;
         if(deliveriesRemaining==0 || aliveCount<=1) {
             bool won = (deliveriesRemaining==0) || (aliveCount==1 && getPlayerHP(player)>0);
@@ -463,7 +462,6 @@ void endScreen(SDL_Renderer* renderer, bool won) {
     const char* msg = won? "You Won" : "You Lost";
     Text* text = createText(renderer, won?green.r:red.r, won?green.g:red.g, won?green.b:red.b, font, msg, SCREEN_WIDTH/2, won?SCREEN_HEIGHT/2:50);
     drawTextCentered(text, SCREEN_WIDTH/2, won?SCREEN_HEIGHT/2:50);
-    destroyText(text);
     SDL_RenderPresent(renderer);
 }
 
