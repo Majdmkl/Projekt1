@@ -241,6 +241,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     setPackageCount(player, deliveriesRemaining);
     SDL_Event event;
     bool running = true;
+    bool gameOver = false;
     bool spectating = false;
     float deathX = 0, deathY = 0;
     Uint32 lastNetworkUpdate = 0;
@@ -261,6 +262,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) running = false;
             if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT && !spectating) {
+                if (gameOver) break;
                 int mouseX, mouseY;
                 SDL_GetMouseState(&mouseX, &mouseY);
 
@@ -290,6 +292,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         bool actionSent = 0;
 
         if (!spectating) {
+            if (gameOver) { moveX = moveY = 0; }
             if (keys[SDL_SCANCODE_W]) {
                 moveY -= MOVE_SPEED;
                 turnUp(player);
@@ -443,6 +446,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         int aliveCount=0; for(int i=0;i<MAX_PLAYERS;i++) if(i==playerID? getPlayerHP(player)>0 : playerActive[i]) aliveCount++;
         if(deliveriesRemaining==0 || aliveCount<=1) {
+            gameOver = true;
             bool won = (deliveriesRemaining==0) || (aliveCount==1 && getPlayerHP(player)>0);
             extern void endScreen(SDL_Renderer*, bool);
             endScreen(renderer, won);

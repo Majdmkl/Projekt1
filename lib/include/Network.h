@@ -3,7 +3,7 @@
 
 #include "Bullet.h"
 
-#define MAX_PLAYERS 2
+#define MAX_PLAYERS 3
 #define SERVER_PORT 2000
 
 typedef enum { MENU, ONGOING  } GameState;
