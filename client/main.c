@@ -452,7 +452,11 @@ char* connectionScreen(SDL_Renderer* renderer) {
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
 
-                if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &inputBox)) { typingActive = true; SDL_StartTextInput(); }
+                if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &inputBox)) {
+                    typingActive = true;
+                    SDL_StartTextInput();
+                    Mix_PlayChannel(-1, buttonSound, 0);
+                }
                 else { typingActive = false; SDL_StopTextInput(); }
 
                 if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &closeBtn)) {
@@ -461,10 +465,14 @@ char* connectionScreen(SDL_Renderer* renderer) {
                     SDL_StopTextInput();
                 }
             }
-            else if (typingActive && event.type == SDL_TEXTINPUT) strncat(ip, event.text.text, sizeof(ip) - strlen(ip) - 1);
+            else if (typingActive && event.type == SDL_TEXTINPUT) {
+                strncat(ip, event.text.text, sizeof(ip) - strlen(ip) - 1);
+                Mix_PlayChannel(-1, buttonSound, 0);
+            }
             else if (typingActive && event.type == SDL_KEYDOWN) {
                 if (event.key.keysym.sym == SDLK_BACKSPACE && strlen(ip) > 0) ip[strlen(ip) - 1] = '\0';
                 if (event.key.keysym.sym == SDLK_RETURN) {
+                    Mix_PlayChannel(-1, buttonSound, 0);
                     SDL_StopTextInput();
                     SDL_DestroyTexture(menuTexture);
                     SDL_DestroyTexture(grassTexture);
