@@ -43,6 +43,9 @@ SDL_Texture* mapTexture = NULL;
 
 Mix_Chunk *shootSound = NULL;
 Mix_Chunk *hitSound = NULL;
+Mix_Music *bgMusic = NULL;
+Mix_Chunk *buttonSound = NULL;
+Mix_Chunk *selectSound = NULL;
 
 int main(int argc, char* argv[]) {
     initSDL();
@@ -51,6 +54,11 @@ int main(int argc, char* argv[]) {
 
     shootSound = Mix_LoadWAV("lib/assets/sounds/shoot.wav");
     hitSound = Mix_LoadWAV("lib/assets/sounds/hit.wav");
+
+    bgMusic = Mix_LoadMUS("lib/assets/sounds/bg_music.mp3");
+    buttonSound = Mix_LoadWAV("lib/assets/sounds/Button_press.wav");
+    selectSound = Mix_LoadWAV("lib/assets/sounds/character_select.wav");
+    Mix_PlayMusic(bgMusic, -1);
 
     SDL_Window* window = createWindow();
     SDL_Renderer* renderer = createRenderer(window);
@@ -605,9 +613,9 @@ int mainMenu(SDL_Renderer* renderer) {
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
 
-                if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &startBtn)) selection = 0;
-                else if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &connectBtn)) selection = 1;
-                else if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &quitBtn)) selection = 2;
+                if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &startBtn)) { Mix_PlayChannel(-1, buttonSound, 0); selection = 0; }
+                else if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &connectBtn)) { Mix_PlayChannel(-1, buttonSound, 0); selection = 1; }
+                else if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &quitBtn))   { Mix_PlayChannel(-1, buttonSound, 0); selection = 2; }
             }
         }
 
@@ -676,6 +684,7 @@ int selectCharacter(SDL_Renderer* renderer) {
                 int mouseY = event.button.y;
                 for (int i = 0; i < 6; ++i) {
                     if (SDL_PointInRect(&(SDL_Point){mouseX, mouseY}, &characters[i])) {
+                        Mix_PlayChannel(-1, selectSound, 0);
                         selected = i;
                         break;
                     }
@@ -731,6 +740,9 @@ void cleanup(SDL_Window* window, SDL_Renderer* renderer) {
     cleanupNetwork();
     Mix_FreeChunk(shootSound);
     Mix_FreeChunk(hitSound);
+    Mix_FreeChunk(buttonSound);
+    Mix_FreeChunk(selectSound);
+    Mix_FreeMusic(bgMusic);
     Mix_CloseAudio();
     Mix_Quit();
     SDL_Quit();
