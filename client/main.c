@@ -238,6 +238,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
     SDL_Texture* packageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/package1.png");
     setCharacterPackageIcon(player, packageIcon);
+    setPackageCount(player, deliveriesRemaining);
     SDL_Event event;
     bool running = true;
     bool spectating = false;

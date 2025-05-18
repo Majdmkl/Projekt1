@@ -156,15 +156,18 @@ void healthBar(Character* character, SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &healthRect);
 
-    if (character->packageIcon) {
+    // draw package icons according to current package count
+    if (character->packageIcon && character->packages > 0) {
         int iconSize = 20;
         int spacing = 3;
-        int totalWidth = 3 * iconSize + 2 * spacing;
+        int packageCount = character->packages;
+        if (packageCount > 3) packageCount = 3;
+        int totalWidth = packageCount * iconSize + (packageCount - 1) * spacing;
 
         int startX = character->x + (CHARACTER_WIDTH - totalWidth) / 2;
         int startY = character->y - 30;
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < packageCount; i++) {
             SDL_Rect iconRect = { startX + i * (iconSize + spacing), startY, iconSize, iconSize };
             SDL_RenderCopy(renderer, character->packageIcon, NULL, &iconRect);
         }
