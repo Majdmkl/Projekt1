@@ -433,7 +433,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             }
         }
         for (int i = 0; i < bulletCount; i++) drawBullet(bullets[i], renderer);
-        // house packages
         for(int i=0;i<3;i++) {
             if(!delivered[i]) {
                 SDL_Rect h = targets[i];
