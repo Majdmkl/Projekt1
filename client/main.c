@@ -214,7 +214,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     bool playerActive[MAX_PLAYERS] = {false};
 
     SDL_Texture* packageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/package1.png");
-
+    setCharacterPackageIcon(player, packageIcon);
     SDL_Event event;
     bool running = true;
     bool spectating = false;

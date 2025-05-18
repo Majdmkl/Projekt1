@@ -34,6 +34,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     character->lastFrameTime = SDL_GetTicks();
     character->state = IDLE;
     character->packageIcon = NULL;
+    character->packages = 0;
 
     const char* characterType = NULL;
     switch (characterNumber) {
