@@ -11,9 +11,9 @@ typedef struct { float x, y, dx, dy; int whoShot; } BulletData;
 typedef enum { UP, DOWN, LEFT, RIGHT, FIRE, BLOCKED, CONNECTING, CONTINUE } ClientCommand;
 
 typedef struct {
+    int packages;
     int health, type;
     float x, y, speed_x, speed_y;
-    int packages;
 } Animal;
 
 typedef struct {
@@ -24,12 +24,12 @@ typedef struct {
 } ClientData;
 
 typedef struct {
+    int readyCount;
     GameState gameState;
     Animal animals[MAX_PLAYERS];
     int slotsTaken[MAX_PLAYERS];
     BulletData bullets[MAX_BULLETS];
     int numberOfPlayers, numberOfBullets;
-    int readyCount;
 } ServerData;
 
 #endif

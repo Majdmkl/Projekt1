@@ -12,14 +12,19 @@ Bullet* createBullet(SDL_Renderer* renderer, float x, float y, float dx, float d
     return b;
 }
 
-void destroyBullet(Bullet* bullet) { free(bullet); }
 float xBullet(Bullet* b) { return b->x; }
+
 float yBullet(Bullet* b) { return b->y; }
+
 float DxBullet(Bullet* b) { return b->dx; }
+
 float DyBullet(Bullet* b) { return b->dy; }
 
-Uint32 getBulletBornTime(Bullet* b) { return b->bornTime; }
+void destroyBullet(Bullet* bullet) { free(bullet); }
+
 void moveBullet(Bullet* b) { b->x += b->dx; b->y += b->dy; }
+
+Uint32 getBulletBornTime(Bullet* b) { return b->bornTime; }
 
 void drawBullet(Bullet* bullet, SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);

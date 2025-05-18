@@ -10,18 +10,22 @@
 
 struct Character {
     float x, y, speed;
-    int health, frame, characterID, packages;
     Uint32 lastFrameTime;
-    SDL_Texture *fullSheet;
-    SDL_Texture *packageIcon;
+    SDL_Texture *fullSheet, *packageIcon;
+    int health, frame, characterID, packages;
     enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;
 };
 
 float getX(Character* character) { return character->x; }
+
 float getY(Character* character) { return character->y; }
-int getcharacterID(Character* character) { return character->characterID; }
+
 float getSpeed(Character* character) { return character->speed; }
+
 int getPackageCount(Character* character) { return character->packages; }
+
+int getcharacterID(Character* character) { return character->characterID; }
+
 void setPackageCount(Character* character, int count) { character->packages = count; }
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
