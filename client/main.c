@@ -73,7 +73,12 @@ int main(int argc, char* argv[]) {
     case 0: ip = (argc > 1) ? argv[1] : "127.0.0.1"; break;
     //connect button = 1
     case 1: ip = connectionScreen(renderer); break;
-    //exit button = 2: cleanup(window, renderer); cleanupNetwork(); return 0;
+    //exit button = 2: ;
+    case 2:
+        SDL_Delay(100);
+        cleanup(window, renderer);
+        cleanupNetwork();
+        return 0;
     default: break;
     }
 
