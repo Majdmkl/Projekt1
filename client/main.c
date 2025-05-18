@@ -33,9 +33,9 @@ SDL_Texture* loadTexture(SDL_Renderer* renderer, const char* filePath);
 Character* createSelectedCharacter(SDL_Renderer* renderer, int selected);
 
 UDPsocket clientSocket;
-UDPpacket *sendPacket;
-UDPpacket *receivePacket;
+UDPpacket *sendPacket, *receivePacket;
 IPaddress serverIP;
+
 int playerID = -1;
 ServerData serverData;
 bool connected = false;
@@ -314,11 +314,10 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                     if (i != playerID && serverData.slotsTaken[i]) {
                         if (!playerActive[i] || !otherPlayers[i]) {
                             otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
-                            if (otherPlayers[i]) {
-                                setCharacterPackageIcon(otherPlayers[i], packageIcon);
-                            }
+                            if (otherPlayers[i]) setCharacterPackageIcon(otherPlayers[i], packageIcon);
                             playerActive[i] = otherPlayers[i] != NULL;
                         }
+
                         if (playerActive[i]) {
                             float oldX = getX(otherPlayers[i]);
                             float oldY = getY(otherPlayers[i]);

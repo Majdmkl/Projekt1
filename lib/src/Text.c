@@ -6,7 +6,8 @@
 
 typedef struct  text {
   SDL_Rect rect;
-  SDL_Texture *texture, *renderer;
+  SDL_Texture *texture;
+  SDL_Renderer *renderer;
 } Text;
 
 Text *createText(SDL_Renderer *renderer, int r, int g, int b, TTF_Font *font, char *string, int x, int y) {
