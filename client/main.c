@@ -471,7 +471,7 @@ void endScreen(SDL_Renderer* renderer, bool won) {
     TTF_Font* font = TTF_OpenFont("lib/assets/fonts/PressStart2P-Regular.ttf", 48);
     SDL_Color white={255,255,255,255}, red={255,0,0,255};
     SDL_Color green={0,255,0,255};
-    const char* msg = won? "You Won" : "You Lost";
+    char* msg = won? "You Won" : "You Lost";
     Text* text = createText(renderer, won?green.r:red.r, won?green.g:red.g, won?green.b:red.b, font, msg, SCREEN_WIDTH/2, won?SCREEN_HEIGHT/2:50);
     drawTextCentered(text, SCREEN_WIDTH/2, won?SCREEN_HEIGHT/2:50);
     SDL_RenderPresent(renderer);
