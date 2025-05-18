@@ -426,7 +426,7 @@ static void tileGrass(SDL_Renderer* renderer, SDL_Texture* grass) {
             SDL_RenderCopy(renderer, grass, NULL, &dst);
         }
 }
-
+/comenc
 char* connectionScreen(SDL_Renderer* renderer) {
     static char ip[64] = "";
     bool typingActive = false;
