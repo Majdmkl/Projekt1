@@ -450,7 +450,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         if(deliveriesRemaining==0 || aliveCount<=1) {
             gameOver = true;
             bool won = (deliveriesRemaining==0) || (aliveCount==1 && getPlayerHP(player)>0);
-            endScreen(renderer, won);
+            endScreen(renderer, won); // needs improvements -- change to image
             SDL_Event event;
             while (SDL_WaitEvent(&event)) if (event.type == SDL_QUIT) break;
 
@@ -466,7 +466,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     for (int i = 0; i < MAX_PLAYERS; i++) if (i != playerID && playerActive[i]) destroyCharacter(otherPlayers[i]);
 
 }
-
+// needs imrovements -- change to image
 void endScreen(SDL_Renderer* renderer, bool won) {
     TTF_Font* font = TTF_OpenFont("lib/assets/fonts/PressStart2P-Regular.ttf", 48);
     SDL_Color white={255,255,255,255}, red={255,0,0,255};
