@@ -617,6 +617,7 @@ void waitingRoom(SDL_Renderer* renderer) {
     SDL_Rect continueBtn = { menuRect.x + 170, menuRect.y + 765, 390, 85 };
     bool pressed = false;
     Uint32 lastSent = SDL_GetTicks();
+
     while (1) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) return;
@@ -628,6 +629,7 @@ void waitingRoom(SDL_Renderer* renderer) {
                 }
             }
         }
+
         if (pressed && SDL_GetTicks() - lastSent > 200) {
             ClientData cd = {0};
             cd.playerNumber = playerID;
@@ -637,9 +639,9 @@ void waitingRoom(SDL_Renderer* renderer) {
             SDLNet_UDP_Send(clientSocket, -1, sendPacket);
             lastSent = SDL_GetTicks();
         }
-        while (SDLNet_UDP_Recv(clientSocket, receivePacket)) {
-            memcpy(&serverData, receivePacket->data, sizeof(ServerData));
-        }
+
+        while (SDLNet_UDP_Recv(clientSocket, receivePacket)) memcpy(&serverData, receivePacket->data, sizeof(ServerData));
+
         tileGrass(renderer, grassTexture);
         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
