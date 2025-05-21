@@ -114,6 +114,7 @@ void renderCharacter(Character* character, SDL_Renderer* renderer) {
         case WALKING_LEFT: row = 2; break;
         case WALKING_RIGHT: row = 3; break;
         case WALKING_UP: row = 1; break;
+        default: row = 0; break;
     }
     SDL_Rect srcRect = { character->frame * CHARACTER_WIDTH, row * CHARACTER_HEIGHT, CHARACTER_WIDTH, CHARACTER_HEIGHT };
     SDL_Rect destRect = { (int)character->x, (int)character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };

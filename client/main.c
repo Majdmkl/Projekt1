@@ -666,8 +666,8 @@ void waitingRoom(SDL_Renderer* renderer) {
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         for (int i = 0; i < 4; i++) SDL_RenderDrawRect(renderer, &(SDL_Rect){ menuRect.x - i, menuRect.y - i, menuRect.w + 2*i, menuRect.h + 2*i });
         char buf[32]; sprintf(buf, "Ready: %d/%d", serverData.readyCount, serverData.numberOfPlayers);
-        Text *readyText = createText(renderer, 255, 255, 255, font, buf, 20, 20);
-        drawText(readyText);
+        Text *readyText = createText(renderer, 255, 255, 255, font, buf, SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
+        drawTextCentered(readyText, SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
         destroyText(readyText);
         SDL_RenderPresent(renderer);
         if (serverData.gameState == ONGOING) break;
