@@ -108,8 +108,15 @@ void updateCharacterAnimation(Character* character, Uint32 deltaTime) {
 }
 
 void renderCharacter(Character* character, SDL_Renderer* renderer) {
-    SDL_Rect srcRect = { character->frame * CHARACTER_WIDTH, 0, CHARACTER_WIDTH, CHARACTER_HEIGHT };
-    SDL_Rect destRect = { character->x, character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    int row;
+    switch (character->state) {
+        case WALKING_DOWN: row = 0; break;
+        case WALKING_LEFT: row = 2; break;
+        case WALKING_RIGHT: row = 3; break;
+        case WALKING_UP: row = 1; break;
+    }
+    SDL_Rect srcRect = { character->frame * CHARACTER_WIDTH, row * CHARACTER_HEIGHT, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    SDL_Rect destRect = { (int)character->x, (int)character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
     SDL_RenderCopy(renderer, character->fullSheet, &srcRect, &destRect);
 }
 
