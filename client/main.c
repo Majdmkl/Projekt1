@@ -228,9 +228,21 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         {1524, 512, 159, 139},  // Green house
         {1584, 765, 144, 122},  // Black house
     };
-    SDL_Rect targets[3]; bool delivered[3] = {false,false,false}; int deliveriesRemaining = 3;
+
+    SDL_Rect targets[3]; bool delivered[3] = {false}; int deliveriesRemaining = 3;
     srand(SDL_GetTicks());
-    for(int i=0;i<3;i++) { int idx=rand()% (sizeof(possibleHouses)/sizeof(SDL_Rect)); targets[i]=possibleHouses[idx]; }
+    int houseCount = sizeof(possibleHouses)/sizeof(SDL_Rect);
+    int ind [houseCount];
+    for(int i = 0; i < houseCount; i++) ind[i] = i;
+
+    for (int i = 0; i < 3; i++) {
+        int j = i + rand() % (houseCount - i);
+        int temp = ind[i];
+        ind[i] = ind[j];
+        ind[j] = temp;
+    }
+
+    for (int i = 0; i < 3; i++) targets[i] = possibleHouses[ind[i]];
 
     Bullet* bullets[MAX_BULLETS] = {NULL};
     int bulletCount = 0;
@@ -239,9 +251,13 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     bool playerActive[MAX_PLAYERS] = {false};
 
     SDL_Texture* packageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/package1.png");
+    SDL_SetTextureBlendMode(packageIcon, SDL_BLENDMODE_BLEND);
     SDL_Texture* housePackageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/Zone.png");
+    SDL_SetTextureBlendMode(housePackageIcon, SDL_BLENDMODE_BLEND);
+
     setCharacterPackageIcon(player, packageIcon);
     setPackageCount(player, deliveriesRemaining);
+
     SDL_Event event;
     bool running = true;
     bool gameOver = false;
@@ -447,9 +463,9 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         }
 
         int aliveCount=0; for(int i=0;i<MAX_PLAYERS;i++) if(i==playerID? getPlayerHP(player)>0 : playerActive[i]) aliveCount++;
-        if(deliveriesRemaining==0 || aliveCount<=1) {
+        if(deliveriesRemaining == 0 || aliveCount <= 1) {
             gameOver = true;
-            bool won = (deliveriesRemaining==0) || (aliveCount==1 && getPlayerHP(player)>0);
+            bool won = player && (deliveriesRemaining == 0 || (aliveCount == 1 && getPlayerHP(player) > 0));
             endScreen(renderer, won); // needs improvements -- change to image
             SDL_Event event;
             while (SDL_WaitEvent(&event)) if (event.type == SDL_QUIT) break;
