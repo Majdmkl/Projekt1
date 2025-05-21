@@ -2,19 +2,10 @@
 #define CHARACTER_H
 
 #include <stdbool.h>
+#include "config.h"
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-
 #include "Map.h"
 #include "Bullet.h"
-#include "Network.h"
-
-#define MOVE_SPEED 3
-#define MAX_HEALTH 100
-#define CHARACTER_WIDTH 64
-#define CHARACTER_HEIGHT 64
-#define CHARACTER_HITBOX_WIDTH 20
-#define CHARACTER_HITBOX_HEIGHT 20
 
 typedef struct Character Character;
 
@@ -28,21 +19,21 @@ void turnRight(Character *pCharacter);
 int getPlayerHP(Character *character);
 int getcharacterID(Character* character);
 void setDirection(Character *pCharacter);
+int getPackageCount(Character* character);
 void decreaseHealth(Character *pCharacter);
 bool isCharacterAlive(Character *pCharacter);
 void destroyCharacter(Character *pCharacter);
+void setPackageCount(Character* character, int count);
 void setPosition(Character *pCharacter, float x, float y);
 void healthBar(Character *pCharacter, SDL_Renderer *renderer);
 int howManyPlayersAlive(Character *players[], int num_players);
 void renderCharacter(Character *pCharacter, SDL_Renderer *renderer);
 bool checkCollision(Character *character, MAP *walls, int num_walls);
+void setCharacterPackageIcon(Character* character, SDL_Texture* icon);
 void updateCharacterAnimation(Character *pCharacter, Uint32 deltaTime);
 Character *createCharacter(SDL_Renderer *renderer, int characterNumber);
 bool checkCollisionCharacterBullet(Character *character, Bullet *bullet);
 void setBulletStartPosition(Character *pCharacter, float *startX, float *startY);
 void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount);
-int getPackageCount(Character* character);
-void setPackageCount(Character* character, int count);
-void setCharacterPackageIcon(Character* character, SDL_Texture* icon);
 
 #endif

@@ -10,24 +10,11 @@
 
 struct Character {
     float x, y, speed;
-    int health, frame, characterID, packages;
     Uint32 lastFrameTime;
-    SDL_Texture *walkRight;
-    SDL_Texture *walkLeft;
-    SDL_Texture *walkDown;
-    SDL_Texture *walkUp;
-    SDL_Texture *idleFront;
-    SDL_Texture *fullSheet;
-    SDL_Texture *packageIcon;
+    SDL_Texture *fullSheet, *packageIcon;
+    int health, frame, characterID, packages;
     enum { IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT } state;
 };
-
-float getX(Character* character) { return character->x; }
-float getY(Character* character) { return character->y; }
-int getcharacterID(Character* character) { return character->characterID; }
-float getSpeed(Character* character) { return character->speed; }
-int getPackageCount(Character* character) { return character->packages; }
-void setPackageCount(Character* character, int count) { character->packages = count; }
 
 SDL_Texture* loadCharacterTexture(SDL_Renderer* renderer, const char* filePath) {
     SDL_Surface* surface = IMG_Load(filePath);
@@ -47,6 +34,7 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     character->lastFrameTime = SDL_GetTicks();
     character->state = IDLE;
     character->packageIcon = NULL;
+    character->packages = 0;
 
     const char* characterType = NULL;
     switch (characterNumber) {
@@ -68,36 +56,50 @@ Character* createCharacter(SDL_Renderer* renderer, int characterNumber) {
     return character;
 }
 
-void setCharacterPackageIcon(Character* character, SDL_Texture* icon) {
-    if (character) character->packageIcon = icon;
-}
+float getX(Character* character) { return character->x; }
+
+float getY(Character* character) { return character->y; }
+
+float getSpeed(Character* character) { return character->speed; }
+
+int getPlayerHP(Character* character) { return character->health; }
+
+void setDirection(Character* character) { character->state = IDLE; }
 
 void turnUp(Character* character) { character->state = WALKING_UP; }
+
 void turnDown(Character* character) { character->state = WALKING_DOWN; }
+
 void turnLeft(Character* character) { character->state = WALKING_LEFT; }
+
 void turnRight(Character* character) { character->state = WALKING_RIGHT; }
-int getPlayerHP(Character* character) { return character->health; }
+
+int getPackageCount(Character* character) { return character->packages; }
+
+int getcharacterID(Character* character) { return character->characterID; }
+
+bool isCharacterAlive(Character* character) { return character->health > 0; }
+
+void setPackageCount(Character* character, int count) { character->packages = count; }
+
+void setPosition(Character* character, float x, float y) { character->x = x; character->y = y; }
+
+void setCharacterPackageIcon(Character* character, SDL_Texture* icon) { character->packageIcon = icon; }
 
 void decreaseHealth(Character* character) {
     character->health -= BULLET_DAMAGE;
     if (character->health < 0) character->health = 0;
 }
 
-bool isCharacterAlive(Character* character) { return character->health > 0; }
-
 void destroyCharacter(Character* character) {
-    if (character) {
-        if (character->fullSheet) SDL_DestroyTexture(character->fullSheet);
-        free(character);
-    }
+    if (character->fullSheet) SDL_DestroyTexture(character->fullSheet);
+    free(character);
 }
 
 void updateCharacterAnimation(Character* character, Uint32 deltaTime) {
     Uint32 currentTime = SDL_GetTicks();
-    bool isMoving = (character->state == WALKING_UP ||
-                     character->state == WALKING_DOWN ||
-                     character->state == WALKING_LEFT ||
-                     character->state == WALKING_RIGHT);
+    bool isMoving = (character->state == WALKING_UP || character->state == WALKING_DOWN ||
+                     character->state == WALKING_LEFT || character->state == WALKING_RIGHT);
 
     if (isMoving && currentTime - character->lastFrameTime >= FRAME_DELAY) {
         character->frame = (character->frame + 1) % FRAME_COUNT;
@@ -105,18 +107,20 @@ void updateCharacterAnimation(Character* character, Uint32 deltaTime) {
     } else if (!isMoving) character->frame = 0;
 }
 
-void setPosition(Character* character, float x, float y) {
-    character->x = x;
-    character->y = y;
-}
-
-void setDirection(Character* character) { character->state = IDLE; }
-
 void renderCharacter(Character* character, SDL_Renderer* renderer) {
-    SDL_Rect srcRect = { character->frame * CHARACTER_WIDTH, 0, CHARACTER_WIDTH, CHARACTER_HEIGHT };
-    SDL_Rect destRect = { character->x, character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    int row;
+    switch (character->state) {
+        case WALKING_DOWN: row = 0; break;
+        case WALKING_LEFT: row = 2; break;
+        case WALKING_RIGHT: row = 3; break;
+        case WALKING_UP: row = 1; break;
+        default: row = 0; break;
+    }
+    SDL_Rect srcRect = { character->frame * CHARACTER_WIDTH, row * CHARACTER_HEIGHT, CHARACTER_WIDTH, CHARACTER_HEIGHT };
+    SDL_Rect destRect = { (int)character->x, (int)character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
     SDL_RenderCopy(renderer, character->fullSheet, &srcRect, &destRect);
 }
+
 void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, int wallCount) {
     float prevX = character->x;
     float prevY = character->y;
@@ -148,13 +152,7 @@ void moveCharacter(Character* character, float moveX, float moveY, MAP* walls, i
 bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
     if (!character || !bullet) return false;
 
-    SDL_Rect characterRect = {
-        (int)character->x,
-        (int)character->y,
-        CHARACTER_WIDTH,
-        CHARACTER_HEIGHT
-    };
-
+    SDL_Rect characterRect = { (int)character->x, (int)character->y, CHARACTER_WIDTH, CHARACTER_HEIGHT };
     SDL_Rect bulletRect = getBulletRect(bullet);
 
     return SDL_HasIntersection(&characterRect, &bulletRect);
@@ -166,21 +164,19 @@ void healthBar(Character* character, SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &healthRect);
 
-    if (character->packageIcon) {
+    // draw package icons according to current package count
+    if (character->packageIcon && character->packages > 0) {
         int iconSize = 20;
         int spacing = 3;
-        int totalWidth = 3 * iconSize + 2 * spacing;
+        int packageCount = character->packages;
+        if (packageCount > 3) packageCount = 3;
+        int totalWidth = packageCount * iconSize + (packageCount - 1) * spacing;
 
         int startX = character->x + (CHARACTER_WIDTH - totalWidth) / 2;
         int startY = character->y - 30;
 
-        for (int i = 0; i < 3; i++) {
-            SDL_Rect iconRect = {
-                startX + i * (iconSize + spacing),
-                startY,
-                iconSize,
-                iconSize
-            };
+        for (int i = 0; i < packageCount; i++) {
+            SDL_Rect iconRect = { startX + i * (iconSize + spacing), startY, iconSize, iconSize };
             SDL_RenderCopy(renderer, character->packageIcon, NULL, &iconRect);
         }
     }
