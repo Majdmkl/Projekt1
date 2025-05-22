@@ -173,8 +173,9 @@ void healthBar(Character* character, SDL_Renderer* renderer) {
         int totalWidth = packageCount * iconSize + (packageCount - 1) * spacing;
 
         int startX = character->x + (CHARACTER_WIDTH - totalWidth) / 2;
-        int startY = character->y - 30;
-
+        int startY = (int)character->y - 30;
+        if (startY < 0) startY = 0;
+        
         for (int i = 0; i < packageCount; i++) {
             SDL_Rect iconRect = { startX + i * (iconSize + spacing), startY, iconSize, iconSize };
             SDL_RenderCopy(renderer, character->packageIcon, NULL, &iconRect);

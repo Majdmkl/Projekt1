@@ -217,6 +217,8 @@ void executeCommand(Game *game, ClientData *clientData) {
     if (!player) return;
 
     setPosition(player, clientData->animals.x, clientData->animals.y);
+    setPackageCount(player, clientData->animals.packages); // ✅ Lägg till detta!
+
 
     if (clientData->command[1] == UP && clientData->command[6] != BLOCKED) turnUp(player);
     if (clientData->command[2] == DOWN && clientData->command[6] != BLOCKED) turnDown(player);

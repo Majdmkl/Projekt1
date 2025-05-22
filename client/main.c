@@ -255,6 +255,12 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
     SDL_Texture* housePackageIcon = IMG_LoadTexture(renderer, "lib/assets/images/character/weapons/Zone.png");
     SDL_SetTextureBlendMode(housePackageIcon, SDL_BLENDMODE_BLEND);
 
+    for (int i = 0; i < MAX_PLAYERS; i++) {
+        if (i != playerID && otherPlayers[i]) {
+            setCharacterPackageIcon(otherPlayers[i], packageIcon);
+        }
+    }
+
     setCharacterPackageIcon(player, packageIcon);
     setPackageCount(player, deliveriesRemaining);
 
@@ -354,7 +360,6 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
             }
             updateCharacterAnimation(player, SDL_GetTicks());
         }
-
         Uint32 now = SDL_GetTicks();
         if (now - lastNetworkUpdate > NETWORK_TICK_MS) {
             bool gotData = false;
@@ -362,40 +367,44 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
                 memcpy(&serverData, receivePacket->data, sizeof(ServerData));
                 gotData = true;
             }
-            if (gotData) {
-                for (int i = 0; i < MAX_PLAYERS; i++) {
-                    if (i != playerID && serverData.slotsTaken[i]) {
-                        if (!playerActive[i] || !otherPlayers[i]) {
-                            otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
-                            if (otherPlayers[i]) setCharacterPackageIcon(otherPlayers[i], packageIcon);
-                            playerActive[i] = otherPlayers[i] != NULL;
+            if (gotData) {for (int i = 0; i < MAX_PLAYERS; i++) {
+                if (i != playerID && serverData.slotsTaken[i]) {
+                    if (!playerActive[i] || !otherPlayers[i]) {
+                        otherPlayers[i] = createCharacter(renderer, serverData.animals[i].type);
+                        playerActive[i] = otherPlayers[i] != NULL;
+                        if (otherPlayers[i]) {
+                            setCharacterPackageIcon(otherPlayers[i], packageIcon);
                         }
-
-                        if (playerActive[i]) {
-                            float oldX = getX(otherPlayers[i]);
-                            float oldY = getY(otherPlayers[i]);
-                            float newX = serverData.animals[i].x;
-                            float newY = serverData.animals[i].y;
-                            float dx = newX - oldX, dy = newY - oldY;
-                            if (fabsf(dx) < 0.1f && fabsf(dy) < 0.1f) setDirection(otherPlayers[i]);
-                            else if (fabsf(dx) > fabsf(dy))(dx > 0 ? turnRight : turnLeft)(otherPlayers[i]);
-                            else (dy > 0 ? turnDown : turnUp)(otherPlayers[i]);
-
-                            setPosition(otherPlayers[i], newX, newY);
-                            setPackageCount(otherPlayers[i], serverData.animals[i].packages);
-                            updateCharacterAnimation(otherPlayers[i], SDL_GetTicks());
-                            int oldHP = getPlayerHP(otherPlayers[i]);
-                            int srvHP = serverData.animals[i].health;
-                            if (srvHP < oldHP) Mix_PlayChannel(-1, hitSound, 0);
-                            while (getPlayerHP(otherPlayers[i]) > srvHP) decreaseHealth(otherPlayers[i]);
-                        }
-                    } else if (i != playerID && !serverData.slotsTaken[i] && playerActive[i]) {
-                        if (otherPlayers[i]) destroyCharacter(otherPlayers[i]);
-                        otherPlayers[i] = NULL;
-                        playerActive[i] = false;
                     }
+                    if (playerActive[i]) {
+                        setCharacterPackageIcon(otherPlayers[i], packageIcon);
+                        setPackageCount(otherPlayers[i], serverData.animals[i].packages);
+            
+                        float oldX = getX(otherPlayers[i]);
+                        float oldY = getY(otherPlayers[i]);
+                        float newX = serverData.animals[i].x;
+                        float newY = serverData.animals[i].y;
+                        float dx = newX - oldX, dy = newY - oldY;
+                        if (fabsf(dx) < 0.1f && fabsf(dy) < 0.1f) setDirection(otherPlayers[i]);
+                        else if (fabsf(dx) > fabsf(dy)) (dx > 0 ? turnRight : turnLeft)(otherPlayers[i]);
+                        else (dy > 0 ? turnDown : turnUp)(otherPlayers[i]);
+            
+                        setPosition(otherPlayers[i], newX, newY);
+                        updateCharacterAnimation(otherPlayers[i], SDL_GetTicks());
+            
+                        int oldHP = getPlayerHP(otherPlayers[i]);
+                        int srvHP = serverData.animals[i].health;
+                        if (srvHP < oldHP) Mix_PlayChannel(-1, hitSound, 0);
+                        while (getPlayerHP(otherPlayers[i]) > srvHP)
+                            decreaseHealth(otherPlayers[i]);
+                    }
+                } else if (i != playerID && !serverData.slotsTaken[i] && playerActive[i]) {
+                    if (otherPlayers[i]) destroyCharacter(otherPlayers[i]);
+                    otherPlayers[i] = NULL;
+                    playerActive[i] = false;
                 }
-
+            }
+            
                 if (serverData.slotsTaken[playerID]) {
                     int oldHP = getPlayerHP(player);
                     int srvHP = serverData.animals[playerID].health;
@@ -449,8 +458,10 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         for (int i = 0; i < MAX_PLAYERS; i++) {
             if (i != playerID && playerActive[i] && otherPlayers[i]) {
-                if (getPlayerHP(otherPlayers[i]) > 0) renderCharacter(otherPlayers[i], renderer);
-                healthBar(otherPlayers[i], renderer);
+                if (getPlayerHP(otherPlayers[i]) > 0){
+                    renderCharacter(otherPlayers[i], renderer);
+                    healthBar(otherPlayers[i], renderer);
+                }
             }
         }
         for (int i = 0; i < bulletCount; i++) drawBullet(bullets[i], renderer);
