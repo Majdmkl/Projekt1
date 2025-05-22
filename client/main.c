@@ -192,7 +192,7 @@ void sendPlayerData(Character* player, int action) {
     clientData.playerNumber = playerID;
     clientData.animals.x = getX(player);
     clientData.animals.y = getY(player);
-
+    clientData.animals.packages = getPackageCount(player);
     applyPlayerAction(&clientData, player, action);
 
     memcpy(sendPacket->data, &clientData, sizeof(ClientData));
@@ -439,6 +439,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
         SDL_RenderCopy(renderer, mapTexture, NULL, NULL);
 
         if (player && getPlayerHP(player) > 0) {
+            updateCharacterAnimation(player, now);
             renderCharacter(player, renderer);
             healthBar(player, renderer);
         } else if (spectating) {
@@ -449,6 +450,7 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 
         for (int i = 0; i < MAX_PLAYERS; i++) {
             if (i != playerID && playerActive[i] && otherPlayers[i]) {
+                updateCharacterAnimation(otherPlayers[i], now);
                 if (getPlayerHP(otherPlayers[i]) > 0) renderCharacter(otherPlayers[i], renderer);
                 healthBar(otherPlayers[i], renderer);
             }
