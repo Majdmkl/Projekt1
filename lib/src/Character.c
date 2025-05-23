@@ -164,7 +164,6 @@ void healthBar(Character* character, SDL_Renderer* renderer) {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &healthRect);
 
-    // draw package icons according to current package count
     if (character->packageIcon && character->packages > 0) {
         int iconSize = 20;
         int spacing = 3;
