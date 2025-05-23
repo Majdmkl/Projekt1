@@ -486,14 +486,72 @@ void gameLoop(SDL_Renderer* renderer, Character* player) {
 }
 // needs imrovements -- change to image
 void endScreen(SDL_Renderer* renderer, bool won) {
-    TTF_Font* font = TTF_OpenFont("lib/assets/fonts/PressStart2P-Regular.ttf", 48);
-    SDL_Color white={255,255,255,255}, red={255,0,0,255};
-    SDL_Color green={0,255,0,255};
-    char* msg = won? "You Won" : "You Lost";
-    Text* text = createText(renderer, won?green.r:red.r, won?green.g:red.g, won?green.b:red.b, font, msg, SCREEN_WIDTH/2, won?SCREEN_HEIGHT/2:50);
-    drawTextCentered(text, SCREEN_WIDTH/2, won?SCREEN_HEIGHT/2:50);
-    SDL_RenderPresent(renderer);
+    if (won) {
+        // === Ladda texturer ===
+        SDL_Texture* grassTexture = loadTexture(renderer, "lib/assets/images/objects/nature/grass.png");
+        SDL_Texture* winTexture = loadTexture(renderer, "lib/assets/images/ui/YouWon.png");
+
+        if (!grassTexture || !winTexture) {
+            SDL_Log("Failed to load end screen textures");
+            return;
+        }
+
+        // === Rita gräs (exakt som mainMenu) ===
+        for (int y = 0; y < SCREEN_HEIGHT; y += 64) {
+            for (int x = 0; x < SCREEN_WIDTH; x += 64) {
+                SDL_Rect dst = { x, y, 64, 64 };
+                SDL_RenderCopy(renderer, grassTexture, NULL, &dst);
+            }
+        }
+
+        // === Mörk overlay ===
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
+        SDL_Rect overlay = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+        SDL_RenderFillRect(renderer, &overlay);
+
+        // === Rita YouWon.png centrerat ===
+        SDL_Rect popupRect = {
+            (SCREEN_WIDTH - 700) / 2,
+            (SCREEN_HEIGHT - 900) / 2,
+            700,
+            900
+        };
+        SDL_RenderCopy(renderer, winTexture, NULL, &popupRect);
+
+        // === Svart ram ===
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        for (int i = 0; i < 4; i++) {
+            SDL_Rect outline = {
+                popupRect.x - i,
+                popupRect.y - i,
+                popupRect.w + 2 * i,
+                popupRect.h + 2 * i
+            };
+            SDL_RenderDrawRect(renderer, &outline);
+        }
+
+        SDL_RenderPresent(renderer);
+        SDL_Delay(4000);
+
+        SDL_DestroyTexture(grassTexture);
+        SDL_DestroyTexture(winTexture);
+    } else {
+        // Visa "You Lost"-text som tidigare
+        TTF_Font* font = TTF_OpenFont("lib/assets/fonts/PressStart2P-Regular.ttf", 48);
+        if (!font) return;
+        SDL_Color red = {255, 0, 0, 255};
+        Text* text = createText(renderer, red.r, red.g, red.b, font, "You Lost", SCREEN_WIDTH / 2, 50);
+        drawTextCentered(text, SCREEN_WIDTH / 2, 50);
+        SDL_RenderPresent(renderer);
+        SDL_Delay(4000);
+        destroyText(text);
+        TTF_CloseFont(font);
+    }
 }
+
+
+
 
 static void tileGrass(SDL_Renderer* renderer, SDL_Texture* grass) {
     for (int y = 0; y < SCREEN_HEIGHT; y += 64)
