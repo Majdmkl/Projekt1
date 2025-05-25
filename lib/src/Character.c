@@ -158,7 +158,6 @@ bool checkCollisionCharacterBullet(Character* character, Bullet* bullet) {
     return SDL_HasIntersection(&characterRect, &bulletRect);
 }
 
-
 void healthBar(Character* character, SDL_Renderer* renderer) {
     SDL_Rect healthRect = { character->x, character->y - 10, (CHARACTER_WIDTH * character->health) / MAX_HEALTH, 5 };
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
