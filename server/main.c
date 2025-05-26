@@ -17,12 +17,15 @@
 
 #define CONTINUE_CMD CONTINUE
 
+typedef enum { MAIN, INGAME } MenuState;
+
 typedef struct {
     TTF_Font *font;
     GameState state;
     UDPsocket socket;
     UDPpacket *packet;
     SDL_Window *window;
+    MenuState menuState;
     ServerData server_data;
     SDL_Renderer *renderer;
     SDL_Texture *background, *packageIcon;
