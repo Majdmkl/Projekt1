@@ -4,7 +4,7 @@
 #include "Bullet.h"
 #include "config.h"
 
-typedef enum { MENU, ONGOING  } GameState;
+typedef enum { MAIN, INGAME  } GameState;
 typedef struct { float x, y, dx, dy; int whoShot; } BulletData;
 typedef enum { UP, DOWN, LEFT, RIGHT, FIRE, BLOCKED, CONNECTING, CONTINUE } ClientCommand;
 
