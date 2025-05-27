@@ -22,13 +22,13 @@ typedef enum { MAIN, INGAME } MenuState;
 typedef struct {
     TTF_Font *font;
     GameState state;
-    ServerData server_data;
     UDPsocket socket;
     UDPpacket *packet;
     SDL_Window *window;
     MenuState menuState;
+    ServerData server_data;
     SDL_Renderer *renderer;
-    SDL_Texture *background;
+    SDL_Texture *background, *packageIcon;
     Bullet *bullets[MAX_BULLETS];
     Text *waitingText, *joinedText;
     Character *players[MAX_PLAYERS];
@@ -66,7 +66,7 @@ int initiate(Game *game) {
     game->font = TTF_OpenFont("lib/assets/fonts/arial.ttf", 60);
     if (!game->font) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "TTF_OpenFont Error: %s", TTF_GetError()); return 0; }
 
-    game->window = SDL_CreateWindow("COZY TOWN Server", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    game->window = SDL_CreateWindow("Safari Delivery Server", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     if (!game->window) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDL_CreateWindow Error: %s", SDL_GetError()); return 0; }
 
     game->renderer = SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -74,6 +74,9 @@ int initiate(Game *game) {
 
     game->background = IMG_LoadTexture(game->renderer, "lib/assets/images/ui/MapNew.png");
     if (!game->background) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "IMG_LoadTexture Error: %s", IMG_GetError()); return 0; }
+
+    game->packageIcon = IMG_LoadTexture(game->renderer, "lib/assets/images/character/weapons/package1.png");
+    if (!game->packageIcon) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "IMG_LoadTexture Error: %s", IMG_GetError()); return 0; }
 
     if (SDLNet_Init() == -1) { SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "SDLNet_Init Error: %s", SDLNet_GetError()); return 0;}
 
@@ -217,6 +220,7 @@ void executeCommand(Game *game, ClientData *clientData) {
     if (!player) return;
 
     setPosition(player, clientData->animals.x, clientData->animals.y);
+    setPackageCount(player, clientData->animals.packages);
 
     if (clientData->command[1] == UP && clientData->command[6] != BLOCKED) turnUp(player);
     if (clientData->command[2] == DOWN && clientData->command[6] != BLOCKED) turnDown(player);
@@ -241,8 +245,10 @@ void executeCommand(Game *game, ClientData *clientData) {
 }
 
 void renderCharacters(Game *game) {
+    Uint32 now = SDL_GetTicks();
     for (int i = 0; i < MAX_PLAYERS; i++) {
         if (game->slotsTaken[i] && game->players[i]) {
+            updateCharacterAnimation(game->players[i], now);
             renderCharacter(game->players[i], game->renderer);
             healthBar(game->players[i], game->renderer);
         }
@@ -307,6 +313,7 @@ void close(Game *game) {
     destroyText(game->joinedText);
     TTF_CloseFont(game->font);
 
+    if (game->packageIcon) SDL_DestroyTexture(game->packageIcon);
     SDL_DestroyRenderer(game->renderer);
     SDL_DestroyWindow(game->window);
     SDL_DestroyTexture(game->background);

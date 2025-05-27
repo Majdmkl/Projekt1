@@ -11,9 +11,7 @@ typedef struct  text {
 } Text;
 
 Text *createText(SDL_Renderer *renderer, int r, int g, int b, TTF_Font *font, char *string, int x, int y) {
-    if (!renderer || !font || !string) {
-        return NULL;
-    }
+    if (!renderer || !font || !string) return NULL;
 
     Text *text = (Text *)malloc(sizeof(Text));
     if (!text) return NULL;
@@ -21,11 +19,10 @@ Text *createText(SDL_Renderer *renderer, int r, int g, int b, TTF_Font *font, ch
     text->renderer = renderer;
 
     SDL_Color color = {r, g, b, 255};
-    SDL_Surface *surface = TTF_RenderText_Solid(font, string, color);
-    if (!surface) {
-        free(text);
-        return NULL;
-    }
+    TTF_SetFontOutline(font, 1);
+    SDL_Surface *surface = TTF_RenderText_Blended(font, string, color);
+    TTF_SetFontOutline(font, 0);
+    if (!surface) { free(text); return NULL; }
 
     text->texture = SDL_CreateTextureFromSurface(renderer, surface);
     if (!text->texture) {
@@ -44,13 +41,15 @@ Text *createText(SDL_Renderer *renderer, int r, int g, int b, TTF_Font *font, ch
     return text;
 }
 
-void drawText(Text *text) {
-    if (text && text->texture) SDL_RenderCopy(text->renderer, text->texture, NULL, &text->rect);
-}
+void drawText(Text *text) { SDL_RenderCopy(text->renderer, text->texture, NULL, &text->rect); }
 
 void destroyText(Text *text) {
-    if (text) {
-        SDL_DestroyTexture(text->texture);
-        free(text);
-    }
+    SDL_DestroyTexture(text->texture);
+    free(text);
+}
+
+void drawTextCentered(Text *text, int centerX, int centerY) {
+    text->rect.x = centerX - text->rect.w / 2;
+    text->rect.y = centerY - text->rect.h / 2;
+    SDL_RenderCopy(text->renderer, text->texture, NULL, &text->rect);
 }
